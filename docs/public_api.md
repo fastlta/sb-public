@@ -1,8 +1,9 @@
 # FAST LTA AG - Silent Bricks Public REST API Description
 
-API Version v1, September 2017
+__Version:__ API v1  for Silent Bricks Software R 9.1 (Version 1.3.2661, Build 2661)
+__Date:__ September 2017
 
-Terms used:
+__Terms used:__
 
 - Silent Brick Library: The whole system
 - Tape Library: A single, emulated tape library
