@@ -10,17 +10,13 @@ use FAST::ApiPublic;
 my $ip = '172.100.51.175';
 
 
-# my $user = 'admin';
-# my $pass = 'adminadmin';
+my $object = FAST::ApiPublic->new();
 
-
-my $object = FAST::SBApiHelper->new();
-
-$object->SetEndpoint({
+$object->SetHost({
         host => $ip,
     });
 
-
+# print Dumper ($object->{target});
 
 $object->SetCredentials({
         user        => 'admin',
@@ -35,7 +31,7 @@ $object->SetHeaders();
 # my $serials     = $object->GetBrickSerials();
 # my $uuids       = $object->GetBrickUuids();
 
-# my $libs        = $object->GetLibraries();
+my $libs        = $object->GetLibraries();
 my $vols        = $object->GetVolumes();
 
 print Dumper $vols;
@@ -45,7 +41,7 @@ print Dumper $vols;
 # print Dumper  ($uuids);
 # print Dumper ($serials);
 
-# print Dumper  ($libs);
+print Dumper  ($libs);
 # print Dumper  ($vols);
 # print Dumper  ($lib_uuids);
 

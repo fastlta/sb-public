@@ -1,6 +1,6 @@
 package FAST::ApiPublic;
 
-# use strict;
+use strict;
 use warnings;
 
 use REST::Client;
@@ -54,7 +54,7 @@ sub SetHost {
     my ($self, $param) = @_;
 
     my $ip = $param->{host};
-    $self->{target} = 'https://'."$ip".'/sb-public-api/v1';
+    $self->{target} = 'https://'."$ip".'/sb-public-api/api/v1';
 
     return 1;
 }
@@ -121,17 +121,13 @@ sub SetCredentials {
     return 1;
 } 
 
-sub GetAllLibraries{
+sub GetLibraries{
 
     my ($self, $param) = @_;
     
-    my $method      = $param->{method} || $self->{method};
+    my $method      = 'libraries';
     my $headers     = $self->{headers};  
     my $target      = $self->{target}; 
-    my $user        = $self->{user};
-    my $password    = $self->{password};
-
-# print $self->{target};
 
     $ENV{PERL_LWP_SSL_VERIFY_HOSTNAME}=0;
 
@@ -139,39 +135,22 @@ sub GetAllLibraries{
     $client->getUseragent()->ssl_opts( SSL_verify_mode => 0 );
     $client->setHost($target);
 
-    my $response = $client->GET($method.'.json', $headers);
+    my $response = $client->GET($method, $headers);
 
-# print Dumper $response;
 
     my $data = decode_json($response->{'_res'}{'_content'});
 
-# print Dumper $data;
-
-    # my $libraries = [];
-    # foreach my $item (@$data) {
-    #     push $libraries,($item->{brick_uuid});
-    # }
-
-    # $self->{brick_uuids} = $uuids;
-
-
-    # # print Dumper ($serials);
-    # return $uuids;
-    # return $response->{'_res'}{'_content'};
+    return $data;
 }
 
 
-sub GetAllVolumes{
+sub GetVolumes{
 
     my ($self, $param) = @_;
     
     my $method      = 'volumes';
     my $headers     = $self->{headers};  
     my $target      = $self->{target}; 
-    my $user        = $self->{user};
-    my $password    = $self->{password};
-
-# print $self->{target};
 
     $ENV{PERL_LWP_SSL_VERIFY_HOSTNAME}=0;
 
@@ -179,25 +158,12 @@ sub GetAllVolumes{
     $client->getUseragent()->ssl_opts( SSL_verify_mode => 0 );
     $client->setHost($target);
 
-    my $response = $client->GET($method.'.json', $headers);
-
-print Dumper $response;
-
+    my $response = $client->GET($method, $headers);
+print Dumper ($response);
     my $data = decode_json($response->{'_res'}{'_content'});
 
-print Dumper $data;
+    return $data;
 
-    # my $libraries = [];
-    # foreach my $item (@$data) {
-    #     push $libraries,($item->{brick_uuid});
-    # }
-
-    # $self->{brick_uuids} = $uuids;
-
-
-    # # print Dumper ($serials);
-    # return $uuids;
-    # return $response->{'_res'}{'_content'};
 }
 
 1;
