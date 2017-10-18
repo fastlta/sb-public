@@ -17,29 +17,29 @@ our @EXPORT_OK = qw(new );
 sub new        # constructor, this method makes an object
         # that belongs to class Number
 {
-my $class       = shift;        # $_[0] contains the class name
+    my $class       = shift;        # $_[0] contains the class name
 # my $number = shift;    
                                 # $_[1] contains the value of our number
-my $target      = shift;
-my $headers     = undef;
-my $method      = undef;
-my $payload     = undef;
-my $user        = undef;
-my $password    = undef;
-
-
+    my $host        = shift;
+    my $user        = shift;
+    my $password    = shift;
+    my $headers     = {
+                         Authorization => 'Basic '.encode_base64($user.':'.$password),
+                         Accept        => 'application/json',
+                        };
+    my $target      = 'https://'."$host".'/sb-public-api/api/v1';
 
 # it is given by the user as an argument
-my $self        = {};        # the internal structure we'll use to represent
+    my $self        = {};        # the internal structure we'll use to represent
             # the data in our class is a hash reference
-bless($self, $class);
+    bless($self, $class);
 # bless( $self, $class );    # make $self an object of class $class
 
-$self->{target}     = $target;
-$self->{method}     = $method;
-$self->{headers}    = $headers;
-$self->{user}       = $user;
-$self->{password}   = $password;
+    $self->{host}       = $host;
+    $self->{target}     = $target;
+    $self->{headers}    = $headers;
+    $self->{user}       = $user;
+    $self->{password}   = $password;
 
 
 # $self->{num} = $number;    # give $self->{num} the supplied value
@@ -125,7 +125,7 @@ sub GetLibraries{
 
     my ($self, $param) = @_;
     
-    my $method      = 'libraries';
+    my $endpoint      = 'libraries';
     my $headers     = $self->{headers};  
     my $target      = $self->{target}; 
 
@@ -135,12 +135,17 @@ sub GetLibraries{
     $client->getUseragent()->ssl_opts( SSL_verify_mode => 0 );
     $client->setHost($target);
 
-    my $response = $client->GET($method, $headers);
+    my $response = $client->GET($endpoint, $headers);
 
-
-    my $data = decode_json($response->{'_res'}{'_content'});
-
-    return $data;
+    if ($response->{'_res'}{'_rc'} == 200) {
+    
+        my $data = decode_json($response->{'_res'}{'_content'});
+        return $data;
+    
+    }else {
+        my $error = ["$response->{'_res'}{'_msg'}"];
+        return $error;
+    }
 }
 
 
@@ -148,7 +153,7 @@ sub GetVolumes{
 
     my ($self, $param) = @_;
     
-    my $method      = 'volumes';
+    my $endpoint      = 'volumes';
     my $headers     = $self->{headers};  
     my $target      = $self->{target}; 
 
@@ -158,11 +163,17 @@ sub GetVolumes{
     $client->getUseragent()->ssl_opts( SSL_verify_mode => 0 );
     $client->setHost($target);
 
-    my $response = $client->GET($method, $headers);
-print Dumper ($response);
-    my $data = decode_json($response->{'_res'}{'_content'});
-
-    return $data;
+    my $response = $client->GET($endpoint, $headers);
+# print Dumper ($response);
+    if ($response->{'_res'}{'_rc'} == 200) {
+    
+        my $data = decode_json($response->{'_res'}{'_content'});
+        return $data;
+    
+    }else {
+        my $error = ["$response->{'_res'}{'_msg'}"];
+        return $error;
+    }
 
 }
 
