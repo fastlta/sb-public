@@ -59,22 +59,6 @@ sub SetHost {
     return 1;
 }
 
-### routine for setting method for targetcontroller
-# needs : string containing method for api call
-# returns : $self object
-sub SetMethod{
-    
-
-    my ($self, $param)  = @_;
-
-
-
-    my $method      = $param->{method};
-
-    $self->{method} = $method;
-
-    return 1;
-}
 
 ### Routine to set headers to use for api call
 # needs : hash reference containing all headers to use
