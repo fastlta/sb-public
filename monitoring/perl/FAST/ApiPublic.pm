@@ -17,12 +17,18 @@ our @EXPORT_OK = qw(new );
 sub new        # constructor, this method makes an object
         # that belongs to class Number
 {
-    my $class       = shift;        # $_[0] contains the class name
-# my $number = shift;    
+    my $class        = shift;        # $_[0] contains the class name
+    my $param        = shift; 
+# print Dumper ($param);
+    my $host = $param->{host}           || return "Error: No host set";
+    my $user = $param->{user}           || return "Error: No user provided";
+    my $password = $param->{password}   || return "Error: No password provided";
+
+    # my $number = shift;
                                 # $_[1] contains the value of our number
-    my $host        = shift;
-    my $user        = shift;
-    my $password    = shift;
+    # my $host        = shift;
+    # my $user        = shift;
+    # my $password    = shift;
     my $headers     = {
                          Authorization => 'Basic '.encode_base64($user.':'.$password),
                          Accept        => 'application/json',
@@ -36,12 +42,10 @@ sub new        # constructor, this method makes an object
 # bless( $self, $class );    # make $self an object of class $class
 
     $self->{host}       = $host;
-    $self->{target}     = $target;
-    $self->{headers}    = $headers;
     $self->{user}       = $user;
     $self->{password}   = $password;
-
-
+    $self->{headers}    = $headers;
+    $self->{target}     = $target;
 # $self->{num} = $number;    # give $self->{num} the supplied value
             # $self->{num} is our internal number
 return $self;        # a constructor always returns an blessed()
@@ -73,7 +77,7 @@ sub SetHeaders {
     if ($param){
         my $headers = $param;
         $self->{headers} = $param;
-    
+
     }else {
             $self->{headers}    = {
                                         Authorization => 'Basic '.encode_base64($self->{user}.':'.$self->{password}),
@@ -103,15 +107,15 @@ sub SetCredentials {
     $self->{password}   = $pass;
 
     return 1;
-} 
+}
 
 sub GetLibraries{
 
     my ($self, $param) = @_;
-    
+
     my $endpoint      = 'libraries';
-    my $headers     = $self->{headers};  
-    my $target      = $self->{target}; 
+    my $headers     = $self->{headers};
+    my $target      = $self->{target};
 
     $ENV{PERL_LWP_SSL_VERIFY_HOSTNAME}=0;
 
@@ -122,10 +126,10 @@ sub GetLibraries{
     my $response = $client->GET($endpoint, $headers);
 
     if ($response->{'_res'}{'_rc'} == 200) {
-    
+
         my $data = decode_json($response->{'_res'}{'_content'});
         return $data;
-    
+
     }else {
         my $error = ["$response->{'_res'}{'_msg'}"];
         return $error;
@@ -136,10 +140,10 @@ sub GetLibraries{
 sub GetVolumes{
 
     my ($self, $param) = @_;
-    
+
     my $endpoint      = 'volumes';
-    my $headers     = $self->{headers};  
-    my $target      = $self->{target}; 
+    my $headers     = $self->{headers};
+    my $target      = $self->{target};
 
     $ENV{PERL_LWP_SSL_VERIFY_HOSTNAME}=0;
 
@@ -150,16 +154,122 @@ sub GetVolumes{
     my $response = $client->GET($endpoint, $headers);
 # print Dumper ($response);
     if ($response->{'_res'}{'_rc'} == 200) {
-    
+
         my $data = decode_json($response->{'_res'}{'_content'});
         return $data;
-    
+
     }else {
         my $error = ["$response->{'_res'}{'_msg'}"];
         return $error;
     }
 
 }
+
+sub SetVolumeOfflineByUUID {
+
+    my ($self, $param) = @_;
+
+    my $volume_uuid = $param->{volume_uuid};
+
+    my $endpoint    = 'volumes';
+    my $headers     = $self->{headers};
+    my $target      = $self->{target};
+    my $task        = 'set_offline';
+    my $payload      = undef;
+
+    $endpoint       = $endpoint.'/'.$volume_uuid.'/'.$task;
+
+    $ENV{PERL_LWP_SSL_VERIFY_HOSTNAME}=0;
+
+    my $client = REST::Client->new();
+    $client->getUseragent()->ssl_opts( SSL_verify_mode => 0 );
+    $client->setHost($target);
+
+    my $response = $client->PUT($endpoint, $payload, $headers);
+# print Dumper ($response);
+    if ($response->{'_res'}{'_rc'} == 200) {
+
+        my $data = decode_json($response->{'_res'}{'_content'});
+        return $data;
+
+    }else {
+        my $error = ["$response->{'_res'}{'_msg'}"];
+        return $error;
+    }
+}
+
+sub SetVolumeOnlineByUUID {
+
+    my ($self, $param) = @_;
+
+    my $volume_uuid = $param->{volume_uuid};
+
+    my $endpoint    = 'volumes';
+    my $headers     = $self->{headers};
+    my $target      = $self->{target};
+    my $task        = 'set_online';
+    my $payload      = undef;
+
+    $endpoint       = $endpoint.'/'.$volume_uuid.'/'.$task;
+
+    $ENV{PERL_LWP_SSL_VERIFY_HOSTNAME}=0;
+
+    my $client = REST::Client->new();
+    $client->getUseragent()->ssl_opts( SSL_verify_mode => 0 );
+    $client->setHost($target);
+
+    my $response = $client->PUT($endpoint, $payload, $headers);
+# print Dumper ($response);
+    if ($response->{'_res'}{'_rc'} == 200) {
+
+        my $data = decode_json($response->{'_res'}{'_content'});
+        return $data;
+
+    }else {
+        my $error = ["$response->{'_res'}{'_msg'}"];
+        return $error;
+    }
+}
+
+sub GetVolumeByName {
+    
+    my ($self, $param) = @_;
+   
+    my $volume_name   = $param->{volume_name}; 
+    my $endpoint      = 'volumes';
+    my $headers     = $self->{headers};
+    my $target      = $self->{target};
+
+    $ENV{PERL_LWP_SSL_VERIFY_HOSTNAME}=0;
+
+    my $client = REST::Client->new();
+    $client->getUseragent()->ssl_opts( SSL_verify_mode => 0 );
+    $client->setHost($target);
+
+    my $response = $client->GET($endpoint, $headers);
+# print Dumper ($response);
+    if ($response->{'_res'}{'_rc'} == 200) {
+        my $vols =  decode_json($response->{'_res'}{'_content'});
+        
+        foreach my $item (@$vols) {
+            if ($item->{name}=~ m/$volume_name/){
+                return $item;
+            }
+        }
+        
+        # my $data = decode_json($response->{'_res'}{'_content'});
+        # return $data;
+
+    }else {
+        my $error = ["$response->{'_res'}{'_msg'}"];
+        return $error;
+    }
+
+
+
+}
+
+
 
 1;
 
