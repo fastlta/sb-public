@@ -7,20 +7,15 @@ use MIME::Base64;
 use FAST::ApiPublic;
 # use FAST::SBApiHelper;
 
-my $ip = '172.100.51.98';
+my $ip = '172.100.51.175';
 my $user = 'admin';
 my $pass = 'adminadmin';
 
-
-    my $headers_default = {
-                        Authorization => 'Basic '.encode_base64($user.':'.$pass),
-                         Accept        => 'application/json',
-                        }; 
-
-
-
-
-my $object = FAST::ApiPublic->new($ip, $user, $pass );
+my $object = FAST::ApiPublic->new({
+                                    host => $ip,
+                                    user => $user,
+                                    password => $pass,
+                                });
 # print Dumper ($object);
 
 
@@ -44,6 +39,18 @@ my $object = FAST::ApiPublic->new($ip, $user, $pass );
 
 # my $libs        = $object->GetLibraries();
 # my $vols        = $object->GetVolumes();
+
+my $vol         = $object->GetVolumeByName( {volume_name => 'Backup2DiskOffsite2'} );
+
+print Dumper ($vol->{uuid});
+# print Dumper($uuid);
+# my $offline      = $object->SetVolumeOfflineByUUID( {volume_uuid => $uuid} );
+# print Dumper ($vol);
+# my $online      = $object->SetVolumeOnlineByUUID( {volume_uuid => $uuid} );
+
+
+# print Dumper($offline);
+# print Dumper($online);
 
 # print Dumper $vols;
 
