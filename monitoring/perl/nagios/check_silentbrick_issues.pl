@@ -118,14 +118,6 @@ my $object = FAST::ApiPublic->new({
                                 });
 
 
-$object->setHost({
-        host => $host,
-    });
-
-$object->setCredentials({
-        user        => 'admin',
-        password    => 'adminadmin',
-    });
 
 my $errors 			= $object->getOpenIssues( { type => 'Error' });
 my $warnings 		= $object->getOpenIssues( { type => 'Warning' });
