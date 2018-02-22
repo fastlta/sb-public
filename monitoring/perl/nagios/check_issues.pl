@@ -43,7 +43,7 @@
 #   	password:	valid password for the UI
 #   	
 #   
-
+##################################################################
 
 use FindBin;   
 use lib "$FindBin::Bin/..";
@@ -63,7 +63,7 @@ sub usage {
       "\nUsage: $command -h hostname -u username -p password [--help]\n\n".
       "\thostname : Hostname or IP of the Silent Brick System\n".
       "\tusername : Valid UI logon user\n".
-      "\tpassword : Valid password for the logon user\n".
+      "\tpassword : Valid password for the logon user\n"
   
    		);
 
