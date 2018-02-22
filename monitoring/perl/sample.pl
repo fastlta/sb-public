@@ -5,7 +5,7 @@ use warnings;
 use Data::Dumper;
 use MIME::Base64;
 use FAST::ApiPublic;
-# use FAST::SBApiHelper;
+
 
 my $ip = '172.100.51.175';
 my $user = 'admin';
@@ -20,37 +20,40 @@ my $object = FAST::ApiPublic->new({
 
 
 
-# $object->SetHost({
-#         host => '172.100.51.98',
-#     });
+$object->SetHost({
+        host => '172.100.51.68',
+    });
 
-# $object->SetCredentials({
-#         user        => 'support',
-#         password    => '1qay2wsx#',
-#     });
+$object->SetCredentials({
+        user        => 'admin',
+        password    => 'adminadmin',
+    });
 
 
 # $object->SetHeaders();
 
+my $vols        = $object->GetVolumes();
+print Dumper ($vols);
 
+my $libs        = $object->GetLibraries();
+print Dumper $libs;
 
-# my $serials     = $object->GetBrickSerials();
-# my $uuids       = $object->GetBrickUuids();
-
-# my $libs        = $object->GetLibraries();
-# my $vols        = $object->GetVolumes();
-
-my $vol         = $object->GetVolumeByName( {volume_name => 'Backup2DiskOffsite2'} );
-
-print Dumper ($vol->{uuid});
+my $uuid = '2a4de596-d9b8-4659-bcac-6836af838374';
 # print Dumper($uuid);
+
 # my $offline      = $object->SetVolumeOfflineByUUID( {volume_uuid => $uuid} );
-# print Dumper ($vol);
+# print Dumper $offline;
+
 # my $online      = $object->SetVolumeOnlineByUUID( {volume_uuid => $uuid} );
+# print Dumper $online;
 
 
-# print Dumper($offline);
-# print Dumper($online);
 
-# print Dumper $vols;
+
+
+
+
+
+
+
 
