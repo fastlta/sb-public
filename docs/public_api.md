@@ -1,7 +1,7 @@
 # FAST LTA AG - Silent Bricks Public REST API Description
 
-__Version:__ API v1  for Silent Bricks Software R 9.1 (Version 1.3.2661, Build 2661)  
-__Date:__ September 2017
+__Version:__ API v1.  for Silent Bricks Software R 2.10 (Version 2.10.3064, Build 3064)  
+__Date:__ November 2017
 
 __Terms used:__
 
@@ -78,6 +78,11 @@ like this:
       "code": <the http status code>
       "msg": "<a detailed error message>"
     }
+
+## Note
+
+To ensure a correct response format always append `.json` to your request URL as shown in the
+examples below.
 
 ## API Calls
 
@@ -337,3 +342,70 @@ A `key` can be:
   `yes`, `y` or `1` enables the overlay. Any other value disables the logo.
 
 Any other keys are ignored.
+
+
+### Listing Open Issues
+
+All the open issues of the day can be listed with this call:
+
+    GET https://172.100.51.240/sb-public-api/api/v1/open_issues.json
+    
+ Response body example:
+    
+        [
+            {
+                "URC":"S17017",
+                "Error Level":"Error",
+                "Title":"Service failed",
+                "Data":"Service ID: S17017",
+                "Status":"Open",
+                "Date Opened":"2017-09-25T14:02:21.000+00:00",
+                "Date Closed":"-",
+                "Ticket Number":null,
+                "Technician":null
+            }
+        ]
+  
+The `Error Level` can be
+
+- `Error` 
+- `Warning` 
+- `Info` 
+
+
+# Listing the hardware info
+
+All the available serial numbers and other hardware information can be listed with this call:
+
+    GET https://172.100.51.240/sb-public-api/api/v1/hardware_info.json
+    
+ Response body example:
+     
+         
+     {
+       "system":
+                {"id":"6c1cc3bb-874f-4661-8db0-ba69f4e74b73",
+                "creation_data":"2017-09-25T14:06:23+02:00",
+                "hardware":{"site":{"id":"1","main_board":{"manufacturer":" ","pn":" ","serial":" ","version":" "},
+                            "devices":{"device":
+                                        [
+                                            {"shortname":"G5","type":null,"serial":"3000-9990-0640","version":"2.0.2928","components":{"mc_units":null,"psus":null,"rtcs":null,"ssds":null,"gpus":null,"nics":null}},
+                                            {"shortname":"EXTSHELF","type":null,"serial":"1000-9990-0511","components":{"mc_units":null,"psus":null,"rtcs":null}},
+                                            {"shortname":"EXTSHELF","type":null,"serial":"1000-9991-0533","components":{"mc_units":null,"psus":null,"rtcs":null}},
+                                            {"shortname":"EXTSHELF","type":null,"serial":"1000-9992-0500","components":{"mc_units":null,"psus":null,"rtcs":null}}
+                                        ]}}},
+                "software":{"used":"35 KB",
+                            "bricks":{"brick":
+                                        [  
+                                            {"shortname":"SB","type":"hdd","serial":"V10AFDEB","fw":"0.0.0","used":"35 KB","slot":"0"},
+                                            {"shortname":"SB","type":"hdd","serial":"V10AFDE9","fw":"0.0.0","used":"-","slot":"0"},
+                                            {"shortname":"SB","type":"hdd","serial":"V10AFDED","fw":"0.0.0","used":"-","slot":"1"},
+                                            {"shortname":"SB","type":"hdd","serial":"V10AFDEA","fw":"0.0.0","used":"-","slot":"0"},
+                                            {"shortname":"SB","type":"hdd","serial":"V10AFDE8","fw":"0.0.0","used":"-","slot":"0"},
+                                            {"shortname":"SB","type":"hdd","serial":"V10AFDEC","fw":"0.0.0","used":"-","slot":"1"}
+                                         ]}},
+                "eventhistory":{"events":null}}}
+     }
+         
+  
+  
