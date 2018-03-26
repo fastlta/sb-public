@@ -7,7 +7,7 @@ use MIME::Base64;
 use FAST::ApiPublic;
 
 
-my $ip = '172.100.51.175';
+my $ip = '172.20.60.70';
 my $user = 'admin';
 my $pass = 'adminadmin';
 
@@ -16,36 +16,81 @@ my $object = FAST::ApiPublic->new({
                                     user => $user,
                                     password => $pass,
                                 });
-# print Dumper ($object);
 
 
 
-$object->SetHost({
-        host => '172.100.51.68',
-    });
+### Modifying Hostname
+$object->setHost({
+        host => $ip,
 
-$object->SetCredentials({
+ });
+
+### Modifying credentials
+$object->setCredentials({
         user        => 'admin',
         password    => 'adminadmin',
     });
 
 
-# $object->SetHeaders();
+### Reading all Volumes
+my $vols        = $object->getVolumes();
+if( $vols->{rc} == 1 ){
+	print "Found Volumes:";
+	print Dumper ($vols->{content});
+}
+else{
+	print "Failed to retrieve Volumes.";
+	print Dumper ($vols->{content});
+}
 
-my $vols        = $object->GetVolumes();
-print Dumper ($vols);
+### Reading all Libraries
+my $libs        = $object->getLibraries();
+if( $libs->{rc} == 1 ){
+	print "Found Libraries:";
+	print Dumper ($libs->{content});
+}
+else{
+	print "Failed to retrieve Libraries.";
+	print Dumper ($libs->{content});
+}
 
-my $libs        = $object->GetLibraries();
-print Dumper $libs;
+### Reading all Issues by type
+my $issues 		= $object->getOpenIssues( { type => "error" });
+if( $issues->{rc} == 1 ){
+	print "Found Issues:";
+	print Dumper ($issues->{content});
+}
+else{
+	print "Failed to retrieve Issues.";
+	print Dumper ($issues->{content});
+}
+
+
 
 my $uuid = '2a4de596-d9b8-4659-bcac-6836af838374';
-# print Dumper($uuid);
 
-# my $offline      = $object->SetVolumeOfflineByUUID( {volume_uuid => $uuid} );
-# print Dumper $offline;
 
-# my $online      = $object->SetVolumeOnlineByUUID( {volume_uuid => $uuid} );
-# print Dumper $online;
+### Setting a Volume offline by UUID
+my $offline_ret   = $object->SetVolumeOfflineByUUID( {volume_uuid => $uuid} );
+if( $offline_ret->{rc} == 1 ){
+	print "Setting offline successful:";
+	print Dumper ($offline_ret->{content});
+}
+else{
+	print "Failed to set offline.";
+	print Dumper ($offline_ret->{content});
+}
+
+### Setting a Volume online by UUID
+my $online_ret      = $object->SetVolumeOnlineByUUID( {volume_uuid => $uuid} );
+if( $online_ret->{rc} == 1 ){
+	print "Setting online successful:";
+	print Dumper ($online_ret->{content});
+}
+else{
+	print "Failed to set online.";
+	print Dumper ($online_ret->{content});
+}
 
 
 

@@ -1,3 +1,26 @@
+##################################################################
+# Copyright 2018 FAST LTA AG
+# 
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License. 
+# 
+# Authors   : jgelhorn, rwr
+# Version   : 1.0
+# Date      : 22.02.2018
+#
+##################################################################
+
+
+
 package FAST::ApiPublic;
 
 use strict;
@@ -9,10 +32,20 @@ use JSON;
 use Data::Dumper;
 
 
-# use Exporter qw(import);
 
-# our @EXPORT_OK = qw(new );
 
+#** @class FAST::ApiPublic
+# 
+#   @brief Class for Querying Silent Brick API
+# 
+#   This class is the base for commandline script to query or modify
+#   the Silent Brick System
+#   
+#   @params host required Hostname or IP address of the Silent Brick System
+#   @params user required Username for the Silent Brick User Interface
+#   @params password required Password for the user
+#   
+#*
 
 sub new {
 
@@ -45,8 +78,15 @@ sub new {
 }
 
 
+#** @method public int setHost
+#
+#   @brief Sets the target in the class object
+#   @params host Hostname or IP
+#   @retval 1   Returns 1 and sets target of the class
+#   
+#*
 
-sub SetHost {
+sub setHost {
     my ($self, $param) = @_;
 
     my $ip = $param->{host};
@@ -55,11 +95,13 @@ sub SetHost {
     return 1;
 }
 
+#** @method public int setHeaders
+#
+#   @brief Sets the headers in the class object
+#   @retval 1 Returns 1 since only headers are set
+#*
 
-### Routine to set headers to use for api call
-# needs : hash reference containing all headers to use
-# returns : self object
-sub SetHeaders {
+sub setHeaders {
     my ($self, $param) = @_;
 
     my $user        = $self->{user};
@@ -82,8 +124,16 @@ sub SetHeaders {
 }
 
 
+#** @method public int setCredentials
+#
+#   @brief Sets the credentials in the class object
+#   @params user Username for the Webinterface
+#   @params password Password of the User
+#   
+#   @retval 1 Returns 1 since only headers are set
+#*
 
-sub SetCredentials {
+sub setCredentials {
 
     my ($self, $param)  = @_;
 
@@ -96,7 +146,14 @@ sub SetCredentials {
     return 1;
 }
 
-sub GetLibraries{
+#** @method public int getLibraries
+#
+#   @brief Reads all Libraries from the system
+#   
+#   @retval hash Returns hash with rc ( 0 or 1 ) and content
+#*
+
+sub getLibraries{
 
     my ($self, $param) = @_;
 
@@ -115,16 +172,23 @@ sub GetLibraries{
     if ($response->{'_res'}{'_rc'} == 200) {
 
         my $data = decode_json($response->{'_res'}{'_content'});
-        return $data;
+        return { rc=>1, content=>$data };
 
     }else {
         my $error = ["$response->{'_res'}{'_msg'}"];
-        return $error;
+        return { rc=>0, content=>$error };
     }
 }
 
 
-sub GetVolumes{
+#** @method public int getVolumes
+#
+#   @brief Reads all Volumes from the system
+#   
+#   @retval hash Returns hash with rc ( 0 or 1 ) and content
+#*
+
+sub getVolumes{
 
     my ($self, $param) = @_;
 
@@ -139,20 +203,26 @@ sub GetVolumes{
     $client->setHost($target);
 
     my $response = $client->GET($endpoint, $headers);
-# print Dumper ($response);
     if ($response->{'_res'}{'_rc'} == 200) {
 
         my $data = decode_json($response->{'_res'}{'_content'});
-        return $data;
+        return { rc=>1, content=>$data };
 
     }else {
         my $error = ["$response->{'_res'}{'_msg'}"];
-        return $error;
+        return { rc=>0, content=>$error};
     }
 
 }
 
-sub SetVolumeOfflineByUUID {
+#** @method public int setVolumeOfflineByUUID
+#
+#   @brief Sets a defined volume to offline
+#   @params volume_uuid UUID of the volume to be set offline
+#   @retval hash Returns hash with rc ( 0 or 1 ) and content
+#*
+
+sub setVolumeOfflineByUUID {
 
     my ($self, $param) = @_;
 
@@ -173,19 +243,27 @@ sub SetVolumeOfflineByUUID {
     $client->setHost($target);
 
     my $response = $client->PUT($endpoint, $payload, $headers);
-# print Dumper ($response);
+
     if ($response->{'_res'}{'_rc'} == 200) {
 
         my $data = decode_json($response->{'_res'}{'_content'});
-        return $data;
+        return { rc=>1, content=>$data };
 
     }else {
         my $error = ["$response->{'_res'}{'_msg'}"];
-        return $error;
+        return { rc=>0, content=>$error};
     }
 }
 
-sub SetVolumeOnlineByUUID {
+
+#** @method public int setVolumeOnlineByUUID
+#
+#   @brief Sets a defined volume to online
+#   @params volume_uuid UUID of the volume to be set offline
+#   @retval hash Returns hash with rc ( 0 or 1 ) and content
+#*
+
+sub setVolumeOnlineByUUID {
 
     my ($self, $param) = @_;
 
@@ -210,14 +288,63 @@ sub SetVolumeOnlineByUUID {
     if ($response->{'_res'}{'_rc'} == 200) {
 
         my $data = decode_json($response->{'_res'}{'_content'});
-        return $data;
+        return { rc=>1, content=>$data};
 
     }else {
         my $error = ["$response->{'_res'}{'_msg'}"];
-        return $error;
+        return {rc=>0, content=>$error};
     }
 }
 
+
+#** @method public int getOpenIssues
+#
+#   @brief Reads all open issues from the system
+#   @params type Optional. May be all (default), error, info, warning. 
+#   @retval hash Returns hash with rc ( 0 or 1 ) and content
+#*
+sub getOpenIssues {
+
+    my ($self, $param) = @_;
+
+    my $issues_type = $param->{type} || 'all';
+
+    my $endpoint      = 'open_issues';
+    my $headers     = $self->{headers};
+    my $target      = $self->{target};
+
+    $ENV{PERL_LWP_SSL_VERIFY_HOSTNAME}=0;
+
+    my $client = REST::Client->new();
+    $client->getUseragent()->ssl_opts( SSL_verify_mode => 0 );
+    $client->setHost($target);
+
+    my $response = $client->GET($endpoint, $headers);
+    # print Dumper ($response);
+    if ($response->{'_res'}{'_rc'} == 200) {
+
+        my $data   = decode_json($response->{'_res'}{'_content'});
+        my @issues; 
+        
+        if( lc $issues_type ne "all" ){
+            foreach my $issue( @{$data} ){
+                if( lc $issue->{'Error Level'} eq lc $issues_type ){
+                    push( @issues, $issue );
+                }
+            }
+        }else{
+            @issues = @{$data};
+        }
+
+        
+        return { rc=>1, content=>\@issues};
+
+    }else {
+        my $error = ["$response->{'_res'}{'_msg'}"];
+        return { rc=>0, content=>$error };
+    }
+
+}
 
 
 
