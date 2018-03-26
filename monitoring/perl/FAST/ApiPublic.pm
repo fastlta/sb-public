@@ -51,7 +51,7 @@ sub new {
 
     my $class        = shift;        
     my $param        = shift; 
-# print Dumper ($param);
+
     my $host = $param->{host}           || return "Error: No host set";
     my $user = $param->{user}           || return "Error: No user provided";
     my $password = $param->{password}   || return "Error: No password provided";
@@ -170,10 +170,8 @@ sub getLibraries{
     my $response = $client->GET($endpoint, $headers);
 
     if ($response->{'_res'}{'_rc'} == 200) {
-
         my $data = decode_json($response->{'_res'}{'_content'});
         return { rc=>1, content=>$data };
-
     }else {
         my $error = ["$response->{'_res'}{'_msg'}"];
         return { rc=>0, content=>$error };
@@ -204,10 +202,8 @@ sub getVolumes{
 
     my $response = $client->GET($endpoint, $headers);
     if ($response->{'_res'}{'_rc'} == 200) {
-
         my $data = decode_json($response->{'_res'}{'_content'});
         return { rc=>1, content=>$data };
-
     }else {
         my $error = ["$response->{'_res'}{'_msg'}"];
         return { rc=>0, content=>$error};
@@ -245,10 +241,8 @@ sub setVolumeOfflineByUUID {
     my $response = $client->PUT($endpoint, $payload, $headers);
 
     if ($response->{'_res'}{'_rc'} == 200) {
-
         my $data = decode_json($response->{'_res'}{'_content'});
         return { rc=>1, content=>$data };
-
     }else {
         my $error = ["$response->{'_res'}{'_msg'}"];
         return { rc=>0, content=>$error};
@@ -284,12 +278,10 @@ sub setVolumeOnlineByUUID {
     $client->setHost($target);
 
     my $response = $client->PUT($endpoint, $payload, $headers);
-# print Dumper ($response);
-    if ($response->{'_res'}{'_rc'} == 200) {
 
+    if ($response->{'_res'}{'_rc'} == 200) {
         my $data = decode_json($response->{'_res'}{'_content'});
         return { rc=>1, content=>$data};
-
     }else {
         my $error = ["$response->{'_res'}{'_msg'}"];
         return {rc=>0, content=>$error};
@@ -320,7 +312,7 @@ sub getOpenIssues {
     $client->setHost($target);
 
     my $response = $client->GET($endpoint, $headers);
-    # print Dumper ($response);
+
     if ($response->{'_res'}{'_rc'} == 200) {
 
         my $data   = decode_json($response->{'_res'}{'_content'});
