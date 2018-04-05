@@ -211,6 +211,44 @@ sub getVolumes{
 
 }
 
+#** @method public int getVolumeDetails
+#
+#   @brief Reads Partition information for a Volumes
+#   @params volume_uuid UUID of the volume to be set offline
+#   @retval hash Returns hash with rc ( 0 or 1 ) and content
+#*
+
+sub getVolumeDetails{
+
+    my ($self, $param) = @_;
+
+    my $volume_uuid = $param->{volume_uuid} || return { rc=>0, content=>"No Volume UUID given" };
+
+    my $endpoint    = 'volumes';
+    my $headers     = $self->{headers};
+    my $target      = $self->{target};
+    my $task        = "partitions";
+
+    $endpoint       = $endpoint.'/'.$volume_uuid.'/'.$task;
+
+    $ENV{PERL_LWP_SSL_VERIFY_HOSTNAME}=0;
+
+    my $client = REST::Client->new();
+    $client->getUseragent()->ssl_opts( SSL_verify_mode => 0 );
+    $client->setHost($target);
+
+    my $response = $client->GET($endpoint, $headers);
+
+    if ($response->{'_res'}{'_rc'} == 200) {
+        my $data = decode_json($response->{'_res'}{'_content'});
+        return { rc=>1, content=>$data };
+    }else {
+        my $error = ["$response->{'_res'}{'_msg'}"];
+        return { rc=>0, content=>$error};
+    }
+
+}
+
 #** @method public int setVolumeOfflineByUUID
 #
 #   @brief Sets a defined volume to offline
