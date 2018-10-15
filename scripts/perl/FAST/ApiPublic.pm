@@ -14,8 +14,10 @@
 # limitations under the License. 
 # 
 # Authors   : jgelhorn, rwr
-# Version   : 1.0
-# Date      : 22.02.2018
+# Version   : 1.2
+# Date      : 15.10.2018
+# 
+# Changelog : Adjusted to fit with the latest release 
 #
 ##################################################################
 
@@ -78,6 +80,8 @@ sub new {
 }
 
 
+#****************************************************** Connection Methods *******************************+*******#
+
 #** @method public int setHost
 #
 #   @brief Sets the target in the class object
@@ -124,6 +128,7 @@ sub setHeaders {
 }
 
 
+
 #** @method public int setCredentials
 #
 #   @brief Sets the credentials in the class object
@@ -146,6 +151,130 @@ sub setCredentials {
     return 1;
 }
 
+
+
+#****************************************************** Generic Methods *******************************+*******#
+
+
+#** @method public int getCall
+#
+#   @brief Sends a GET request to the API
+#   @params get_string
+#   @retval hash Returns hash with rc ( 0 or 1 ) and content
+#*
+
+sub getCall {
+
+  
+    my ($self, $param) = @_;
+
+    my $get_string = $param->{endpoint} || return { rc=>0, content=>"No Endpoint String given" };
+
+    my $headers     = $self->{headers};
+    my $target      = $self->{target};
+
+
+    $ENV{PERL_LWP_SSL_VERIFY_HOSTNAME}=0;
+
+    my $client = REST::Client->new();
+    $client->getUseragent()->ssl_opts( SSL_verify_mode => 0 );
+    $client->setHost($target);
+
+    my $response = $client->GET($get_string, $headers);
+
+    if ($response->{'_res'}{'_rc'} == 200) {
+        my $data = decode_json($response->{'_res'}{'_content'});
+        return { rc=>1, content=>$data };
+    }else {
+        my $error = ["$response->{'_res'}{'_msg'}"];
+        return { rc=>0, content=>$error};
+    }
+
+}
+
+
+#** @method public int setCall
+#
+#   @brief Sends a PUT request to the API
+#   @params set_string
+#   @retval hash Returns hash with rc ( 0 or 1 ) and content
+#*
+
+sub setCall {
+
+    my ($self, $param) = @_;
+
+
+    my $endpoint = $param->{endpoint} || return { rc=>0, content=>"No endpoint given" };
+    my $payload  = $param->{payload}  || '';
+
+   
+    my $headers     = $self->{headers};
+    my $target      = $self->{target};
+
+    $ENV{PERL_LWP_SSL_VERIFY_HOSTNAME}=0;
+
+    my $client = REST::Client->new();
+    $client->getUseragent()->ssl_opts( SSL_verify_mode => 0 );
+    $client->setHost($target);
+
+   if( $payload ){
+        $payload = $client->buildQuery($payload);
+   }
+    
+
+    my $response = $client->PUT($endpoint.$payload, undef, $headers);
+
+    if ($response->{'_res'}{'_rc'} == 200) {
+        my $data = decode_json($response->{'_res'}{'_content'});
+        return { rc=>1, content=>$data };
+    }else {
+        my $error = ["$response->{'_res'}{'_msg'}"];
+        return { rc=>0, content=>$error};
+    }
+}
+
+
+#** @method public int deleteCall
+#
+#   @brief Sends a DELETE request to the API
+#   @params del_string
+#   @retval hash Returns hash with rc ( 0 or 1 ) and content
+#*
+
+sub deleteCall {
+
+    my ($self, $param) = @_;
+
+
+    my $endpoint = $param->{endpoint} || return { rc=>0, content=>"No endpoint given" };
+    
+
+    my $headers     = $self->{headers};
+    my $target      = $self->{target};
+
+
+
+    $ENV{PERL_LWP_SSL_VERIFY_HOSTNAME}=0;
+
+    my $client = REST::Client->new();
+    $client->getUseragent()->ssl_opts( SSL_verify_mode => 0 );
+    $client->setHost($target);
+
+    my $response = $client->DELETE($endpoint, $headers);
+
+    if ($response->{'_res'}{'_rc'} == 200) {
+        my $data = decode_json($response->{'_res'}{'_content'});
+        return { rc=>1, content=>$data };
+    }else {
+        my $error = ["$response->{'_res'}{'_msg'}"];
+        return { rc=>0, content=>$error};
+    }
+}
+
+
+#****************************************************** Get Methods *******************************+*******#
+
 #** @method public int getLibraries
 #
 #   @brief Reads all Libraries from the system
@@ -158,24 +287,10 @@ sub getLibraries{
     my ($self, $param) = @_;
 
     my $endpoint      = 'libraries';
-    my $headers     = $self->{headers};
-    my $target      = $self->{target};
 
-    $ENV{PERL_LWP_SSL_VERIFY_HOSTNAME}=0;
+    return $self->getCall( { endpoint=>$endpoint } );
 
-    my $client = REST::Client->new();
-    $client->getUseragent()->ssl_opts( SSL_verify_mode => 0 );
-    $client->setHost($target);
 
-    my $response = $client->GET($endpoint, $headers);
-
-    if ($response->{'_res'}{'_rc'} == 200) {
-        my $data = decode_json($response->{'_res'}{'_content'});
-        return { rc=>1, content=>$data };
-    }else {
-        my $error = ["$response->{'_res'}{'_msg'}"];
-        return { rc=>0, content=>$error };
-    }
 }
 
 
@@ -191,23 +306,8 @@ sub getVolumes{
     my ($self, $param) = @_;
 
     my $endpoint      = 'volumes';
-    my $headers     = $self->{headers};
-    my $target      = $self->{target};
 
-    $ENV{PERL_LWP_SSL_VERIFY_HOSTNAME}=0;
-
-    my $client = REST::Client->new();
-    $client->getUseragent()->ssl_opts( SSL_verify_mode => 0 );
-    $client->setHost($target);
-
-    my $response = $client->GET($endpoint, $headers);
-    if ($response->{'_res'}{'_rc'} == 200) {
-        my $data = decode_json($response->{'_res'}{'_content'});
-        return { rc=>1, content=>$data };
-    }else {
-        my $error = ["$response->{'_res'}{'_msg'}"];
-        return { rc=>0, content=>$error};
-    }
+    return $self->getCall( { endpoint=>$endpoint } );
 
 }
 
@@ -225,105 +325,12 @@ sub getVolumeDetails{
     my $volume_uuid = $param->{volume_uuid} || return { rc=>0, content=>"No Volume UUID given" };
 
     my $endpoint    = 'volumes';
-    my $headers     = $self->{headers};
-    my $target      = $self->{target};
     my $task        = "partitions";
 
     $endpoint       = $endpoint.'/'.$volume_uuid.'/'.$task;
 
-    $ENV{PERL_LWP_SSL_VERIFY_HOSTNAME}=0;
+    return $self->getCall( { endpoint=>$endpoint } );
 
-    my $client = REST::Client->new();
-    $client->getUseragent()->ssl_opts( SSL_verify_mode => 0 );
-    $client->setHost($target);
-
-    my $response = $client->GET($endpoint, $headers);
-
-    if ($response->{'_res'}{'_rc'} == 200) {
-        my $data = decode_json($response->{'_res'}{'_content'});
-        return { rc=>1, content=>$data };
-    }else {
-        my $error = ["$response->{'_res'}{'_msg'}"];
-        return { rc=>0, content=>$error};
-    }
-
-}
-
-#** @method public int setVolumeOfflineByUUID
-#
-#   @brief Sets a defined volume to offline
-#   @params volume_uuid UUID of the volume to be set offline
-#   @retval hash Returns hash with rc ( 0 or 1 ) and content
-#*
-
-sub setVolumeOfflineByUUID {
-
-    my ($self, $param) = @_;
-
-    my $volume_uuid = $param->{volume_uuid};
-
-    my $endpoint    = 'volumes';
-    my $headers     = $self->{headers};
-    my $target      = $self->{target};
-    my $task        = 'set_offline';
-    my $payload      = undef;
-
-    $endpoint       = $endpoint.'/'.$volume_uuid.'/'.$task;
-
-    $ENV{PERL_LWP_SSL_VERIFY_HOSTNAME}=0;
-
-    my $client = REST::Client->new();
-    $client->getUseragent()->ssl_opts( SSL_verify_mode => 0 );
-    $client->setHost($target);
-
-    my $response = $client->PUT($endpoint, $payload, $headers);
-
-    if ($response->{'_res'}{'_rc'} == 200) {
-        my $data = decode_json($response->{'_res'}{'_content'});
-        return { rc=>1, content=>$data };
-    }else {
-        my $error = ["$response->{'_res'}{'_msg'}"];
-        return { rc=>0, content=>$error};
-    }
-}
-
-
-#** @method public int setVolumeOnlineByUUID
-#
-#   @brief Sets a defined volume to online
-#   @params volume_uuid UUID of the volume to be set offline
-#   @retval hash Returns hash with rc ( 0 or 1 ) and content
-#*
-
-sub setVolumeOnlineByUUID {
-
-    my ($self, $param) = @_;
-
-    my $volume_uuid = $param->{volume_uuid};
-
-    my $endpoint    = 'volumes';
-    my $headers     = $self->{headers};
-    my $target      = $self->{target};
-    my $task        = 'set_online';
-    my $payload      = undef;
-
-    $endpoint       = $endpoint.'/'.$volume_uuid.'/'.$task;
-
-    $ENV{PERL_LWP_SSL_VERIFY_HOSTNAME}=0;
-
-    my $client = REST::Client->new();
-    $client->getUseragent()->ssl_opts( SSL_verify_mode => 0 );
-    $client->setHost($target);
-
-    my $response = $client->PUT($endpoint, $payload, $headers);
-
-    if ($response->{'_res'}{'_rc'} == 200) {
-        my $data = decode_json($response->{'_res'}{'_content'});
-        return { rc=>1, content=>$data};
-    }else {
-        my $error = ["$response->{'_res'}{'_msg'}"];
-        return {rc=>0, content=>$error};
-    }
 }
 
 
@@ -343,17 +350,12 @@ sub getOpenIssues {
     my $headers     = $self->{headers};
     my $target      = $self->{target};
 
-    $ENV{PERL_LWP_SSL_VERIFY_HOSTNAME}=0;
 
-    my $client = REST::Client->new();
-    $client->getUseragent()->ssl_opts( SSL_verify_mode => 0 );
-    $client->setHost($target);
+    my $response = $self->getCall( { endpoint=>$endpoint } );
 
-    my $response = $client->GET($endpoint, $headers);
+    if ($response->{'rc'} == 1) {
 
-    if ($response->{'_res'}{'_rc'} == 200) {
-
-        my $data   = decode_json($response->{'_res'}{'_content'});
+        my $data   = $response->{'content'};
         my @issues; 
         
         if( lc $issues_type ne "all" ){
@@ -370,11 +372,154 @@ sub getOpenIssues {
         return { rc=>1, content=>\@issues};
 
     }else {
-        my $error = ["$response->{'_res'}{'_msg'}"];
+        my $error = ["$response->{'content'}"];
         return { rc=>0, content=>$error };
     }
 
 }
+
+
+
+#** @method public int getFreeBricks
+#
+#   @brief Returns a list of all free or unassigned bricks
+#   @retval hash Returns hash with rc ( 0 or 1 ) and content
+#*
+
+sub getFreeBricks {
+
+
+   my ($self, $param) = @_;
+
+    my $endpoint      = 'bricks';
+    
+    return $self->getCall( { endpoint=>$endpoint } );
+
+}
+
+
+
+#** @method public int getSnapshotsByVolume
+#
+#   @brief Returns a list of all Snapshots by Volume UUID
+#   @params volume_uuid UUID of the volume to be set offline
+#   @retval hash Returns hash with rc ( 0 or 1 ) and content
+#*
+
+sub getSnapshotsByVolume {
+
+  
+    my ($self, $param) = @_;
+
+    my $volume_uuid = $param->{volume_uuid} || return { rc=>0, content=>"No Volume UUID given" };
+
+    my $endpoint    = 'volumes';
+    my $task        = "list_snapshots";
+
+    $endpoint       = $endpoint.'/'.$volume_uuid.'/'.$task;
+
+    return $self->getCall( { endpoint=>$endpoint } );
+
+
+}
+
+
+#**************************** Set Methods ********************************#
+ 
+
+#** @method public int setVolumeOfflineByUUID
+#
+#   @brief Sets a defined volume to offline
+#   @params volume_uuid UUID of the volume to be set offline
+#   @retval hash Returns hash with rc ( 0 or 1 ) and content
+#*
+
+sub setVolumeOfflineByUUID {
+
+    my ($self, $param) = @_;
+
+    my $volume_uuid = $param->{volume_uuid};
+
+    my $endpoint    = 'volumes';
+    my $task        = 'set_offline';
+    my $payload      = undef;
+
+    $endpoint       = $endpoint.'/'.$volume_uuid.'/'.$task;
+
+    return $self->setCall( { endpoint=>$endpoint, payload=>$payload });
+}
+
+
+#** @method public int setVolumeOnlineByUUID
+#
+#   @brief Sets a defined volume to online
+#   @params volume_uuid UUID of the volume to be set offline
+#   @retval hash Returns hash with rc ( 0 or 1 ) and content
+#*
+
+sub setVolumeOnlineByUUID {
+
+    my ($self, $param) = @_;
+
+    my $volume_uuid = $param->{volume_uuid};
+
+    my $endpoint    = 'volumes';
+    my $task        = 'set_online';
+    my $payload      = undef;
+
+    $endpoint       = $endpoint.'/'.$volume_uuid.'/'.$task;
+
+    return $self->setCall( { endpoint=>$endpoint, payload=>$payload });
+}
+
+
+#** @method public int setEpocSnapshotByUUID
+#
+#   @brief Sets a snapshot with epoc name on a volume
+#   @params volume_uuid UUID of the volume to be set offline
+#   @retval hash Returns hash with rc ( 0 or 1 ) and content
+#*
+
+sub setEpocSnapshotByUUID {
+
+    my ($self, $param) = @_;
+
+    my $volume_uuid = $param->{volume_uuid};
+
+    my $endpoint    = 'volumes';
+    my $task        = 'snapshot';
+    my $epoc        = time();
+    my $payload     = { name=>$epoc, description=>"Snapshot created via API Call" };
+    $endpoint       = $endpoint.'/'.$volume_uuid.'/'.$task;
+
+
+    return $self->setCall( { endpoint=>$endpoint, payload=>$payload } );
+}
+
+
+#**************************** Delete Methods ********************************#
+
+#** @method public int deleteSnapshotByUUID
+#
+#   @brief Deletes a snapshot by uuid
+#   @params snapshot_uuid UUID of the Snapshot
+#   @retval hash Returns hash with rc ( 0 or 1 ) and content
+#*
+
+sub deleteSnapshotByUUID {
+
+    my ($self, $param) = @_;
+
+    my $snapshot_uuid = $param->{snapshot_uuid};
+
+    my $endpoint    = 'snapshots';
+ 
+    $endpoint       = $endpoint.'/'.$snapshot_uuid;
+
+
+    return $self->deleteCall( { endpoint=>$endpoint } );
+}
+
 
 
 
