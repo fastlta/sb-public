@@ -1,7 +1,7 @@
 # FAST LTA AG - Silent Bricks Public REST API Description
 
-__Version:__ API v2.  for Silent Bricks Software R 2.15 (Version 2.15)  
-__Date:__ Oktober 2018
+__Version:__ API v2.  for Silent Bricks Software R 2.15 (Version 2.15.0.9)  
+__Date:__ December 2018
 
 __Terms used:__
 
