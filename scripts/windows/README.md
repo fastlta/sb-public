@@ -12,6 +12,8 @@ You may find sample scripts for ordered by the different OS types you may use th
 Install at least the main class file "FAST.ps1" into any folder on your Windows host.
 The class file may be included in other Powershell scripts in order to call defined functions.
 
+_These scripts require a PowerShell Version >= 5_
+
 #### Example 
 
 # Initialize Object
