@@ -124,7 +124,7 @@ my $vol_name;
 my $vol_net;
 my $vol_used;
 my $vol_perc;
-my $all_volumes_string;
+my $all_volumes_string = "";
 my $volume_usages;
 my $max_error = 0;
 
@@ -135,7 +135,7 @@ my $exit_state_prefix = {  0 => "OK",
 						};
 
 
-foreach( @{$ret->{content}} ){
+foreach( @{$ret->{volumes}} ){
 
 	if( $_->{status} ne 'online'){
 		next;
