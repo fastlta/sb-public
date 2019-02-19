@@ -131,7 +131,7 @@ if( 0!= $bRSuccess ){
 	if( @{$warnings->{content}}  gt 0 ){
 			print "WARN - ";
 			print_titles( $warnings->{content} );
-         $exitCode = 2;
+         $exitCode = 1;
 	}
 }
 
@@ -139,7 +139,7 @@ if(  0!= $bESuccess ){
    if( @{$errors->{content}}  gt 0 ){
       print "CRIT -";
       print_titles( $errors->{content} );
-      $exitCode = 1;
+      $exitCode = 2;
    }
 }
 
