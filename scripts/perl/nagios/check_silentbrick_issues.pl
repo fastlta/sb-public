@@ -88,7 +88,7 @@ sub print_titles {
 		}
 	}
 	chop($string);
-	print $string;
+	print $string . "\n";
 
 	return 1;	
 
@@ -118,28 +118,34 @@ my $object = FAST::ApiPublic->new({
                                 });
 
 
-
+# ATTENTION: returncode rc may be 1 if contetn is empty.
+#           rc reflects the return code of the service, means successful call or not
 my $errors 			= $object->getOpenIssues( { type => 'Error' });
 my $warnings 		= $object->getOpenIssues( { type => 'Warning' });
 
-if( $errors->{rc} == 1 ){
-	if( @{$errors->{content}}  gt 0 ){
-		print "CRIT -";
-		print_titles( $errors->{content} );
-		exit 2;
-	}
-}
-elsif( $warnings->{rc} == 1 ){
-	
+my $bESuccess = ( $errors->{rc} == 1 );
+my $bRSuccess = ( $warnings->{rc} == 1 );
+my $exitCode = 0;
+
+if( 0!= $bRSuccess ){
 	if( @{$warnings->{content}}  gt 0 ){
 			print "WARN - ";
 			print_titles( $warnings->{content} );
-			exit 1;
+         $exitCode = 1;
 	}
-}else{
-	print "UNK - Failed to connect to your system. Please verify IP and software version >= 2.10";
-	exit 3;
 }
 
-print "OK - No errors. No warnings.";
-exit 0;
+if(  0!= $bESuccess ){
+   if( @{$errors->{content}}  gt 0 ){
+      print "CRIT -";
+      print_titles( $errors->{content} );
+      $exitCode = 2;
+   }
+}
+
+if ( !($bESuccess || $bRSuccess) ) {
+	print "UNK - Failed to connect to your system. Please verify IP and software version >= 2.10";
+	$exitCode = 3;
+}
+
+exit $exitCode;
