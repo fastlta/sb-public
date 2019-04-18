@@ -682,7 +682,8 @@ sub createLibrary {
     my $tape_name_prefix = $param->{tape_name_prefix} || "Brick-";
     my $tape_count  = $param->{tape_count} || 1;
 
-
+    # Adding Bricks not supported at the Moment.
+    # Reason: Transformation of the Array not correct by url builder.
 
 
     my $endpoint    = 'libraries.json';
