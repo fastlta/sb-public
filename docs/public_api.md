@@ -1,16 +1,9 @@
 # FAST LTA AG - Silent Bricks Public REST API Description
 
-__Version:__ API v2.  for Silent Bricks Software R 2.15 (Version 2.15.0.9)  
-__Date:__ December 2018
+__Version:__ API v2.  for Silent Bricks Software R 2.22 (Version 2.22.0.3)  
+__Date:__ July 2019
 
 __Terms used:__
-
-- Silent Brick Library: The whole system
-- Tape Library: A single, emulated tape library
-- Tape: Emulated tape instance, equivalent to a single Silent Brick
-# Silent Bricks API Description
-
-Terms used:
 
 - Silent Brick Library: The whole system
 - Tape Library: A single, emulated tape library
@@ -88,7 +81,21 @@ like this:
       "code": <the http status code>
       "msg": "<a detailed error message>"
     }
+    
+### SSL certificate
 
+Because our default certificate is a self-signed certificate, 
+we need to ignore the certificate or indicate the path of the certificate when
+HTTPS client are called.
+
+Calling without a custom SSL certificate
+
+    curl -k -X GET https://172.100.51.240/sb-public-api/api/v1/bricks.json -u admin
+    
+Calling with a custom SSL certificate
+
+    curl --cacert company.cert -X GET https://172.100.51.240/sb-public-api/api/v1/bricks.json -u admin
+    
 ## Note
 
 To ensure a correct response format always append `.json` to your request URL as shown in the
@@ -144,7 +151,7 @@ Response body example:
             "gross_capacity":3995903488,
             "net_capacity":3990496256,
             "status":"online",
-          "unassigned":"No",
+        	"unassigned":"No",
             "v_devs": [
               {
                 "uuid":"8dd53317-ef74-4869-a2f0-5e162d2d5c0b",,
@@ -162,7 +169,7 @@ Response body example:
             "gross_capacity":3995903488,
             "net_capacity":3990496256,
             "status":"online",
-          "unassigned":"No",
+        	"unassigned":"No",
             "tapes": [
               {
                 "uuid":"52c99404-00b1-46d6-adf8-f710d6bfe1bc",
@@ -181,7 +188,7 @@ Response body example:
             "gross_capacity":3995903488,
             "net_capacity":3990496256,
             "status":"online",
-          "unassigned":"No",
+        	"unassigned":"No",
             "partitions": [
               {
                 "uuid":"8dd53317-ef74-4869-a2f0-5e162d2d5c0b",,
@@ -235,7 +242,7 @@ A `key` can be:
 - `find_me`      To toggle on/off the beacon
 
     - `0`  To switch off
-    - `1`  To switch on   
+    - `1`  To switch on		
 
 Any other keys are ignored.
 
@@ -264,18 +271,18 @@ Request:
 
 Response body example:
 
-  {
+	{
         "library_types": [
-        {
-          "vendor_identification": "ADIC",
-          "product_identification": "Scalar 1000",
-          "default_revision_level": "500A"
-        },
+	      {
+	        "vendor_identification": "ADIC",
+	        "product_identification": "Scalar 1000",
+	        "default_revision_level": "500A"
+	      },
           {
             ... info for next library type
           }
         ]
-  }
+	}
 
 ### List Tape Drive Emulations
 
@@ -287,7 +294,7 @@ Request:
 
 Response body example:
 
-  {
+	{
       "tape_drive_types": [
         {
           "vendor_identification": "IBM",
@@ -388,8 +395,8 @@ ends with '999' (e.g. 'XXX000' to 'XXX999') the generated barcodes will consist 
 
 - `barcode_start`           The start pattern for tape barcode
 - `barcode_end`             The end pattern for tape barcode
-- `storage_slots`           The number of storage slots required
-- `export_slots`            The number of export slots required
+- `storage_slots`						The number of storage slots required
+- `export_slots`						The number of export slots required
 
 Any other keys are ignored
 
@@ -441,7 +448,7 @@ string of the request URL.
 
 A `key` can be:
 
-- `brick_uuids`           The uuids of the bricks to format as an array.
+- `brick_uuids`          	The uuids of the bricks to format as an array.
 - `tape_name_prefix`      The (prefix-)name of the tapes.
 
 ### Erase Tapes in the library
@@ -468,8 +475,8 @@ Request:
 
 Response body example:
 
-    {
-      "libraries": [
+		{
+		  "libraries": [
              {
                "name": "L1",
                "description": "",
@@ -508,8 +515,8 @@ Response body example:
              {
                ... info for next library
              }
-        ]
-      }
+    	  ]
+	    }
 
 ### Listing tapes inside a library.
 
@@ -607,7 +614,10 @@ Request:
 
 ### Listing volumes
 
-With this call you can list all available volumes(SNAS ERC, SNAS 2P, SNAS 3P).
+With this call you can list all available volumes(SNAS ERC, SNAS 2P, SNAS 3P) of the current user.
+
+Note: If the current user has ComplianceAdmin, the results will also include the available Sub Volumes for Privilege Delete.
+The results of these Sub Volumes will has limited information only for Privilege Delete operation. For more details please see the chapter <Privilege Delete Operation> 
 
 Request:
 
@@ -708,8 +718,8 @@ Request:
 Response body example:
 
     {
-     "state": "online"
-  }
+	   "state": "online"
+	}
 
 The `state` can be
 
@@ -740,7 +750,7 @@ A `key` can be:
     - `snas_3p`  For a SNAS Triple Parity  ( Protection level 3 )  (default)
     - `snas_erc` For a SNAS ERC volume
 
-- `brick_uuids`  The uuids of the bricks as an array. If brick_uuids are not given an empty volume is created.  
+- `brick_uuids`  The uuids of the bricks as an array. If brick_uuids are not given an empty volume is created. 	
 
 SNAS Volume specific options
 
@@ -757,15 +767,15 @@ Any other keys are ignored
 Response body example:
 
     {
-    "name": "SNAS2P",
-    "description": "Test Volume",
-    "volume_type": "snas_2p",
-    "mode": "plain",
-    "status": "incomplete",
-    "uuid": "653bf326-a834-47ef-bab9-99ab8e5bcf9f",
-    "size": 0,
-    "used": 0
-  }
+	  "name": "SNAS2P",
+	  "description": "Test Volume",
+	  "volume_type": "snas_2p",
+	  "mode": "plain",
+	  "status": "incomplete",
+	  "uuid": "653bf326-a834-47ef-bab9-99ab8e5bcf9f",
+	  "size": 0,
+	  "used": 0
+	}
 
 The `nas_engine` key from the response is deprecated although still available.
 
@@ -901,9 +911,9 @@ Response body example:
             "path":"/",
             "fstype":"smb",
             "nfsid":4,
-          "options":"browseable,casesens,public",
-          "nfs_path":null,
-          "share_clients":[]
+       		"options":"browseable,casesens,public",
+       		"nfs_path":null,
+       		"share_clients":[]
           },
           {
             "uuid":"5941d228-e2ab-4093-9b8f-b06a5a399a1b",
@@ -954,31 +964,31 @@ Flags specific for the SMB share type.Set to true/false.
 
 NFS share type specific keys.
 
-- `nfs_client`    NFS share client (Default: '*')
+- `nfs_client`  	NFS share client (Default: '*')
 
 Options specific to the nfs share.Set to true/false.
 
-- `nfs_rw`          write access on the NFS share(Default: true)
-- `nfs_sync`          synchronize IO on the NFS share(Default: false)
-- `nfs_insecure`        access from insecure ports on the NFS share(Default: false)
+- `nfs_rw`  		    write access on the NFS share(Default: true)
+- `nfs_sync`   		    synchronize IO on the NFS share(Default: false)
+- `nfs_insecure`   	    access from insecure ports on the NFS share(Default: false)
 - `nfs_subtree_check`   subtree checking NFS share(Default: false)
-- `nfs_root_squash`     root squashing on the NFS share(Default: true)
+- `nfs_root_squash`   	root squashing on the NFS share(Default: true)
 
 Any other keys are ignored
 
 Response body example:
 
     {
-    "uuid": "4f421fba-6d44-4bea-a56c-c63652a04c34",
-    "volume_uuid": "653bf326-a834-47ef-bab9-99ab8e5bcf9f",
-    "name": "SNAS2P-NFS01",
-    "path": "/SNAS2P-NFS01",
-    "fstype": "nfs",
-    "nfsid": 2,
-    "options": "",
-    "nfs_path": null,
-    "share_clients": [{"name": "*","uuid": "bb5c656b-3d06-4cc7-9263-2a6bf6314083","options": "rw,no_root_squash"}]
-  }
+		"uuid": "4f421fba-6d44-4bea-a56c-c63652a04c34",
+		"volume_uuid": "653bf326-a834-47ef-bab9-99ab8e5bcf9f",
+		"name": "SNAS2P-NFS01",
+		"path": "/SNAS2P-NFS01",
+		"fstype": "nfs",
+		"nfsid": 2,
+		"options": "",
+		"nfs_path": null,
+		"share_clients": [{"name": "*","uuid": "bb5c656b-3d06-4cc7-9263-2a6bf6314083","options": "rw,no_root_squash"}]
+	}
 
 ### Update Shares
 
@@ -999,15 +1009,15 @@ SMB share type specific keys.
 
 NFS share type specific keys.
 
-- `nfs_client`    NFS share client (Default: '*')
+- `nfs_client`  	NFS share client (Default: '*')
 
 Options specific to the nfs share client.Set to true/false.
 
-- `nfs_rw`          write access on the NFS share(Default: true)
-- `nfs_sync`          synchronize IO on the NFS share(Default: false)
-- `nfs_insecure`        access from insecure ports on the NFS share(Default: false)
+- `nfs_rw`  		    write access on the NFS share(Default: true)
+- `nfs_sync`   		    synchronize IO on the NFS share(Default: false)
+- `nfs_insecure`   	    access from insecure ports on the NFS share(Default: false)
 - `nfs_subtree_check`   subtree checking NFS share(Default: false)
-- `nfs_root_squash`     root squashing on the NFS share(Default: true)
+- `nfs_root_squash`   	root squashing on the NFS share(Default: true)
 
 Any other keys are ignored
 
@@ -1033,46 +1043,46 @@ Response body example:
 
     {
         "replications": [
-        {
-          "replication_uuid": "e14db50b-1f67-47c3-b487-7d278f33d32d",
-          "source_volume_uuid": "bd056f33-cf07-49eb-a66e-a457f3bd2179",
-          "target_volume_uuid": "5e9b45c0-09dd-4016-b544-bc3268ebdfa5",
-          "sync_type": "async",
-          "status": "running",
-          "progress": 100,
-          "source_data_high_watermark": 212992,
-          "target_volume": {
-              "name": "SNAS2P-REP01",
-              "description": "Test Replication Created Using The PublicApi",
-              "volume_type": "snas_2p",
-              "mode": "replication",
-              "status": "online",
-              "uuid": "5e9b45c0-09dd-4016-b544-bc3268ebdfa5",
-              "size": 829919573,
-              "used": 112208
-            }
-      },
-      {
-          "replication_uuid": "8880e427-b2df-4fc0-b6d2-7b5694c08b11",
-          "source_volume_uuid": "8e4b7aa4-0db7-48d8-8b76-dadc78562ae1",
-          "target_volume_uuid": "65ab57cb-cc5e-452d-893d-a6b957db443b",
-          "sync_type": "async",
-          "status": "paused",
-          "progress": 100,
-          "source_data_high_watermark": 0,
-          "target_volume": {
-              "name": "SNASERC-REP01",
-              "description": "Test Replication Created Using The PublicApi",
-              "volume_type": "snas_erc",
-              "mode": "replication",
-              "status": "online",
-              "uuid": "65ab57cb-cc5e-452d-893d-a6b957db443b",
-              "size": 995903488,
-              "used": 35205
-          }
-      }
-    ]
-  }
+		    {
+			    "replication_uuid": "e14db50b-1f67-47c3-b487-7d278f33d32d",
+			    "source_volume_uuid": "bd056f33-cf07-49eb-a66e-a457f3bd2179",
+			    "target_volume_uuid": "5e9b45c0-09dd-4016-b544-bc3268ebdfa5",
+			    "sync_type": "async",
+			    "status": "running",
+			    "progress": 100,
+			    "source_data_high_watermark": 212992,
+			    "target_volume": {
+			        "name": "SNAS2P-REP01",
+			        "description": "Test Replication Created Using The PublicApi",
+			        "volume_type": "snas_2p",
+			        "mode": "replication",
+			        "status": "online",
+			        "uuid": "5e9b45c0-09dd-4016-b544-bc3268ebdfa5",
+			        "size": 829919573,
+			        "used": 112208
+			      }
+			},
+			{
+			    "replication_uuid": "8880e427-b2df-4fc0-b6d2-7b5694c08b11",
+			    "source_volume_uuid": "8e4b7aa4-0db7-48d8-8b76-dadc78562ae1",
+			    "target_volume_uuid": "65ab57cb-cc5e-452d-893d-a6b957db443b",
+			    "sync_type": "async",
+			    "status": "paused",
+			    "progress": 100,
+			    "source_data_high_watermark": 0,
+			    "target_volume": {
+			        "name": "SNASERC-REP01",
+			        "description": "Test Replication Created Using The PublicApi",
+			        "volume_type": "snas_erc",
+			        "mode": "replication",
+			        "status": "online",
+			        "uuid": "65ab57cb-cc5e-452d-893d-a6b957db443b",
+			        "size": 995903488,
+			        "used": 35205
+			    }
+			}
+		]
+	}
 
 ### List Replications for a particular volume
 
@@ -1085,28 +1095,28 @@ Request:
 Response body example:
 
 
-  {
-    "replications": [
-       {
-           "replication_uuid": "9bc87a57-c986-4593-b069-8d31ce835782",
-           "source_volume_uuid": "653bf326-a834-47ef-bab9-99ab8e5bcf9f",
-           "target_volume_uuid": "fd56da28-6b99-4f04-8200-5ca7b25dfd35",
-           "sync_type": "async",
-           "status": "running",
-           "progress": 100,
-           "source_data_high_watermark": 385024
-       },
-       {
-           "replication_uuid": "17866248-042c-48d8-879d-75484e15de0d",
-           "source_volume_uuid": "653bf326-a834-47ef-bab9-99ab8e5bcf9f",
-           "target_volume_uuid": "de199919-aa1e-4972-915e-45b1a3c00814",
-           "sync_type": "async",
-           "status": "running",
-           "progress": 100,
-           "source_data_high_watermark": 454656
-       }
-    ]
-  }
+	{
+		"replications": [
+			 {
+			     "replication_uuid": "9bc87a57-c986-4593-b069-8d31ce835782",
+			     "source_volume_uuid": "653bf326-a834-47ef-bab9-99ab8e5bcf9f",
+			     "target_volume_uuid": "fd56da28-6b99-4f04-8200-5ca7b25dfd35",
+			     "sync_type": "async",
+			     "status": "running",
+			     "progress": 100,
+			     "source_data_high_watermark": 385024
+			 },
+			 {
+			     "replication_uuid": "17866248-042c-48d8-879d-75484e15de0d",
+			     "source_volume_uuid": "653bf326-a834-47ef-bab9-99ab8e5bcf9f",
+			     "target_volume_uuid": "de199919-aa1e-4972-915e-45b1a3c00814",
+			     "sync_type": "async",
+			     "status": "running",
+			     "progress": 100,
+			     "source_data_high_watermark": 454656
+			 }
+		]
+	}
 
 ### Create Replication
 
@@ -1160,9 +1170,9 @@ Request:
 Response body example:
 
     {
-    "state": "running",
+	  "state": "running",
       "progress": 100
-  }
+	}
 
 ### Update Replication Volume
 
@@ -1236,30 +1246,32 @@ Request:
 Response body example:
 
 
-  {
-    "snapshots": [
-       {
-         "name": "SNAS2P-SNAP01",
-         "description": null,
-         "label": "20180725_152029",
-         "uuid": "67731e3a-c0ba-4112-9b89-a0dcb83be12b",
-         "volume_uuid": "653bf326-a834-47ef-bab9-99ab8e5bcf9f",
-         "index_hwm": null,
-         "data_hwm": null,
-         "used": 212992
-       },
-       {
-         "name": "SNAS3P-SNAP02",
-         "description": null,
-         "label": "20180725_152560",
-         "uuid": "85f27112-33e8-41e2-bd6c-cb9cfe7e1585",
-         "volume_uuid": "f5c9b996-03b5-4775-aac1-3abbf6a8a9aa",
-         "index_hwm": null,
-         "data_hwm": null,
-         "used": 286720
-       }
-    ]
-  }
+	{
+	  "snapshots": [
+	     {
+	       "name": "SNAS2P-SNAP01",
+	       "description": null,
+	       "label": "20180725_152029",
+	       "timestamp": "2012-12-09 08:50:03",
+	       "uuid": "67731e3a-c0ba-4112-9b89-a0dcb83be12b",
+	       "volume_uuid": "653bf326-a834-47ef-bab9-99ab8e5bcf9f",
+	       "index_hwm": null,
+	       "data_hwm": null,
+	       "used": 212992
+	     },
+	     {
+	       "name": "SNAS3P-SNAP02",
+	       "description": null,
+	       "label": "20180725_152560",
+	       "timestamp": "2012-12-09 08:50:03",
+	       "uuid": "85f27112-33e8-41e2-bd6c-cb9cfe7e1585",
+	       "volume_uuid": "f5c9b996-03b5-4775-aac1-3abbf6a8a9aa",
+	       "index_hwm": null,
+	       "data_hwm": null,
+	       "used": 286720
+	     }
+		]
+	}
 
 ### List snapshots for a particular volume
 
@@ -1272,30 +1284,32 @@ Request:
 Response body example:
 
 
-  {
-    "snapshots": [
-       {
-         "name": "SNAS2P-SNAP01",
-         "description": null,
-         "label": "20180725_152029",
-         "uuid": "67731e3a-c0ba-4112-9b89-a0dcb83be12b",
-         "volume_uuid": "653bf326-a834-47ef-bab9-99ab8e5bcf9f",
-         "index_hwm": null,
-         "data_hwm": null,
-         "used": 212992
-       },
-       {
-         "name": "SNAS2P-SNAP02",
-         "description": null,
-         "label": "20180725_152302",
-         "uuid": "562d4f03-7170-4145-8215-4cac217124b7",
-         "volume_uuid": "653bf326-a834-47ef-bab9-99ab8e5bcf9f",
-         "index_hwm": null,
-         "data_hwm": null,
-         "used": 286720
-       }
-    ]
-  }
+	{
+	  "snapshots": [
+	     {
+	       "name": "SNAS2P-SNAP01",
+	       "description": null,
+	       "label": "20180725_152029",
+	       "timestamp": "2012-12-09 08:50:03",
+	       "uuid": "67731e3a-c0ba-4112-9b89-a0dcb83be12b",
+	       "volume_uuid": "653bf326-a834-47ef-bab9-99ab8e5bcf9f",
+	       "index_hwm": null,
+	       "data_hwm": null,
+	       "used": 212992
+	     },
+	     {
+	       "name": "SNAS2P-SNAP02",
+	       "description": null,
+	       "label": "20180725_152302",
+	       "timestamp": "2012-12-09 08:50:03",
+	       "uuid": "562d4f03-7170-4145-8215-4cac217124b7",
+	       "volume_uuid": "653bf326-a834-47ef-bab9-99ab8e5bcf9f",
+	       "index_hwm": null,
+	       "data_hwm": null,
+	       "used": 286720
+	     }
+		]
+	}
 
 ### Create snapshot
 
@@ -1316,16 +1330,17 @@ Any other keys are ignored
 
 Response body example:
 
-  {
-    "name": "SNAS2P-SNAP02",
-    "description": "Test",
-    "label": "20180719_144408",
-    "uuid": "397e27fc-b242-445e-930d-922f4decb3c0",
-    "volume_uuid": "bd056f33-cf07-49eb-a66e-a457f3bd2179",
-    "index_hwm": null,
-    "data_hwm": null,
-    "used": 131072
-  }
+	{
+		"name": "SNAS2P-SNAP02",
+		"description": "Test",
+		"label": "20180719_144408",
+		"timestamp": "2012-12-09 08:50:03",
+		"uuid": "397e27fc-b242-445e-930d-922f4decb3c0",
+		"volume_uuid": "bd056f33-cf07-49eb-a66e-a457f3bd2179",
+		"index_hwm": null,
+		"data_hwm": null,
+		"used": 131072
+	}
 
 ### Snapshot as Volume
 
@@ -1343,28 +1358,29 @@ Any other keys are ignored
 
 Response body example:
 
-  {
-    "name": "SNAS2P-SNAP02",
-    "description": "Test",
-    "label": "20180719_144408",
-    "uuid": "397e27fc-b242-445e-930d-922f4decb3c0",
-    "volume_uuid": "bd056f33-cf07-49eb-a66e-a457f3bd2179",
-    "index_hwm": null,
-    "data_hwm": null,
-    "used": 131072,
-    "snapshot_volume": {
-    "name": "SNAS2P-SNAP02",
-    "description": "Test",
-    "volume_type": "snas_2p",
-    "mode": "snapshot",
-    "status": "incomplete",
-    "uuid": "2bddcb51-363b-4272-a5d8-eb38c851a931",
-    "size": 0,
-    "used": 0
-    }
-  }
+	{
+	  "name": "SNAS2P-SNAP02",
+	  "description": "Test",
+	  "label": "20180719_144408",
+	  "timestamp": "2012-12-09 08:50:03",
+	  "uuid": "397e27fc-b242-445e-930d-922f4decb3c0",
+	  "volume_uuid": "bd056f33-cf07-49eb-a66e-a457f3bd2179",
+	  "index_hwm": null,
+	  "data_hwm": null,
+	  "used": 131072,
+	  "snapshot_volume": {
+		"name": "SNAS2P-SNAP02",
+		"description": "Test",
+		"volume_type": "snas_2p",
+		"mode": "snapshot",
+		"status": "incomplete",
+		"uuid": "2bddcb51-363b-4272-a5d8-eb38c851a931",
+		"size": 0,
+		"used": 0
+	  }
+	}
 
-Note: Please use the snapshot_volume `uuid` to delete the snapshot volume.  
+Note: Please use the snapshot_volume `uuid` to delete the snapshot volume. 	
 
 ### Delete Snapshot
 
@@ -1443,53 +1459,50 @@ Request:
 Response body example:
 
     {
-      "brick_archives": [
-      {
-        "brick_archive_uuid": "9a8e4326-8a80-11e8-9ecd-ccf0d678e953",
-        "revision": 1,
-        "name": "Arch01",
-        "description": "Test Brick Archive",
-        "archive_volume_uuid": "5ba7f0b1-cc95-4ab6-9c26-c0bb00d1ca16",
-        "stage_volume_uuid": "8832e635-406f-4787-ac25-a656dd2a1ef3",
-        "status": "running",
-        "rfa_status": "inactive",
-        "recovery_status": "inactive",
-        "type": "plain",
-        "stageless": false,
-        "read_only": false,
-        "can_start": true,
-        "can_archive_start": true,
-        "can_stage_start": true,
-        "rfa_possible": false,
-        "stages": [
-          {
-            "stage_uuid": "cc3aa51a-f695-4c29-bc75-ed08b874d5ab",
-            "brick_archive_uuid": "9a8e4326-8a80-11e8-9ecd-ccf0d678e953",
-            "stage_volume_uuid": "8832e635-406f-4787-ac25-a656dd2a1ef3",
-            "current_stage": true,
-            "stage_volume": {
-              "name": "stage-9a8e4326-8a80-11e8-9ecd-ccf0d678e953-8f882e7f17a7ca2f",
-              "description": "",
-              "volume_type": "snas_3p",
-              "mode": "plain",
-              "status": "incomplete",
-              "uuid": "8832e635-406f-4787-ac25-a656dd2a1ef3",
-              "size": 2993855232,
-              "used": 412432
-              }
-          }
-        ],
-        "archive_volume": {
-            "name": "archive-9a8e4326-8a80-11e8-9ecd-ccf0d678e953",
-            "description": "",
-            ""volume_type": "snas_erc",
-            "mode": "plain",
-            "status": "incomplete",
-            "uuid": "5ba7f0b1-cc95-4ab6-9c26-c0bb00d1ca16",
-            "size": 1995903488,
-            "used": 206074
-          }
-      },
+	    "brick_archives": [
+			{
+			  "brick_archive_uuid": "9a8e4326-8a80-11e8-9ecd-ccf0d678e953",
+			  "revision": 1,
+			  "name": "Arch01",
+			  "description": "Test Brick Archive",
+			  "status": "running",
+			  "rfa_status": "inactive",
+			  "recovery_status": "inactive",
+			  "type": "plain",
+			  "stageless": false,
+			  "read_only": false,
+			  "can_start": true,
+			  "can_archive_start": true,
+			  "can_stage_start": true,
+			  "rfa_possible": false,
+			  "stages": [
+			    {
+			      "stage_uuid": "cc3aa51a-f695-4c29-bc75-ed08b874d5ab",
+			      "brick_archive_uuid": "9a8e4326-8a80-11e8-9ecd-ccf0d678e953",
+			      "current_stage": true,
+			      "stage_volume": {
+			        "name": "stage-9a8e4326-8a80-11e8-9ecd-ccf0d678e953-8f882e7f17a7ca2f",
+			        "description": "",
+			        "volume_type": "snas_3p",
+			        "mode": "plain",
+			        "status": "ok",
+			        "uuid": "8832e635-406f-4787-ac25-a656dd2a1ef3",
+			        "size": 2993855232,
+			        "used": 412432
+			        }
+			    }
+			  ],
+			  "archive_volume": {
+			      "name": "archive-9a8e4326-8a80-11e8-9ecd-ccf0d678e953",
+			      "description": "",
+			      ""volume_type": "snas_erc",
+			      "mode": "plain",
+			      "status": "ok",
+			      "uuid": "5ba7f0b1-cc95-4ab6-9c26-c0bb00d1ca16",
+			      "size": 1995903488,
+			      "used": 206074
+			    }
+			},
             {
               ... info for next archive
             }
@@ -1505,64 +1518,229 @@ Request:
 
 Response body example:
 
-  {
-    "brick_archive_uuid": "9a8e4326-8a80-11e8-9ecd-ccf0d678e953",
-    "revision": 1,
-    "name": "Arch01",
-    "description": "Test Brick Archive",
-    "archive_volume_uuid": "5ba7f0b1-cc95-4ab6-9c26-c0bb00d1ca16",
-    "stage_volume_uuid": "8832e635-406f-4787-ac25-a656dd2a1ef3",
-    "status": "running",
-    "rfa_status": "inactive",
-    "recovery_status": "inactive",
-    "type": "plain",
-    "stageless": false,
-    "read_only": false,
-    "can_start": true,
-    "can_archive_start": true,
-    "can_stage_start": true,
-    "rfa_possible": false,
-    "stages": [
+	{
+	  "brick_archive_uuid": "9a8e4326-8a80-11e8-9ecd-ccf0d678e953",
+	  "revision": 1,
+	  "name": "Arch01",
+	  "description": "Test Brick Archive",
+	  "status": "running",
+	  "rfa_status": "inactive",
+	  "recovery_status": "inactive",
+	  "type": "plain",
+	  "stageless": false,
+	  "read_only": false,
+	  "can_start": true,
+	  "can_archive_start": true,
+	  "can_stage_start": true,
+	  "rfa_possible": false,
+	  "stages": [
+		{
+		    "stage_uuid": "cc3aa51a-f695-4c29-bc75-ed08b874d5ab",
+		    "brick_archive_uuid": "9a8e4326-8a80-11e8-9ecd-ccf0d678e953",
+		    "current_stage": true,
+		    "stage_volume": {
+		        "name": "stage-9a8e4326-8a80-11e8-9ecd-ccf0d678e953-8f882e7f17a7ca2f",
+		        "description": "",
+		        "volume_type": "snas_3p",
+		        "mode": "plain",
+		        "status": "ok",
+		        "uuid": "8832e635-406f-4787-ac25-a656dd2a1ef3",
+		        "size": 2993855232,
+		        "used": 412432
+		    }
+		}
+	  ],
+	  "archive_volume": {
+		"name": "archive-9a8e4326-8a80-11e8-9ecd-ccf0d678e953",
+		"description": "",
+		"volume_type": "snas_erc",
+		"mode": "plain",
+		"status": "ok",
+		"uuid": "5ba7f0b1-cc95-4ab6-9c26-c0bb00d1ca16",
+		"size": 1995903488,
+		"used": 206074
+	  },
+	  "sub_volumes": [
+		{
+		  "name": "Arch01-SubVol01",
+		  "description": "Test SubVol",
+		  "volume_type": "sub_volume",
+		  "mode": "plain",
+		  "status": "ok",
+		  "uuid": "b91c5741-8373-4977-abc9-aafc8df278d6",
+		  "size": 0,
+		  "used": 0,
+		  "sub_devices": [
+        	{
+          	    "sub_device_uuid": "9c2fa302-ad0d-4ef4-bf41-989f477da6bd",
+          	    "status": "ok",
+          	    "net_used": 0,
+          	    "inode_count": 0,
+          	    "file_count": 0,
+          	    "directory_count": 0,
+          	    "symlink_count": 0,
+          	    "pending_file_count": 0,
+          	    "triggered_file_count": 0,
+          	    "file_version_count": 0
+            }
+      	  ]
+	    }
+	 ]
+    }
+
+## Subvolume Operations
+
+Using the `uuid` of a sub_volume, the name and description can be updated just like a standard volume. But all other volume operations are not allowed for a sub_volume.
+
+## Privilege Delete Operations
+
+### List Sub Volumes
+
+See [Listing Volumes](#list-volumes) for instructions on how to list the Sub Volumes.
+
+If the user account has only the ComplianceAdmin role for the Compliant Archive of the Sub Volume then the response will be a stripped down JSON array of the volumes.
+
+Response body example:
+        
     {
-        "stage_uuid": "cc3aa51a-f695-4c29-bc75-ed08b874d5ab",
-        "brick_archive_uuid": "9a8e4326-8a80-11e8-9ecd-ccf0d678e953",
-        "stage_volume_uuid": "8832e635-406f-4787-ac25-a656dd2a1ef3",
-        "current_stage": true,
-        "stage_volume": {
-            "name": "stage-9a8e4326-8a80-11e8-9ecd-ccf0d678e953-8f882e7f17a7ca2f",
-            "description": "",
-            "volume_type": "snas_3p",
-            "mode": "plain",
-            "status": "incomplete",
-            "uuid": "8832e635-406f-4787-ac25-a656dd2a1ef3",
-            "size": 2993855232,
-            "used": 412432
+     "volumes" : [
+        {
+           "name" : "vt2",
+           "brick_archive_uuid" : "b752c88c-6672-11e9-8fc1-b213ea58c339",
+           "uuid" : "24e89a4b-3f11-447b-b046-6c860b939086",
+           "config" : {
+                "privDelMode" : "enterprise",
+           }
+        },
+        {
+           "name" : "vt2-compliance"
+           "brick_archive_uuid" : "b752c88c-6672-11e9-8fc1-b213ea58c339",
+           "sub_volume_uuid" : "ba189522-275b-4c78-8d2e-3e019145881d",
+           "config" : {
+                "privDelMode" : "compliance",
+           }
         }
-    }
-    ],
-    "archive_volume": {
-    "name": "archive-9a8e4326-8a80-11e8-9ecd-ccf0d678e953",
-    "description": "",
-    "volume_type": "snas_erc",
-    "mode": "plain",
-    "status": "incomplete",
-    "uuid": "5ba7f0b1-cc95-4ab6-9c26-c0bb00d1ca16",
-    "size": 1995903488,
-    "used": 206074
-    },
-    "sub_volumes": [
+     ]
+    } 
+    
+If user has mixed roles (e.g. it's also a Compliant Archive Admin), all volumes to which the user has access will be returned with details for each volume according to the corresponding access permissions.
+    
+Response body example:
+        
     {
-      "name": "Arch01-SubVol01",
-      "description": "Test SubVol",
-      "volume_type": "snas_erc",
-      "mode": "plain",
-      "status": "incomplete",
-      "uuid": "b91c5741-8373-4977-abc9-aafc8df278d6",
-      "size": 0,
-      "used": 0
+     "volumes" : [
+        {
+           "name" : "vt2",
+           "brick_archive_uuid" : "b752c88c-6672-11e9-8fc1-b213ea58c339",
+           "uuid" : "24e89a4b-3f11-447b-b046-6c860b939086",
+           "config" : {
+                "privDelMode" : "enterprise",
+           }
+        },
+        {
+           "name" : "vt2-compliance"
+           "brick_archive_uuid" : "b752c88c-6672-11e9-8fc1-b213ea58c339",
+           "sub_volume_uuid" : "ba189522-275b-4c78-8d2e-3e019145881d",
+           "config" : {
+                "privDelMode" : "compliance",
+           }
+        },
+        {
+            "name": "vt5",
+            "uuid": "991aaf69-6c2c-415a-bcea-e7b751f06085",
+            "brick_archive_uuid": "b752c88c-6672-11e9-8fc1-b213ea58c339",
+            "description": "",
+            "nas_engine": "sub",
+            "mode": "plain",
+            "size": 389362,
+            "used": 389362,
+            "config": {
+                "privDelMode": "enterprise"
+            },
+            "status": "ok",
+            "volume_type": "sub_volume"
+        },
+     ]
+    } 
+
+The `privDelMode` can be
+
+- `enterprise`  Enterprise mode
+- `compliance`  Compliance mode
+  
+### Delete a file
+
+Uses a privileged delete to delete the file before its retention. Only available to API users that have the ComplianceAdmin role.
+
+    curl -k -X POST -F "<key>=<value>" https://172.100.51.240/sb-public-api/api/v1/volumes/<volume_uuid>/privdel.json
+
+`volume_uuid`: The Sub Volume's UUID. Can be retrieved by listing the Sub Volumes (see above).
+
+A `key` can be:
+
+- `path` The file path relative to the root path of the specific volume (**not** necessarily the share root!).
+
+For instance, if the volume is accessed through a share on the directory `/invoices` and the file to delete within that share is `/2018/12/invoice1.doc`, then the `path` parameter should be `/invoices/2018/12/invoice1.doc`. 
+   
+Response for a successful operation:
+
+    {
+        "code": 200,
+        "msg": "ok"
     }
-    ]
+	
+Responses for failed attempts:
+
+    {
+        "code": 400,
+        "msg": "The request is malformed."
     }
+    
+    {
+        "code": 400,
+        "msg": "The Sub Volume is not in enterprise mode."
+    }
+    
+    {
+        "code": 400,
+        "msg": "The delete operation is currently unavailable, please try later."
+    }
+    
+    {
+        "code": 403,
+        "msg": "The file is not under retention."
+    }
+    
+    {
+        "code": 403,
+        "msg": "File can not be deleted, because the Compliance Archive is not running. Please set it online."
+    }
+    
+    {
+        "code": 403,
+        "msg": "File can not be deleted, because the Compliance Archive is read-only."
+    }
+    
+    {
+        "code": 403,
+        "msg": "The given file path is not allowed."
+    }
+    
+    
+    {
+        "code": 404,
+        "msg": "The file is not found in the given sub volume."
+    }
+    
+    {
+        "code": 404,
+        "msg": "The Sub Volume is not found."
+    }
+    
+    {
+        "code": 500,
+        "msg": "Internal server error."
+    }     
 
 ## SMB User
 
@@ -1608,10 +1786,10 @@ Any other keys are ignored
 Response body example:
 
     {
-     "id": 980190976,
+	   "id": 980190976,
        "name": "smb01",
        "description": "Test User One"
-  }
+	}
 
 ### Update SMB User
 Updates a local SMB user.
@@ -1632,10 +1810,10 @@ Any other keys are ignored
 Response body example:
 
     {
-     "id": 980190976,
+	   "id": 980190976,
        "name": "smb01",
        "description": "Test SMB User One"
-  }
+	}
 
 ### Delete SMB User
 Delete a local SMB user.
@@ -1645,7 +1823,7 @@ information to be updated. The key/value-pairs can be encoded in the query
 string of the request URL.
 
     curl -X DELETE -F "<key>=<value>" https://172.100.51.240/sb-public-api/api/v1/users/<user-id>.json
-
+    
 ## General SB Information
 
 ### Background Task Active Status
@@ -1657,14 +1835,41 @@ Check if any of the background tasks are still active with this call:
  Response body example:
 
         {
-          "tasks_active":false
-        }   
+       		"tasks_active":false
+       		"job_ids": [
+    							"b7d9343cf809cbf18c129aa6f3cf3756",
+    							"81341b5df9a3466edf86d47c8b04a04c",
+    							"0d1d76694b000f0ae5a48ab1a91cab75"
+  				       ]
+        }
 The `tasks_active` can be
 
-- `true`  If any tasks are running in the background
+- `true`  If any tasks are working/queued in the background
 - `false` If the system is idle, with no tasks running in the background.
 
 Please make sure there are no tasks active, before making changes to the Bricks,Libraries or Volumes.
+
+### Get Job Status
+With this call you can get the job status of a specific job
+Request:
+
+    GET https://172.100.51.240/sb-public-api/api/v1/jobs/<job-id>.json
+
+ Response body example:
+
+        {
+  			"status": "completed",
+  			"id": "b7d9343cf809cbf18c129aa6f3cf3756"
+		}
+		
+The `Status` can be
+
+- `working`
+- `queued`
+- `killed`
+- `failed`
+- `completed`
+
 
 
 ### Listing Open Issues
@@ -1711,10 +1916,10 @@ All the available serial numbers and other hardware information can be listed wi
                 "hardware":{"site":{"id":"1","main_board":{"manufacturer":" ","pn":" ","serial":" ","version":" "},
                             "devices":{"device":
                                         [
-                                            {"shortname":"G5","type":null,"serial":"3000-9990-0640","version":"2.0.2928","components":{"mc_units":null,"psus":null,"rtcs":null,"ssds":null,"gpus":null,"nics":null}},
-                                            {"shortname":"EXTSHELF","type":null,"serial":"1000-9990-0511","components":{"mc_units":null,"psus":null,"rtcs":null}},
-                                            {"shortname":"EXTSHELF","type":null,"serial":"1000-9991-0533","components":{"mc_units":null,"psus":null,"rtcs":null}},
-                                            {"shortname":"EXTSHELF","type":null,"serial":"1000-9992-0500","components":{"mc_units":null,"psus":null,"rtcs":null}}
+                                            {"shortname":"G5","type":null,"serial":"3000-9990-0640","version":"2.0.2928","fw": "2.258",components":{"mc_units":null,"psus":null,"rtcs":null,"ssds":null,"gpus":null,"nics":null}},
+                                            {"shortname":"EXTSHELF","type":null,"serial":"1000-9990-0511","fw": "2.258","components":{"mc_units":null,"psus":null,"rtcs":null}},
+                                            {"shortname":"EXTSHELF","type":null,"serial":"1000-9991-0533","fw": "2.258","components":{"mc_units":null,"psus":null,"rtcs":null}},
+                                            {"shortname":"EXTSHELF","type":null,"serial":"1000-9992-0500","fw": "2.258","components":{"mc_units":null,"psus":null,"rtcs":null}}
                                         ]}}},
                 "software":{"used":"35 KB",
                             "bricks":{"brick":
@@ -1729,5 +1934,75 @@ All the available serial numbers and other hardware information can be listed wi
                 "eventhistory":{"events":null}}}
      }
 
-  
-  
+### Listing Network Info
+
+The network info can be listed with this call:
+
+    GET https://172.100.51.240/sb-public-api/api/v1/network.json
+
+ Response body example:
+
+        {
+          "hostname": "vm-controller-7c429f75",
+          "domain_name": "fast-lta.intra",
+          "gateway": "172.100.50.254",
+          "dns_server_one": "172.100.50.254",
+          "dns_server_two": "172.20.60.254",
+          "nic": [
+            {
+              "name": "management",
+              "dhcp": true,
+              "ipaddr_v4": "172.100.51.240",
+              "subnet_mask": "255.255.254.0",
+              "bonding_mode": "1 (active-backup)"
+            },
+            {
+              "name": "data",
+              "dhcp": true,
+              "ipaddr_v4": "172.20.61.120",
+              "subnet_mask": "255.255.254.0",
+              "bonding_mode": "1 (active-backup)",
+              "link_auto_neg": true,
+              "link_speed": 10000,
+              "link_duplex": "full",
+              "jumbo_frames": "off"
+            }
+          ],
+          "routing": [
+            {
+              "target_addr": "172.100.51.50",
+              "target_mask": "255.255.254.0",
+              "gateway": "172.100.50.254"
+            }
+          ],
+          "ipmi": {
+            "ipaddr_v4": 172.20.60.50,
+            "gateway_v4":172.20.60.254,
+            "netmask_v4": 255.255.254.0
+          }
+        }
+
+The `bonding_mode` can be
+
+- `0 (balance-rr)`
+- `1 (active-backup)`
+- `2 (balance-xor)`
+- `3 (broadcast)`
+- `4 (802.3ad)`
+- `5 (balance-tlb)`
+
+
+### Identification
+
+The system can be identified using this call:
+
+    GET https://172.100.51.240/sb-public-api/api/v1/identification.json
+
+ Response body example:
+
+        {
+  			"shortname": "G5000",
+  			"swversion": "2.20.0.5",
+  			"systemid":  "9000"
+		 }
+            
