@@ -11,4 +11,8 @@ You may find sample scripts for ordered by the different OS types you may use th
 
 All code is provided under Apache License, Version 2.0.  
 Please read at:
-    * http://www.apache.org/licenses/LICENSE-2.0
+   * http://www.apache.org/licenses/LICENSE-2.0
+
+
+All open source products and their licenses used in the __FAST LTA Silent Bricks Systems__ can be found at:
+   * http://swupdate.fast-lta.net/public/sb_opensource_licenses/
