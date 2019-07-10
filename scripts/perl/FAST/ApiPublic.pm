@@ -218,10 +218,12 @@ sub setCall {
     $client->getUseragent()->ssl_opts( SSL_verify_mode => 0 );
     $client->setHost($target);
 
+
    if( $payload ){
         $payload = $client->buildQuery($payload);
    }
-    
+
+
 
     my $response = $client->PUT($endpoint.$payload, undef, $headers);
 
@@ -234,6 +236,48 @@ sub setCall {
     }
 }
 
+#** @method public int setCall
+#
+#   @brief Sends a PUT request to the API
+#   @params set_string
+#   @retval hash Returns hash with rc ( 0 or 1 ) and content
+#*
+
+sub postCall {
+
+    my ($self, $param) = @_;
+
+
+    my $endpoint = $param->{endpoint} || return { rc=>0, content=>"No endpoint given" };
+    my $payload  = $param->{payload}  || '';
+
+   
+    my $headers     = $self->{headers};
+    my $target      = $self->{target};
+
+    $ENV{PERL_LWP_SSL_VERIFY_HOSTNAME}=0;
+
+    my $client = REST::Client->new();
+    $client->getUseragent()->ssl_opts( SSL_verify_mode => 0 );
+    $client->setHost($target);
+
+
+   if( $payload ){
+        $payload = $client->buildQuery($payload);
+   }
+
+
+
+    my $response = $client->POST($endpoint.$payload, undef, $headers);
+
+    if ($response->{'_res'}{'_rc'} == 200) {
+        my $data = decode_json($response->{'_res'}{'_content'});
+        return { rc=>1, content=>$data };
+    }else {
+        my $error = ["$response->{'_res'}{'_msg'}"];
+        return { rc=>0, content=>$error};
+    }
+}
 
 #** @method public int deleteCall
 #
@@ -397,6 +441,55 @@ sub getFreeBricks {
 
 }
 
+#** @method public int getBricks
+#
+#   @brief Returns a list of all bricks
+#   @retval hash Returns hash with rc ( 0 or 1 ) and content
+#*
+
+sub getBricks {
+
+
+   my ($self, $param) = @_;
+
+    my $endpoint      = 'bricks.json?all';
+    
+    return $self->getCall( { endpoint=>$endpoint } );
+
+}
+
+#** @method public int getBrickUUIDBySerial
+#
+#   @brief Returns a list of all bricks
+#   @param brick_serial Serial of the Brick
+#   @retval hash Returns hash with rc ( 0 or 1 ) and content
+#*
+
+sub getBrickUUIDBySerial {
+
+   my ($self, $param) = @_;
+
+    my $brick_serial = $param->{brick_serial} || return { rc=>0, content=>"No Serial given" };
+
+
+    my $endpoint      = 'bricks.json?all';
+    
+    my $bricks = $self->getCall( { endpoint=>$endpoint } );
+
+
+    if( $bricks->{rc} == 1 ){
+        foreach( @{$bricks->{content}->{bricks}} ){
+            if( $_->{serial} eq $brick_serial ){
+               return { rc=>1, content => $_->{uuid} };
+           }
+        }
+    }
+
+    return { rc=>0, content=>"Unknown Brick" };
+
+}
+
+
 
 
 #** @method public int getSnapshotsByVolume
@@ -496,6 +589,125 @@ sub setEpocSnapshotByUUID {
     return $self->setCall( { endpoint=>$endpoint, payload=>$payload } );
 }
 
+#** @method public int setBrickDetails
+#
+#   @brief Sets a defined volume to online
+#   @params brick_serial Serial of the silent brick to be updated
+#   @params description New Description to be set
+#   @params display_mode Display Mode for the Brick Display
+#       Int displaymode 
+#           0 = QR - Description + ContainerID
+#           1 = QR - Description only
+#           2 = Text Display - Top & Left Aligned
+#           3 = Text Display - Top & Center
+#           4 = Text Display - Top & Right Aligned
+#           5 = Text Display - Middle & Center
+#       String Description
+#   @retval hash Returns hash with rc ( 0 or 1 ) and content
+#*
+sub setBrickDescription {
+
+    my ($self, $param) = @_;
+
+    my $brick_serial = $param->{brick_serial} || { rc=>0, content=>"Serial needed" };
+    my $description = $param->{description} || '';
+    my $display_mode = $param->{display_mode} || 0;
+
+    my $brick_get_uuid = $self->getBrickUUIDBySerial( { brick_serial => $brick_serial });
+
+    if( $brick_get_uuid->{rc} != 1 ){
+        return { rc=>0, content=>"Brick not found" };
+    }
+
+    my $brick_uuid = $brick_get_uuid->{content};
+
+
+    my $endpoint    = 'bricks';
+    my $payload      ={ description=>$description, display_mode=>$display_mode };
+
+    $endpoint       = $endpoint.'/'.$brick_uuid;
+
+    return $self->setCall( { endpoint=>$endpoint, payload=>$payload });
+}
+
+
+#** @method public int createLibrary
+#
+#   @brief Creates a new Library
+#   @params name Name of the Library
+#   @params description Description field of the Library
+#   @params vendor Library Vendor 
+#               FAST-LTA
+#               ADIC
+#               SPECTRA
+#               HP
+#   @params product Library Product ID
+#               "Scalar 1000" for ADIC
+#               "Scalar 24" for ADIC
+#               "SBL 2000" for FAST-LTA
+#               "ESL E-Series" for HP
+#               "MSL6480 Series" for HP
+#               "PYTHON" for SPECTRA
+#   @params barcode_start Beginning of the Barcode range ( i.e. 200001 )
+#   @params barcode_end End of the Barcode range ( i.e. 200ZZZ )     
+#   @params tape_drive_prefix Prefix of the Tape Drives
+#   @params tape_drive_vendor Vendor of the Tape Drive
+#               "HP"
+#               "IBM"
+#               "QUANTUM"
+#   @params tape_drive_product Product ID of the Drive
+#               "Ultrium 5-SCSI" for HP
+#               "ULT3580-TD5" for IBM
+#               "ULTRIUM 5" for QUANTUM
+#   @params tape_drive_count Amount of tape drives
+#   @params tape_name_prefix Name prefix of the tapes
+#   @params tape_count Number of tapes to be created.
+#   @params brick_uuids Array of Brick UUIDs to assign
+#   @retval hash Returns hash with rc ( 0 or 1 ) and content
+#*
+sub createLibrary {
+
+    my ($self, $param) = @_;
+
+    my $name        = $param->{name} || { rc=>0, content=>"Name needed" };
+    my $description = $param->{description} ||"";
+    my $vendor      = $param->{vendor} || "ADIC";
+    my $product     = $param->{product} || "Scalar 1000";
+    my $barcode_start = $param->{barcode_start} || { rc=>0, content=>"Barcode Start needed" };
+    my $barcode_end = $param->{barcode_end} || { rc=>0, content=>"Barcode End needed" };
+    my $tape_drive_prefix = $param->{tape_drive_prefix} || "Drive-";
+    my $tape_drive_vendor = $param->{tape_drive_vendor} || "IBM";
+    my $tape_drive_product = $param->{tape_drive_product} || "ULT3580-TD5";    
+    my $tape_drive_count = $param->{tape_drive_count} || 1;   
+    my $tape_name_prefix = $param->{tape_name_prefix} || "Brick-";
+    my $tape_count  = $param->{tape_count} || 1;
+
+    # Adding Bricks not supported at the Moment.
+    # Reason: Transformation of the Array not correct by url builder.
+
+
+    my $endpoint    = 'libraries.json';
+    my $payload      ={ library_name => $name,
+                        library_description => $description,
+                        library_vendor => $vendor,
+                        library_product => $product,
+                        barcode_start => $barcode_start,
+                        barcode_end   => $barcode_end,
+                        tape_drive_prefix => $tape_drive_prefix,
+                        tape_drive_vendor => $tape_drive_vendor,
+                        tape_drive_product => $tape_drive_product,
+                        tape_drive_count => $tape_drive_count,
+                        tape_count => $tape_count
+                    };
+
+    $endpoint       = $endpoint;
+
+    return $self->postCall( { endpoint=>$endpoint, payload=>$payload } );
+}
+
+
+
+
 
 #**************************** Delete Methods ********************************#
 
@@ -520,6 +732,37 @@ sub deleteSnapshotByUUID {
     return $self->deleteCall( { endpoint=>$endpoint } );
 }
 
+#** @method public int unassignBrick
+#
+#   @brief Removes Brick from Tape Libraries or from a Volume
+#   @params brick_serial Serial of the Brick
+#   @retval hash Returns hash with rc ( 0 or 1 ) and content
+#*
+
+# sub unassignBrick {
+#
+#     my ($self, $param) = @_;
+#
+#     my $brick_serial = $param->{brick_serial} || { rc=>0, content=>"Serial needed" };
+#   
+#
+#     my $endpoint    = 'bricks';
+#     my $task        = 'unassign';
+#     $endpoint       = $endpoint.'/'.$task;
+#
+#     my $brick_get_uuid = $self->getBrickUUIDBySerial( { brick_serial => $brick_serial });
+#
+#     if( $brick_get_uuid->{rc} != 1 ){
+#         return { rc=>0, content=>"Brick not found" };
+#     }
+#
+#     my $brick_uuid = $brick_get_uuid->{content};
+#
+#     my $payload      ={ brick_uuids=> [$brick_uuid] };
+#
+#     # PROBLEM: Array in Payload not correctly transformed
+#     return $self->setCall( { endpoint=>$endpoint, payload=>$payload } );
+# }
 
 
 
