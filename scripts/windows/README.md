@@ -18,9 +18,29 @@ _These scripts require a PowerShell Version >= 5_
 
 # Initialize Object
 $mycontroller = New-Object SilentBrick
+
+
+# Authentication
+
+Basically there are two ways to authenticate. 
+Authentication can be done by passing Hostname, Username and Passwort to the controller class or by reading the configuration from an XML File. 
+
+## Authenticate by passing the arguments to the controller
+
 $mycontroller.IP = $Hostname
 $mycontroller.User = $Username
 $mycontroller.Password = $Password
+
+
+## Authenticate by using the configuration file
+
+Use CONF-CreateConfigfile.ps1 in order to create a valid configfile.
+The configfile will hold Hostname, Username and the encrypted password.
+As soon as a configfile was created, the controller class can be initialized by using the StartXMLConfig call:
+
+$mycontroller.StartXMLConfig( $configfile )
+
+# Function calls
 
 $allBricks = $mycontroller.getBricks()
 
