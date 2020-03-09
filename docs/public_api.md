@@ -1,1251 +1,1648 @@
 # FAST LTA AG - Silent Bricks Public REST API Description
 
-__Version:__ API v2.  for Silent Bricks Software R 2.22 (Version 2.22.0.3)  
-__Date:__ July 2019
+__Version:__ API v2.  for Silent Bricks Software R 2.25 (Version 2.25.0.4)  
+__Date:__ November 2019
 
-__Terms used:__
 
-- Silent Brick Library: The whole system
-- Tape Library: A single, emulated tape library
-- Tape: Emulated tape instance, equivalent to a single Silent Brick
+## Glossary
 
-## Library Operations
+| Term | Explanation |
+| - | - |
+| Silent Brick Library | The whole system |
+| Tape Library | A single, emulated tape library |
+| Tape | Emulated tape instance, equivalent to a single Silent Brick |
 
-### Using mtx for tape library operations
-
-For normal tape library operations like moving tapes from a library slot into a
-tape drive, a standard SCSI client like `mtx` should be used.
-
-### Using mt for tape drive operations
-
-For operations on a tape drive, like changing compression settings or querying
-the status, a standard SCSI client like `mt` should be used.
-
-## API Basics:
+## API Basics
 
 ### REST API
 
-The API can be accessed using standard HTTP Commands, following the basic
-principles of REST, see
-<http://en.wikipedia.org/wiki/Representational_state_transfer>.
+The API can be accessed using standard HTTP Commands, following the basic principles of REST, see <http://en.wikipedia.org/wiki/Representational_state_transfer>.
 
 ### API Fundamentals
 
 For accessing the API the following information has to be known:
 
 - Silent Brick Library IP or hostname.
-- Username and password of a SysAdmin User of the Silent Brick Library.
+- Username and password of a User of the Silent Brick Library.
 
 ### API Access
 
-The basic API Endpoint looks like this (given a library with the IP "172.100.51.240")
+The basic API endpoint is:
 
-    https://172.100.51.240/sb-public-api/api/v1
+```
+https://<host-ip>/sb-public-api/api/
+```
 
-Please note that communication is always encrypted with SSL/TLS and happens on
-port 443. By default, the endpoint certificate does not have a valid
-certificate chain and must be trusted by the client. Pure HTTP communication is
-not supported.
+Please note that communication is always encrypted with SSL/TLS and happens on port 443. By default, the endpoint certificate does not have a valid certificate chain and must be trusted by the client.
+Pure HTTP communication is not supported.
 
-### Authentication:
+### Authentication
 
-All calls must be authenticated using Basic HTTP authentication
-(see [RFC 2617](https://www.ietf.org/rfc/rfc2617.txt)).
-Username and password of a SysAdmin User of the Silent Brick Library are required.
+All calls must be authenticated using Basic HTTP authentication (see [RFC 2617](https://www.ietf.org/rfc/rfc2617.txt)). Username and password of a user of the Silent Brick Library are required.
 
 ### Request/Response encoding
 
-Requests should be encoded with UTF-8, the response will be in JSON format.
-This can be achieved by setting the content type like this:
+The character encoding of requests must be UTF-8. The responses have to be in JSON format. This can be achieved by appending '.json' to the URL.
 
-    Content-type: application/json; charset=utf-8
+Note: to ensure a correct response format always append `.json` to your request URL as shown in the examples below.
 
-or by using '.json' in the URL
+### API Requests
+
+Key/value-pairs are passed to the HTTP request. The key represents the information to be updated. The key/value-pairs can be encoded in the query string of the request URL.
+
+```
+curl -X PUT https://<host-ip>/sb-public-api/api/v1/bricks/<brick-uuid>.json?<key>=<value>
+```
+
+The parameters can also be form-data encoded in the payload of the HTTP request. See [RFC 2388](https://www.ietf.org/rfc/rfc2388.txt) for more details.
+
+```
+curl -X PUT -F "<key>=<value>" https://<host-ip>/sb-public-api/api/v1/bricks/<brick-uuid>.json
+```
 
 ### Status codes
 
-The HTTP status code of the response sent back by the server encodes the result
-of the API call. The following status codes are used by all API endpoints:
+The HTTP status code of the response sent back by the server is based on the result of the API call. The following status codes are used:
 
-- `200 (Ok)` The request was successfully processed by the server, the
-  operation was executed, data were delivered.
-- `400 (Bad Request)` Failed to execute operation on the requested resource.
+- `200 (Ok)` The request was successfully processed by the server / the operation was executed / data was delivered.
+- `400 (Bad Request)` Failed to execute operation on the requested resource. This usually happens if parameters are missing from the request or if the resource is in the wrong state (e.g. the volume is already offline and `set_offline` is called).
 - `401 (Unauthorized)` Authentication failed.
 - `403 (Forbidden)` The client tries to start a new task while a background task is active.
 - `404 (Not Found)` The client requests a resource which does not exist.
 
-In case of an error (status-code `4xx`) the response body encodes a message
-like this:
+In case of an error (status-code `4xx`) the response body contains a message clarifying the cause of the problem:
 
-    {
-      "code": <the http status code>
-      "msg": "<a detailed error message>"
-    }
-    
+```
+{
+  "code": <the http status code>,
+  "msg": "<a detailed error message>"
+}
+```
+
 ### SSL certificate
 
-Because our default certificate is a self-signed certificate, 
-we need to ignore the certificate or indicate the path of the certificate when
-HTTPS client are called.
+Because the default certificate is a self-signed certificate, we need to ignore the certificate or indicate the path of the certificate when HTTPS client are called.
 
 Calling without a custom SSL certificate
 
-    curl -k -X GET https://172.100.51.240/sb-public-api/api/v1/bricks.json -u admin
-    
+```
+curl -k -X GET https://<host-ip>/sb-public-api/api/v1/bricks.json -u admin
+```
+
 Calling with a custom SSL certificate
 
-    curl --cacert company.cert -X GET https://172.100.51.240/sb-public-api/api/v1/bricks.json -u admin
-    
-## Note
+```
+curl --cacert company.cert -X GET https://<host-ip>/sb-public-api/api/v1/bricks.json -u admin
+```
 
-To ensure a correct response format always append `.json` to your request URL as shown in the
-examples below.
+## General SilentBrick System Information
 
-## API Calls
+### Identification
 
-## General Brick Operations
+The system can be identified using this call:
 
-### Listing Free Bricks
-
-With this call you can list all the free or unassigned bricks.
-
-Request:
-
-    GET https://172.100.51.240/sb-public-api/api/v1/bricks.json
+```
+GET /v1/identification.json
+```
 
 Response body example:
 
-    {
-        "bricks": [
-          {
-            "uuid": "645aac61-a54b-46fe-aaeb-a44b047f9565",
-            "serial":"V10AFDF1",
-            "type":"HDD",
-            "gross_capacity":3995903488,
-            "net_capacity":3990496256,
-            "status":"online",
-            "unassigned":"Yes",
-          },
-          {
-            ... info for next brick
-          }
-                  ]
-    }
+```
+{
+	"shortname": "G5000",
+	"swversion": "2.20.0.5",
+	"systemid":  "9000"
+}
+```
 
-### Listing All Bricks
+### Background task active status
 
-To display all bricks in the system(assigned and unassigned)
+Check if any of the background tasks are still active with this call:
 
-Request:
-
-    GET -F https://172.100.51.240/sb-public-api/api/v1/bricks.json?all
+```
+GET /v1/tasks_active.json
+```
 
 Response body example:
 
+```
+{
+  "tasks_active":true,
+  "job_ids": [
+  "b7d9343cf809cbf18c129aa6f3cf3756",
+  "81341b5df9a3466edf86d47c8b04a04c",
+  "0d1d76694b000f0ae5a48ab1a91cab75"
+  ]
+}
+```
+
+The `tasks_active` parameter can be:
+
+| Value | Description |
+|-|-|
+| `true` | If any tasks are working/queued in the background |
+| `false`| If the system is idle, with no tasks running in the background|
+
+Please make sure there are no tasks active, before making changes to the Bricks, Libraries or Volumes.
+
+### Get Job Status
+
+With this call you can get the job status of a specific job
+Request:
+
+```
+GET /v1/jobs/<job-id>.json
+```
+
+Response body example:
+
+```
+{
+  "status": "completed",
+  "id": "b7d9343cf809cbf18c129aa6f3cf3756"
+}
+```
+
+The `Status` can be
+
+| Value | Description |
+|-|-|
+| `working`   | job is currently being processed    |
+| `queued`    | job is waiting to be processed      |
+| `killed`    | job has been terminated             |
+| `failed`    | job has failed during processing    |
+| `completed` | job has been completed successfully |
+
+
+### List open issues
+
+Lists all open service issues of the support area.
+
+```
+GET /v1/open_issues.json
+```
+
+Response body example:
+
+```
+[
+  {
+    "URC":"S17017",
+    "siu_uuid:"207e0099-4e28-4153-b2cb-ec778c805342", 
+    "Error Level":"Error",
+    "Title":"Service failed",
+    "Data":"Service ID: S17017",
+    "Status":"Open",
+    "Date Opened":"2017-09-25T14:02:21.000+00:00",
+    "Date Closed":"-",
+    "Ticket Number":null,
+    "Technician":null
+  }
+  
+  {
+    ...."info of next siu"
+  }
+]
+```
+
+The response data
+
+| Value | Description |
+|-|-|
+| URC | The SIU number |
+| siu_uuid | The unique id used to identify the SIU |
+| Error Level | The Error level of the SIU |
+| Title | The FAIL title of the SIU |
+| Data | Data associated with the SIU |
+| Data Opened | The date and time the SIU was generated |
+| Date Closed | The date and time the SIU was (if) closed|
+| Ticket Number | The ticket number of the SIU (if any) |
+| Technician | The details of the technician working on the ticket (if any) |
+
+The `Error Level` can be
+
+| Value | Description |
+|-|-|
+| `Error`   |  |
+| `Warning` |  |
+| `Info`    |  |
+
+### Mark Resolved
+
+To manually mark an open issue as resolved
+
+```
+PUT /v1/sius/<siu-uuid>/mark_resolved.json
+```
+
+### List the hardware info
+
+Retrieves all the available serial numbers and other hardware information.
+
+```
+GET /v1/hardware_info.json
+```
+
+Response body example:
+
+```
+{
+  "system":
+  {"id":"6c1cc3bb-874f-4661-8db0-ba69f4e74b73",
+    "creation_data":"2017-09-25T14:06:23+02:00",
+    "hardware":{"site":{"id":"1","main_board":{"manufacturer":" ","pn":" ","serial":" ","version":" "},
+    "devices":{"device":
+      [
+        {"shortname":"G5","type":null,"serial":"3000-9990-0640","version":"2.0.2928","components":{"mc_units":null,"psus":null,"rtcs":null,"ssds":null,"gpus":null,"nics":null}},
+        {"shortname":"EXTSHELF","type":null,"serial":"1000-9990-0511","components":{"mc_units":null,"psus":null,"rtcs":null}},
+        {"shortname":"EXTSHELF","type":null,"serial":"1000-9991-0533","components":{"mc_units":null,"psus":null,"rtcs":null}},
+        {"shortname":"EXTSHELF","type":null,"serial":"1000-9992-0500","components":{"mc_units":null,"psus":null,"rtcs":null}}
+        ]}}},
+        "software":{"used":"35 KB",
+          "bricks":{"brick":
+            [  
+              {"shortname":"SB","type":"hdd","serial":"V10AFDEB","fw":"0.0.0","used":"35 KB","slot":"0"},
+              {"shortname":"SB","type":"hdd","serial":"V10AFDE9","fw":"0.0.0","used":"-","slot":"0"},
+              {"shortname":"SB","type":"hdd","serial":"V10AFDED","fw":"0.0.0","used":"-","slot":"1"},
+              {"shortname":"SB","type":"hdd","serial":"V10AFDEA","fw":"0.0.0","used":"-","slot":"0"},
+              {"shortname":"SB","type":"hdd","serial":"V10AFDE8","fw":"0.0.0","used":"-","slot":"0"},
+              {"shortname":"SB","type":"hdd","serial":"V10AFDEC","fw":"0.0.0","used":"-","slot":"1"}
+              ]}},
+              "eventhistory":{"events":null}}
+}
+```
+
+### Listing Network Info
+
+The network info can be listed with this call:
+
+```
+GET /v1/network.json
+```
+
+Response body example:
+
+```
+{
+  "hostname": "vm-controller-7c429f75",
+  "domain_name": "fast-lta.intra",
+  "gateway": "172.100.50.254",
+  "dns_server_one": "172.100.50.254",
+  "dns_server_two": "172.20.60.254",
+  "nic": [
     {
-        "bricks": [
-          {
-            "uuid": "da14bdcb-966b-425f-8088-62740760e756",
-            "serial":"V10AFDE9",
-            "type":"HDD",
-            "gross_capacity":3995903488,
-            "net_capacity":3990496256,
-            "status":"online",
-        	"unassigned":"No",
-            "v_devs": [
-              {
-                "uuid":"8dd53317-ef74-4869-a2f0-5e162d2d5c0b",,
-                "span_index":0,
-                "net_size":3835691008,
-                "net_used":454656,
-                "audit_location":454656
-              }
-            ]
-          },
-          {
-            "uuid": "7fcbf628-1575-4555-8da3-8757132dfb09",
-            "serial":"V10AFDEE",
-            "type":"HDD",
-            "gross_capacity":3995903488,
-            "net_capacity":3990496256,
-            "status":"online",
-        	"unassigned":"No",
-            "tapes": [
-              {
-                "uuid":"52c99404-00b1-46d6-adf8-f710d6bfe1bc",
-                "name":"Brick-0001",
-                "label":"100001L5",
-                "net_size":3835691008,
-                "net_used":454656,
-                "audit_location":454656
-              }
-            ]
-          },
-          {
-            "uuid": "c0707153-2ee3-4cd3-9f70-224d0604ec7a",
-            "serial":"V10AFDEC",
-            "type":"HDD",
-            "gross_capacity":3995903488,
-            "net_capacity":3990496256,
-            "status":"online",
-        	"unassigned":"No",
-            "partitions": [
-              {
-                "uuid":"8dd53317-ef74-4869-a2f0-5e162d2d5c0b",,
-                "span_index":0,
-                "net_size":3835691008,
-                "net_used":454656,
-                "audit_location":454656
-              }
-            ]
-          },
-          {
-            ... info for next brick
-          }
-       ]
+      "name": "management",
+      "dhcp": true,
+      "ipaddr_v4": "172.100.51.240",
+      "subnet_mask": "255.255.254.0",
+      "bonding_mode": "1 (active-backup)"
+    },
+    {
+      "name": "data",
+      "dhcp": true,
+      "ipaddr_v4": "172.20.61.120",
+      "subnet_mask": "255.255.254.0",
+      "bonding_mode": "1 (active-backup)",
+      "link_auto_neg": true,
+      "link_speed": 10000,
+      "link_duplex": "full",
+      "jumbo_frames": "off"
     }
+  ],
+  "routing": [
+    {
+      "target_addr": "172.100.51.50",
+      "target_mask": "255.255.254.0",
+      "gateway": "172.100.50.254"
+    }
+  ],
+  "ipmi": {
+    "ipaddr_v4": "172.20.60.50",
+    "gateway_v4":"172.20.60.254",
+    "netmask_v4": "255.255.254.0"
+  }
+}
+```
 
-### Updating Bricks
+The `bonding_mode` can be
 
-Given the brick uuid a brick can be updated
-with this call:
+| Value | Description |
+|-|-|
+| `0 (balance-rr)`    | This mode is also known as round-robin mode. Packets are sequentially transmitted and received through each interface one by one. This mode provides load balancing functionality. |
+| `1 (active-backup)` | This mode has only one interface set to active, while all other interfaces are in the backup state. If the active interface fails, a backup interface replaces it as the only active interface in the bond. The media access control (MAC) address of the bond interface in mode 1 is visible on only one port (the network adapter), which prevents confusion for the switch. This mode provides fault tolerance. |
+| `2 (balance-xor)`   | The source MAC address uses exclusive or (XOR) logic with the destination MAC address. This calculation ensures that the same slave interface is selected for each destination MAC address. This mode provides fault tolerance and load balancing. |
+| `3 (broadcast)`     | When ports are configured with broadcast mode, all slave ports transmit the same packets to the destination to provide fault tolerance. This mode does not provide load balancing. |
+| `4 (802.3ad)`       | 802.3ad mode is an IEEE standard also called LACP (Link Aggregation Control Protocol). LACP balances outgoing traffic across the active ports and accepts incoming traffic from any active port. |
+| `5 (balance-tlb)`   | This mode ensures that the outgoing traffic distribution is set according to the load on each interface and that the current interface receives all the incoming traffic. If the assigned interface fails to receive traffic, another interface is assigned to the receiving role. It provides fault tolerance and load balancing. |
 
-    PUT https://172.100.51.240/sb-public-api/api/v1/bricks/<brick-uuid>.json
 
-Key/value-pairs are passed to the HTTP request. The key represents the
-information to be updated. The key/value-pairs can be encoded in the query
-string of the request URL.
+## Basic Brick Operations
 
-    curl -X PUT https://172.100.51.240/sb-public-api/api/v1/bricks/<brick-uuid>.json?<key>=<value>
+### List free Bricks
 
-The update-information can also be form-data encoded in the payload of the HTTP
-request. See [RFC 2388](https://www.ietf.org/rfc/rfc2388.txt) for more details.
+This call lists all the unassigned bricks.
 
-    curl -X PUT -F "<key>=<value>" https://172.100.51.240/sb-public-api/api/v1/bricks/<brick-uuid>.json
+Request:
 
-A `key` can be:
+```
+GET /v1/bricks.json
+```
 
-- `description`  The description for the brick
-- `display_mode` The description display mode
+Response body example:
 
-    - `0`  QR Display   - Description + Container ID
-    - `1`  QR Display   - Description Only
-    - `2`  Text Display - Top & Left Aligned
-    - `3`  Text Display - Top & Center
-    - `4`  Text Display - Top & Right  Aligned
-    - `5`  Text Display - Middle & Center
+```
+{
+    "bricks": [
+      {
+        "uuid": "645aac61-a54b-46fe-aaeb-a44b047f9565",
+        "serial":"V10AFDF1",
+        "type":"HDD",
+        "gross_capacity":3995903488,
+        "net_capacity":3990496256,
+        "status":"online",
+        "unassigned":"Yes",
+      },
+      {
+        "... info for next brick"
+      }
+              ]
+}
+```
 
-- `qr`  Updates the string encoded in the QR code displayed in front of the
-        brick. When the `value` starts with a `=`, then the complete string is
-        replaced. Otherwise the string is prepended to the QR code.
+### List all Bricks
 
-- `find_me`      To toggle on/off the beacon
+Returns all bricks in the system (assigned and unassigned).
 
-    - `0`  To switch off
-    - `1`  To switch on		
+Request:
 
-Any other keys are ignored.
+```
+GET /v1/bricks.json?all
+```
 
-Please note that description can be updated either with (`description` and `display_mode`) or only `qr`. The three keys should not be used together
+Response body example:
+
+```
+{
+    "bricks": [
+      {
+        "uuid": "da14bdcb-966b-425f-8088-62740760e756",
+        "serial":"V10AFDE9",
+        "type":"HDD",
+        "gross_capacity":3995903488,
+        "net_capacity":3990496256,
+        "status":"online",
+    	"unassigned":"No",
+        "v_devs": [
+          {
+            "uuid":"8dd53317-ef74-4869-a2f0-5e162d2d5c0b",
+            "span_index":0,
+            "net_size":3835691008,
+            "net_used":454656,
+            "audit_location":454656
+          }
+        ]
+      },
+      {
+        "uuid": "7fcbf628-1575-4555-8da3-8757132dfb09",
+        "serial":"V10AFDEE",
+        "type":"HDD",
+        "gross_capacity":3995903488,
+        "net_capacity":3990496256,
+        "status":"online",
+    	"unassigned":"No",
+        "tapes": [
+          {
+            "uuid":"52c99404-00b1-46d6-adf8-f710d6bfe1bc",
+            "name":"Brick-0001",
+            "label":"100001L5",
+            "net_size":3835691008,
+            "net_used":454656,
+            "audit_location":454656
+          }
+        ]
+      },
+      {
+        "uuid": "c0707153-2ee3-4cd3-9f70-224d0604ec7a",
+        "serial":"V10AFDEC",
+        "type":"HDD",
+        "gross_capacity":3995903488,
+        "net_capacity":3990496256,
+        "status":"online",
+    	"unassigned":"No",
+        "partitions": [
+          {
+            "uuid":"8dd53317-ef74-4869-a2f0-5e162d2d5c0b",
+            "span_index":0,
+            "net_size":3835691008,
+            "net_used":454656,
+            "audit_location":454656
+          }
+        ]
+      },
+      {
+        "... info for next brick"
+      }
+   ]
+}
+```
+
+### Edit Brick information
+
+Updates a Brick's description and status.
+
+```
+PUT /v1/bricks/<brick-uuid>.json
+```
+
+List of keys:
+
+| Key | Description |
+|-|-|
+| `description` | The description for the brick |
+| `display_mode` |  The description display mode (see below) |
+| `qr` | Updates the string encoded in the QR code displayed in front of the brick. <br/>If the `value` starts with a `=` the complete string will be replaced. <br/>Otherwise the string is prepended to the QR code. |
+| `find_me` | To toggle on/off the beacon |
+
+The `qr` parameter sets the QR Code displayed in the front of the Silent Brick.
+
+The `display_mode` parameter can have the following values:
+
+| Value | Setting |
+|-|-|
+| `0` |  QR Display   - Description + Container ID |
+| `1` |  QR Display   - Description Only |
+| `2` | Text Display - Top & Left Aligned |
+| `3` | Text Display - Top & Center |
+| `4` | Text Display - Top & Right  Aligned |
+| `5` | Text Display - Middle & Center |
+
+
+The `find_me` parameter can have the following values:
+
+| Value | Setting |
+|-|-|
+| `0` | beacon switched on |
+| `1` |  beacon switched off |
+
+where `beacon` is the LED in the front of the Silent Brick.
+
+Please note that description can be updated either with (`description` and `display_mode`) or only `qr`. The three keys can't be used together.
+
+Examples:
+
+- To display the description as text in the top and centre of the brick e-paper
+
+```
+curl -X PUT -F "description=Brick001" -F"display_mode=3" https://<host-ip>/sb-public-api/api/v1/bricks/<brick-uuid>.json
+```
+- To display the container ID along with the description as QR
+
+```
+curl -X PUT -F "qr=BrickContainer 001" https://<host-ip>/sb-public-api/api/v1/bricks/<brick-uuid>.json
+```
 
 ### Unassign Bricks
 
-Given the brick uuid, the brick can be unassigned from its associated library or volume. A brick can only be unassigned from volume/libraries if they don't contain any partitions.
-with this call:
+Removes one or more Bricks from their associated library or volume. A brick can only be removed from volume/libraries if it doesn't contain any partitions (i.e. it wasn't used yet).
 
-    curl -X PUT -F "<key>=<value>" https://172.100.51.240/sb-public-api/api/v1/bricks/unassign.json
+```
+PUT /v1/bricks/unassign.json
+```
 
-A `key` can be:
+List of keys:
 
-- `brick_uuids`  The brick_uuids to be unassigned as an array
+| Key | Description |
+|-|-|
+| `brick_uuids` | An _array_ containing the UUIDs of the bricks to be unassigned. |
+
+Example:
+
+- To unassign bricks with UUIDs `brick_uuid_1` and `brick_uuid_2` from the library
+
+```
+curl -X PUT -F "brick_uuids[]=brick_uuid_1" -F"brick_uuids[]=brick_uuid_2" https://<host-ip>/sb-public-api/api/v1/bricks/unassign.json
+```
+
+## Controller Operations
+
+### Enable/disable the QR logo overlay
+
+Enables or disables the QR logo overlay.
+
+```
+PUT /v1/controller.json
+```
+
+List of keys:
+
+| Key | Description |
+|-|-|
+| `qr_logo` | Enables resp. disables the QR logo overlay. A value of `true`, `t`,   `yes`, `y` or `1` enables the overlay. Any other value disables the logo. |
+
+## Library Operations
+
+### Using mtx for tape library operations
+
+For normal tape library operations like moving tapes from a library slot into a tape drive, a standard SCSI client like `mtx` should be used.
+
+### Using mt for tape drive operations
+
+For operations on a tape drive, like changing compression settings or querying the status, a standard SCSI client like `mt` should be used.
 
 ## VTL Operations
 
-### List Library Emulations
+### List library emulations
 
-With this call you can list all available library types to create a new library.
-
-Request:
-
-    GET https://172.100.51.240/sb-public-api/api/v1/libraries/library_emulations.json
-
-Response body example:
-
-	{
-        "library_types": [
-	      {
-	        "vendor_identification": "ADIC",
-	        "product_identification": "Scalar 1000",
-	        "default_revision_level": "500A"
-	      },
-          {
-            ... info for next library type
-          }
-        ]
-	}
-
-### List Tape Drive Emulations
-
-With this call you can list all available tape drive types.
+Lists all available library types that can be used when creating a new library.
 
 Request:
 
-    GET https://172.100.51.240/sb-public-api/api/v1/libraries/tape_drive_emulations.json
+```
+GET /v1/libraries/library_emulations.json
+```
 
 Response body example:
 
-	{
-      "tape_drive_types": [
-        {
-          "vendor_identification": "IBM",
-          "product_identification": "ULTRIUM-TD3",
-          "default_revision_level": "54K1"
-        },
-        {
-         ... info for next tape drive type
-        }
-      ]
+```
+{
+     "library_types": [
+      {
+        "vendor_identification": "ADIC",
+        "product_identification": "Scalar 1000",
+        "default_revision_level": "500A"
+      },
+       {
+         "... info for next library type"
+       }
+     ]
+}
+```
+
+### List tape drive emulations
+
+Lists all available tape drive types.
+
+Request:
+
+```
+GET /v1/libraries/tape_drive_emulations.json
+```
+
+Response body example:
+
+```
+{
+  "tape_drive_types": [
+    {
+      "vendor_identification": "IBM",
+      "product_identification": "ULTRIUM-TD3",
+      "default_revision_level": "54K1"
+    },
+    {
+     "... info for next tape drive type"
     }
+  ]
+}
+```
 
-### Create Library
+### Create a library
 
 Creates a library. Only one type of tape drive is allowed per Library.
 
-Key/value-pairs are passed to the HTTP request. The key represents the
-information to be updated. The key/value-pairs can be encoded in the query
-string of the request URL.
-
-    curl -X POST -F "<key>=<value>" https://172.100.51.240/sb-public-api/api/v1/libraries.json
+```
+POST /v1/libraries.json
+```
 
 A `key` can be:
 
-- `library_name`            The name of the library
-- `library_description`     The description for the library
-- `library_type`            The type of the library to be created( Default: LBL )
-- `library_vendor`          The library vendor( Default: FAST-LTA )
-- `library_product`         The library product( Default: SBL 2000 )   
-- `custom_library_revision` The custom revision of the library
+| Key | Description | Comments |
+|-|-|-|
+| `library_name`				| The name of the library | Must be provided to create the library |
+| `library_description`	| The description for the library | Optional key |
+| `library_type`				| The type of the library to be created | Optional key, Default: LBL |
+| `library_vendor`			| The library vendor | Optional key, Default: FAST-LTA |
+| `library_product`			| The library product | Optional key, Default: SBL 2000 |
+| `custom_library_revision` | The custom revision of the library | Optional key |
+| `barcode_start`  <br/>  `barcode_end` | The start pattern for tape barcode <br/> The end pattern for tape barcode <br/> | Set the barcode range to use for new media.|
 
-Please enter the barcode range to use for new media. A-Z and 0-9 are allowed characters.
-A length of 6 characters is recommended (maximum 32). The first three characters of the
-start and end specifiers must match (e.g. 'TTT000' and 'TTTZZZ'). If the range end specifier
-ends with '999' (e.g. 'XXX000' to 'XXX999') the generated barcodes will consist of numbers only.
+To add tape drives to the library, additional keys should be used
 
-- `barcode_start`           The start pattern for tape barcode
-- `barcode_end`             The end pattern for tape barcode
+| Key | Description | Comments |
+|-|-|-|
+| `tape_drive_prefix` | The (prefix-)name of the tape drive(s) | Should be provided if a tape drive needs to be added to the library.|
+| `tape_drive_vendor` | The tape drive vendor | Optional key (Default: IBM)|
+| `tape_drive_product` | The tape drive product| Optional key (Default: ULT3580-TD5) |
+| `tape_drive_count` | The count of tape drives| Optional key (Default: 1) |
 
-- `tape_drive_prefix`       The (prefix-)name of the tape drive(s)
-- `tape_drive_vendor`       The tape drive vendor( Default: IBM )
-- `tape_drive_product`      The tape drive product( Default: ULT3580-TD5 )
-- `tape_drive_count`        The count of tape drives( Default: 1 )
+Bricks can be assigned and formatted with the same call.
 
-- `tape_name_prefix`        The (prefix-)name of the tapes
-- `tape_count`              The number of tapes to be created.All the available bricks will be formatted if empty
-- `brick_uuids`             The uuids of the bricks as an array. If brick_uuids are not given an empty library is created.
+| Key | Description | Comments |
+|-|-|-|
+| `brick_uuids` | The uuids of the bricks as an array | If brick_uuids are not given an empty library is created. |
+| `tape_name_prefix` | The (prefix-)name of the tapes | Should be provided to format the assigned bricks. A tape drive should be assigned to format the bricks. |
+
+
+Criteria for barcodes:
+
+* A-Z and 0-9 are allowed characters.
+* A length of 6 characters is recommended (maximum 32).
+* The first three characters of the start and end specifiers must match (e.g. 'TTT000' and 'TTTZZZ').
+* If the range end specifier ends with '999' (e.g. 'XXX000' to 'XXX999') the generated barcodes will consist of numbers only.|
 
 Response body example:
 
-     {
-        "name": "Lib01",
-        "description": "Test library sb-public-api",
-        "uuid": "14c6daa8-2be9-4f1c-bca9-62a4cd49073f",
-        "num_storage_slots": 47,
-        "num_export_slots": 47,
-        "vendor_identification": "FAST-LTA",
-        "product_identification": "SBL 2000",
-        "product_revision_level": "100A",
-        "num_drives": 1,
-        "drives": [
-          {
-            "drive_index": 10,
-            "emulation_revision_level": "",
-            "loaded_tape_uuid": null,
-            "name": "Drive-0001",
-            "tape_drive_uuid": "becbb7d7-579c-4487-bd65-400ee3e9ecfe",
-            "description": "IBM TS1050",
-            "vendor_identification": "IBM",
-            "product_identification": "ULT3580-TD5",
-            "product_revision_level": "B170"
-          }
-        ]
-      }
+```
+{
+  "name": "Lib01",
+  "description": "Test library sb-public-api",
+  "uuid": "14c6daa8-2be9-4f1c-bca9-62a4cd49073f",
+  "num_storage_slots": 47,
+  "num_export_slots": 47,
+  "vendor_identification": "FAST-LTA",
+  "product_identification": "SBL 2000",
+  "product_revision_level": "100A",
+  "num_drives": 1,
+  "drives": [
+    {
+      "drive_index": 10,
+      "emulation_revision_level": "",
+      "loaded_tape_uuid": null,
+      "name": "Drive-0001",
+      "tape_drive_uuid": "becbb7d7-579c-4487-bd65-400ee3e9ecfe",
+      "description": "IBM TS1050",
+      "vendor_identification": "IBM",
+      "product_identification": "ULT3580-TD5",
+      "product_revision_level": "B170"
+    }
+  ]
+}
+```
 
-### Update Library
+Examples:
 
-Given the library-uuid a library can be updated
+- To create a library with the default settings ( _LBL_ `library_type`, _FAST-LTA_ `library_vendor`, _SBL 2000_ `library product` with _1_ `tape_drive_count` of `tape_drive_vendor` _IBM_ and the `tape_drive_product` _ULT3580-TD5_ )
 
-Key/value-pairs are passed to the HTTP request. The key represents the
-information to be updated. The key/value-pairs can be encoded in the query
-string of the request URL.
+```
+curl -X POST -F"library_name=Lib01" -F"library_description=Test library sb-public-api" -F"tape_drive_prefix=Drive-" https://<host-ip>/sb-public-api/api/v1/libraries.json
+```
 
-    curl -X PUT -F "<key>=<value>" https://172.100.51.240/sb-public-api/api/v1/libraries/<library-uuid>.json
+- To create a library of type _ADIC Scalar 1000_  with _2_ tape drives of type _HP Ultrium 5-SCSI_. Bricks can be assigned and formatted with the same call.
 
-A `key` can be:
+```
+curl -X POST -F"library_name=Lib02" -F"library_vendor=ADIC" -F"library_product=Scalar 1000"  -F"tape_drive_prefix=Drive-" -F"tape_drive_count=2" -F"tape_drive_vendor=HP" -F"tape_drive_product=Ultrium 5-SCSI" -F"brick_uuids[]=<brick_uuid>" -F"brick_uuids[]=<brick_uuid>" -F"tape_name_prefix=Tape-" https://<host-ip>/sb-public-api/api/v1/libraries.json
+```
 
-- `library_name`            The name of the library
-- `library_description`     The description for the library
-- `library_vendor`          The library vendor
-- `library_product`         The library product
-- `custom_library_revision` The custom revision of the library
+### Update library information
 
-Please enter the barcode range to use for new media. A-Z and 0-9 are allowed characters.
-A length of 6 characters is recommended (maximum 32). The first three characters of the
-start and end specifiers must match (e.g. 'TTT000' and 'TTTZZZ'). If the range end specifier
-ends with '999' (e.g. 'XXX000' to 'XXX999') the generated barcodes will consist of numbers only.
+Updates the description and settings of a library.
 
-- `barcode_start`           The start pattern for tape barcode
-- `barcode_end`             The end pattern for tape barcode
-- `storage_slots`						The number of storage slots required
-- `export_slots`						The number of export slots required
-
-Any other keys are ignored
-
-### Add Drives To Library
-
-Given the library uuid drives can be assigned to the library. Only one type of tape drive is allowed per Library.
-
-Key/value-pairs are passed to the HTTP request. The key represents the
-information to be updated. The key/value-pairs can be encoded in the query
-string of the request URL.
-
-    curl -X PUT -F "<key>=<value>" https://172.100.51.240/sb-public-api/api/v1/libraries/<library-uuid>/assign_drives.json
+```
+PUT /v1/libraries/<library-uuid>.json
+```
 
 A `key` can be:
 
-- `tape_drive_prefix`       The (prefix-)name of the tape drive(s)
-- `tape_drive_vendor`       The tape drive vendor( Default: IBM )
-- `tape_drive_product`      The tape drive product( Default: ULT3580-TD5 )
-- `tape_drive_count`        The count of tape drives( Default: 1 )
+| Key | Description |
+|-|-|
+| `library_name`				| The name of the library |
+| `library_description`	| The description for the library |
+| `library_vendor`			| The library vendor (Default: FAST-LTA) |
+| `library_product`			| The library product (Default: SBL 2000) |
+| `custom_library_revision` | The custom revision of the library |
+| `barcode_start`  <br/>  `barcode_end` | The start pattern for tape barcode <br/> The end pattern for tape barcode <br/> Set the barcode range to use for new media.
+| `storage_slots`	 | The number of storage slots to set |
+| `export_slots` | The number of export slots to set |
 
-### Add Bricks To Library
+See [Create a Library](#Create-a-library) for details on the barcodes.
 
-Given the library uuid bricks can be assigned to the library.
+### Add tape drives to a library
 
-Key/value-pairs are passed to the HTTP request. The key represents the
-information to be updated. The key/value-pairs can be encoded in the query
-string of the request URL.
+Creates new tape drives within a library. Only one type of tape drive is allowed per library.
 
-    curl -X PUT -F "<key>=<value>" https://172.100.51.240/sb-public-api/api/v1/libraries/<library-uuid>/assign_bricks.json
+```
+PUT /v1/libraries/<library-uuid>/assign_drives.json
+```
 
-A `key` can be:
+List of keys:
 
-- `brick_uuids`             The uuids of the bricks as an array.
+| Key | Description |
+|-|-|
+| `tape_drive_prefix`        | The (prefix-)name of the tape drive(s) |
+|`tape_drive_vendor`      | The tape drive vendor (Default: IBM) |
+|`tape_drive_product`     | The tape drive product (Default: ULT3580-TD5) |
+|`tape_drive_count`         |  The count of tape drives (Default: 1) |
 
-Keys to format the bricks.
+### Add Bricks to a library
 
-- `tape_name_prefix`        The (prefix-)name of the tapes.
-- `tape_count`              The number of tapes to be created. All bricks are formatted if not provided.
+Assigns bricks to a library.
 
-### Format Bricks in the Library
+```
+PUT /v1/libraries/<library-uuid>/assign_bricks.json
+```
 
-Given the library uuid, the unformatted bricks already assigned to the library can be formatted.
+List of keys:
 
-Key/value-pairs are passed to the HTTP request. The key represents the
-information to be updated. The key/value-pairs can be encoded in the query
-string of the request URL.
+| Key | Description |
+|-|-|
+| `brick_uuids` | The uuids of the bricks as an array |
+| `tape_name_prefix` | The (prefix-)name of the tapes. Also the key to format the bricks, if not provided the bricks will only be assigned and not formatted. |
+| `tape_count`       | The number of tapes to be created. All bricks are formatted if not provided. If the `tape_name_prefix ` key is not provided this key is not considered. |
 
-    curl -X PUT -F "<key>=<value>" https://172.100.51.240/sb-public-api/api/v1/libraries/<library-uuid>/format.json
+### Format Bricks in a library
 
-A `key` can be:
+Formats unformatted bricks that are already assigned to the library.
 
-- `brick_uuids`          	The uuids of the bricks to format as an array.
-- `tape_name_prefix`      The (prefix-)name of the tapes.
+```
+PUT /v1/libraries/<library-uuid>/format.json
+```
 
-### Erase Tapes in the library
+List of keys:
 
-Given the library uuid, the library tapes can be erased. They will not be un-assigned from the library after a successful erase.
+| Key | Description |
+|-|-|
+| `brick_uuids` | The uuids of the bricks as an array |
+| `tape_name_prefix` | The (prefix-)name of the tapes. Also the key to format the bricks, if not provided the bricks will only be assigned and not formatted. |
 
-Key/value-pairs are passed to the HTTP request. The key represents the
-information to be updated. The key/value-pairs can be encoded in the query
-string of the request URL.
+### Erase tapes in a library
 
-    curl -X PUT -F "<key>=<value>" https://172.100.51.240/sb-public-api/api/v1/libraries/<library-uuid>/erase.json
+Erases tapes that are part of a library. The erased Bricks remain assigned to the library.
 
-A `key` can be:
+```
+PUT /v1/libraries/<library-uuid>/erase.json
+```
 
-- `tape_uuids`           The uuids of the tapes to erase as an array.
+List of keys:
 
-### Listing tape libraries and drives
+| Key | Description |
+|-|-|
+| `tape_uuids` | The uuids of the tapes to erase as an array |
 
-With this call you can list all available tape libraries and their corresponding drives.
+### List tape libraries and drives
+
+Lists all available tape libraries and their corresponding drives.
 
 Request:
 
-    GET https://172.100.51.240/sb-public-api/api/v1/libraries.json
+```
+GET /v1/libraries.json
+```
 
 Response body example:
 
-		{
-		  "libraries": [
-             {
-               "name": "L1",
-               "description": "",
-               "uuid": "da14bdcb-966b-425f-8088-62740760e756",
-               "num_storage_slots": 47,
-               "num_export_slots": 47,
-               "vendor_identification": "FAST-LTA",
-               "product_identification": "SBL 2000",
-               "product_revision_level": "100A",
-               "num_drives": 2,
-               "drives": [
-                 {
-                   "drive_index": 2,
-                   "emulation_revision_level": "",
-                   "loaded_tape_uuid": null,
-                   "name": "HP-Ultrium 5-SCSI-0002",
-                   "tape_drive_uuid": "be13ce9d-6b31-4f99-963e-7ed581689061",
-                   "description": "HP Ultrium 3000",
-                   "vendor_identification": "HP",
-                   "product_identification": "Ultrium 5-SCSI",
-                   "product_revision_level": "Z23D"
-                 },
-                 {
-                   "drive_index": 1,
-                   "emulation_revision_level": "",
-                   "loaded_tape_uuid": "2c111621-216a-4252-a854-0e2a6cf5a824",
-                   "name": "HP-Ultrium 5-SCSI-0001",
-                   "tape_drive_uuid": "d3df1092-4f0d-4037-b8bf-c3ff42ee6af3",
-                   "description": "HP Ultrium 3000",
-                   "vendor_identification": "HP",
-                   "product_identification": "Ultrium 5-SCSI",
-                   "product_revision_level": "Z23D"
-                 }
-               ]
-             },
-             {
-               ... info for next library
-             }
-    	  ]
-	    }
-
-### Listing tapes inside a library.
-
-Given a library uuid, the corresponding tapes can be listed with this call.
-
-Request:
-
-    GET https://172.100.51.240/sb-public-api/api/v1/libraries/<library-uuid>/tapes.json
-
-Response body example:
-
+```
+{
+    "libraries": [
+    {
+       "name": "L1",
+       "description": "",
+       "uuid": "da14bdcb-966b-425f-8088-62740760e756",
+       "num_storage_slots": 47,
+       "num_export_slots": 47,
+       "vendor_identification": "FAST-LTA",
+       "product_identification": "SBL 2000",
+       "product_revision_level": "100A",
+       "num_drives": 2,
+       "drives": [
      {
-         "tapes":[
-           {
-             "uuid": "47be86ca-422a-4e36-a35e-2af19ccb8175",
-             "name": "Brick-0003",
-             "label": "100003L5",
-             "net_size": 990496768,
-             "net_used": 0,
-             "audit_location": 0,
-             "status": "online"
-           },
-           {
-              ... info for next tape
-           }
-        ]
+       "drive_index": 2,
+       "emulation_revision_level": "",
+       "loaded_tape_uuid": null,
+       "name": "HP-Ultrium 5-SCSI-0002",
+       "tape_drive_uuid": "be13ce9d-6b31-4f99-963e-7ed581689061",
+       "description": "HP Ultrium 3000",
+       "vendor_identification": "HP",
+       "product_identification": "Ultrium 5-SCSI",
+       "product_revision_level": "Z23D"
+     },
+     {
+       "drive_index": 1,
+       "emulation_revision_level": "",
+       "loaded_tape_uuid": "2c111621-216a-4252-a854-0e2a6cf5a824",
+       "name": "HP-Ultrium 5-SCSI-0001",
+       "tape_drive_uuid": "d3df1092-4f0d-4037-b8bf-c3ff42ee6af3",
+       "description": "HP Ultrium 3000",
+       "vendor_identification": "HP",
+       "product_identification": "Ultrium 5-SCSI",
+       "product_revision_level": "Z23D"
      }
+       ]
+     },
+     {
+       "... info for next library"
+     }
+    ]
+}
+```
+
+### List tapes in a library
+
+Lists all tapes within a library.
+
+Request:
+
+```
+GET /v1/libraries/<library-uuid>/tapes.json
+```
+
+Response body example:
+
+```
+{
+   "tapes":[
+      {
+         "uuid": "47be86ca-422a-4e36-a35e-2af19ccb8175",
+         "name": "Brick-0003",
+         "label": "100003L5",
+         "net_size": 990496768,
+         "net_used": 0,
+         "audit_location": 0,
+         "status": "online"
+      },
+      {
+          "... info for next tape"
+      }
+    ]
+ }
+```
 
 The `status` can be
 
-- `online` The tape is ready and online.
-- `unlocked` The tape is unlocked for eject.
-- `ejected` The tape is ejected.
-- `transport` The tape is in transport mode.
-- `error` The tape is in an error state.
+| Value | Description |
+|-|-|
+| `online` | The tape is ready and online |
+| `unlocked` | The tape is unlocked for eject |
+| `ejected` | The tape is ejected |
+| `transport` | The tape is in transport mode |
+| `error` | The tape is in an error state |
 
-The current audit position is found in the value `audit_location`. Because the
-current default is _Audit after Write_, the value `net_used` is always equal
-to the value `audit_location`. All data is therefore generally audited at least
-once. Independently of this, each brick will be audited again once per month or
-1/30 per day.
+The current audit position is found in the value `audit_location`. Because the current default is _Audit after Write_, the value `net_used` is always equal to the value `audit_location`. All data is therefore generally audited at least once. Independently of this, each brick will be audited again once per month or 1/30 per day.
 
 ### Updating tapes
 
-Given the library uuid and the tape uuid properties of a tape can be updated
-with this call:
+Updates tape information.
 
-    PUT https://172.100.51.240/sb-public-api/api/v1/libraries/<library-uuid>/tapes/<tape-uuid>.json
+```
+PUT /v1/libraries/<library-uuid>/tapes/<tape-uuid>.json
+```
 
-Key/value-pairs are passed to the HTTP request. The key represents the
-information to be updated. The key/value-pairs can be encoded in the query
-string of the request URL.
+List of keys:
 
-    curl -X PUT https://172.100.51.240/sb-public-api/api/v1/libraries/<library-uuid>/tapes/<tape-uuid>.json?<key>=<value>
+| Key | Description |
+|-|-|
+| `qr` | Updates the string encoded in the QR code displayed in front of the brick. When the `value` starts with a `=`, then the complete string is replaced.Otherwise the string is prepended to the QR code |
 
-The update-information can also be form-data encoded in the payload of the HTTP
-request. See [RFC 2388](https://www.ietf.org/rfc/rfc2388.txt) for more details.
-
-    curl -X PUT -F "<key>=<value>" https://172.100.51.240/sb-public-api/api/v1/libraries/<library-uuid>/tapes/<tape-uuid>.json
-
-
-A `key` can be:
-
-- `qr` Updates the string encoded in the QR code displayed in front of the
-  brick. When the `value` starts with a `=`, then the complete string is
-  replaced. Otherwise the string is prepended to the QR code.
-
-Any other keys are ignored.
 
 ### Unlocking/Locking tapes for eject
 
-Unlock a tape for eject (i.e.) the tape can be ejected with the touch of the
-front sensor. A tape that is loaded into a drive can NOT be unlocked and the
-call will generate an error.
+Unlock/Lock a tape for eject (i.e.) the tape can be ejected with the touch of the front sensor. A tape that is loaded into a drive can NOT be unlocked and the call will generate an error.
 
-Given the library uuid and the tape uuid a tape can be unlocked with this call:
+```
+PUT /v1/libraries/<library-uuid>/tapes/<tape-uuid>/unlock.json
+```
 
-    PUT https://172.100.51.240/sb-public-api/api/v1/libraries/<library-uuid>/tapes/<tape-uuid>/unlock.json
-
-To lock a tape again so that the touch sensor is disabled, call:
-
-    PUT https://172.100.51.240/sb-public-api/api/v1/libraries/<library-uuid>/tapes/<tape-uuid>/lock.json
+```
+PUT /v1/libraries/<library-uuid>/tapes/<tape-uuid>/lock.json
+```
 
 ### Delete library
 
-Given the library uuid, an empty library can be deleted. Please make sure all the bricks are removed from the library before attempting to delete it.
+Deletes a library. Please make sure all the bricks are removed from the library before attempting to delete it.
 
 Request:
 
-    DELETE https://172.100.51.240/sb-public-api/api/v1/libraries/<library_uuid>.json
-
-## SNAS Operations
+```
+DELETE /v1/libraries/<library_uuid>.json
+```
 
 ## Volume Operations
 
-### Listing volumes
+### List volumes
 
-With this call you can list all available volumes(SNAS ERC, SNAS 2P, SNAS 3P) of the current user.
+Lists volumes of all available volume types (SNAS ERC, SNAS 2P, SNAS 3P).
 
 Note: If the current user has ComplianceAdmin, the results will also include the available Sub Volumes for Privilege Delete.
-The results of these Sub Volumes will has limited information only for Privilege Delete operation. For more details please see the chapter <Privilege Delete Operation> 
+The results of these Sub Volumes will have limited information only for Privilege Delete operation. For more details please see the chapter [Privilege Delete Operations](#Privilege-Delete-Operations).
 
 Request:
 
-    GET https://172.100.51.240/sb-public-api/api/v1/volumes.json
+```
+GET /api/v1/volumes.json
+```
 
 Response body example:
 
+```
+{
+  "volumes": [
     {
-      "volumes": [
-        {
-          "name": "Vol01",
-          "description": "Test Volume One",
-          "volume_type": "snas_3p",
-          "status": "online",
-          "mode": "plain",
-          "uuid": "26e10c4b-7823-400e-8b3a-f9e29f64ca60",
-          "size": 1496927616,
-          "used": 76743
-        },
-        {
-          "name": "Vol02",
-          "description": "Test Volume Two",
-          "volume_type": "snas_erc",
-          "status": "online",
-          "mode": "plain",
-          "uuid": "f35dc74e-0ce9-440b-b9ac-0ec7603ebaf5",
-          "size": 1995903488,
-          "used": 35079
-        },
-        {
-          ... info for next volume
-        }
-      ]
+      "name": "Vol01",
+      "description": "Test Volume One",
+      "volume_type": "snas_3p",
+      "status": "online",
+      "mode": "plain",
+      "uuid": "26e10c4b-7823-400e-8b3a-f9e29f64ca60",
+      "size": 1496927616,
+      "used": 76743
+    },
+    {
+      "name": "Vol02",
+      "description": "Test Volume Two",
+      "volume_type": "snas_erc",
+      "status": "online",
+      "mode": "plain",
+      "uuid": "f35dc74e-0ce9-440b-b9ac-0ec7603ebaf5",
+      "size": 1995903488,
+      "used": 35079
+    },
+    {
+      "... info for next volume"
     }
+  ]
+}
+```
 
 The `volume_type` can be
 
-- `snas_2p`  SNAS with protection level of 2
-- `snas_3p`  SNAS with protection level of 3
-- `snas_erc` SNAS ERC
+| Value | Description |
+|-|-|
+| `snas_2p` |  SNAS with protection level of 2 |
+| `snas_3p` |  SNAS with protection level of 3 |
+| `snas_erc`|  SNAS ERC |
 
 The `status` can be
 
-- `incomplete` The volume is incomplete, at least one partition is missing.
-- `online` The volume is ready and online.
-- `readonly` The volume is online but read-only.
-- `offline` The volume is offline and cannot be used.
-- `transport` An operation is currently running.
-- `error` The volume is in an error state.
+| Value | Description |
+|-|-|
+| `incomplete` | The volume is incomplete, at least one partition is missing |
+| `online`     | The volume is ready and online |
+| `readonly`   | The volume is online but read-only |
+| `offline`    | The volume is offline and cannot be used |
+| `transport`  | An operation is currently running |
+| `error`      | The volume is in an error state |
 
-### Listing partitions inside all available volume types
+### List partitions within volumes
 
-A volume consists of at least one Brick, which is called _partition_ in this context.
-Given a volume uuid, the corresponding partitions can be listed with this call.
+All volumes (except Sub Volumes) consist of at least one Brick, which is called _partition_ in this context. The partitions of a volume can be listed using the following call:
 
-    GET https://172.100.51.240/sb-public-api/api/v1/volumes/<volume-uuid>/partitions.json
+```
+GET /v1/volumes/<volume-uuid>/partitions.json
+```
 
 Response body example:
 
-    {
-        "partitions": [
-          {
-            "uuid": "47be86ca-422a-4e36-a35e-2af19ccb8175",
-            "span_index": 0,
-            "net_size": 990496768,
-            "net_used": 0,
-            "audit_location": 0,
-            "status": "online"
-          },
-          {
-            ... info for next partition
-          }
-        ]
-    }
+```
+{
+    "partitions": [
+      {
+        "uuid": "47be86ca-422a-4e36-a35e-2af19ccb8175",
+        "span_index": 0,
+        "net_size": 990496768,
+        "net_used": 0,
+        "audit_location": 0,
+        "status": "online"
+      },
+      {
+        "... info for next partition"
+      }
+    ]
+}
+```
 
 The `status` can be
 
-- `online` The partition is ready and online.
-- `unlocked` The partition is unlocked for eject.
-- `ejected` The partition is ejected.
-- `transport` The partition is in transport mode.
-- `error` The partition is in an error state.
+| Value | Description |
+|-|-|
+| `online`    | The partition is ready and online |
+| `unlocked`  | The partition is unlocked for eject |
+| `ejected`   | The partition is ejected |
+| `transport` | The partition is in transport mode |
+| `error`     | The partition is in an error state |
 
-The current audit position is found in the value `audit_location`. Because the
-current default is _Audit after Write_, the value `net_used` is always equal
-to the value `audit_location`. All data is therefore generally audited at least
-once. Independently of this, each brick will be audited again once per month or
-1/30 per day.
+The current audit position is found in the value `audit_location`. Because the current default is _Audit after Write_, the value `net_used` is always equal to the value `audit_location`. All data is therefore generally audited at least once. Independently of this, each brick will be audited again once per month or 1/30 per day.
 
-### Get Volume State
+### Get volume state
 
-Given the volume uuid, the volume state is listed
+Gets the status of the specified volume.
 
 Request:
 
-    GET https://172.100.51.240/sb-public-api/api/v1/volumes/<volume-uuid>/state.json
+```
+GET /v1/volumes/<volume-uuid>/state.json
+```
 
 Response body example:
 
-    {
-	   "state": "online"
-	}
+```
+{
+   "state": "online"
+}
+```
 
 The `state` can be
 
-- `incomplete` The volume is incomplete, at least one partition is missing.
-- `online` The volume is ready and online.
-- `readonly` The volume is online but read-only.
-- `offline` The volume is offline and cannot be used.
-- `transport` An operation is currently running.
-- `error` The volume is in an error state.
+| Value | Description |
+|-|-|
+| `incomplete` | The volume is incomplete, at least one partition is missing |
+| `online`     | The volume is ready and online |
+| `readonly`   | The volume is online but read-only |
+| `offline`    | The volume is offline and cannot be used |
+| `transport`  | An operation is currently running |
+| `error`      | The volume is in an error state |
 
-### Create Volume
+### Create a volume
 
-Creates a volume.Volumes cannot be used without assigning bricks.
+Creates a volume (except Sub Volumes). Volumes cannot be used without assigning bricks.
 
-Key/value-pairs are passed to the HTTP request. The key represents the
-information to be updated. The key/value-pairs can be encoded in the query
-string of the request URL.
+```
+POST /v1/volumes.json
+```
 
-    curl -X POST -F "<key>=<value>" https://172.100.51.240/sb-public-api/api/v1/volumes.json
+List of keys:
 
-A `key` can be:
+| Key | Description | Rules |
+|-|-|-|
+| `name` |  The name of the volume |  It must begin with 'a-z','A-Z' or '0-9' only. Characters '-' or '_'  allowed to follow. Whitespace not allowed |
+| `description` | The description for the volume | Max 255 Characters |
+| `volume_type` | The type of the volume to be created |-|
+| `brick_uuids` | The uuids of the bricks as an array. If brick_uuids are not given an empty volume is created |-|
 
-- `name`  The name of the volume.  ( Must begin with 'a-z','A-Z' or '0-9' only. Characters '-' or '_' allowed to follow. Whitespace not allowed)
-- `description`  The description for the volume
-- `volume_type`  The type of the volume to be created
+Available `volume_type` values
 
-    - `snas_2p`  For a SNAS Dual Parity    ( Protection level 2 )
-    - `snas_3p`  For a SNAS Triple Parity  ( Protection level 3 )  (default)
-    - `snas_erc` For a SNAS ERC volume
-
-- `brick_uuids`  The uuids of the bricks as an array. If brick_uuids are not given an empty volume is created. 	
+| Value | Description |
+|-|-|
+| `snas_2p` | For a SNAS Dual Parity ( Protection level 2 )  |
+| `snas_3p` | For a SNAS Triple Parity  ( Protection level 3 )  (Default) |
+| `snas_erc`| For a SNAS ERC volume |
 
 SNAS Volume specific options
 
-- `compression` To enable/disable compression for the volume ( Default: true )
-- `case_sensitive` To enable/disable case sensitive for the volume ( Default: true )
+| Value | Description |
+|-|-|
+| `compression` 	  	| To enable/disable compression for the volume ( Default: true )    |
+| `case_sensitive` 	| To enable/disable case sensitive for the volume ( Default: true ) |
 
 SNAS ERC Volume specific options
 
-- `encrypt` To encrypt the volume
-- `passphrase`  The passphrase for the encryption.
+| Value | Description |
+|-|-|
+| `encrypt` 		| To encrypt the volume. Set this key to encrypt the volume |
+| `passphrase`	| The passphrase for the encryption |
 
 Any other keys are ignored
 
 Response body example:
 
-    {
-	  "name": "SNAS2P",
-	  "description": "Test Volume",
-	  "volume_type": "snas_2p",
-	  "mode": "plain",
-	  "status": "incomplete",
-	  "uuid": "653bf326-a834-47ef-bab9-99ab8e5bcf9f",
-	  "size": 0,
-	  "used": 0
-	}
+```
+{
+  "name": "SNAS2P",
+  "description": "Test Volume",
+  "volume_type": "snas_2p",
+  "mode": "plain",
+  "status": "incomplete",
+  "uuid": "653bf326-a834-47ef-bab9-99ab8e5bcf9f",
+  "size": 0,
+  "used": 0
+}
+```
 
-The `nas_engine` key from the response is deprecated although still available.
+Note: The `nas_engine` key from the response is deprecated, although still available.
 
-### Update Volume
+Examples:
 
-Given the volume-uuid a volume name/description can be updated
+- To create an empty volume with default settings ( volume of type _snas_3p_ with _compression_ and _case_sentitive_ values enabled )
 
-Key/value-pairs are passed to the HTTP request. The key represents the
-information to be updated. The key/value-pairs can be encoded in the query
-string of the request URL.
+```
+curl -X POST -F"name=Volume01" -F"description=Test volume sb-public-api" https://<host-ip>/sb-public-api/api/v1/volumes.json
+```
 
-    curl -X PUT -F "<key>=<value>" https://172.100.51.240/sb-public-api/api/v1/volumes/<volume-uuid>.json
+- To create an encrypted _snas_erc_ volume and assign _2_ bricks to it
 
-A `key` can be:
+```
+curl -X POST -F"name=Volume02" -F"description=Test erc volume sb-public-api" -F"volume_type=snas_erc" -F"encrypt=true" -F"passphrase=<secret-passphrase>" -F"brick_uuids[]=<brick_uuid>" -F"brick_uuids[]=<brick_uuid" https://<host-ip>/sb-public-api/api/v1/volumes.json
+```
 
-- `name`  The new name for the volume  ( Must begin with 'a-z','A-Z' or '0-9' only. Characters '-' or '_' allowed to follow. Whitespace not allowed)
-- `description`  The new description for the volume
+### Update a volume
 
-Any other keys are ignored
+Updates a volume's name or description.
 
-### Update Passphrase for a SNAS ERC Volume
+```
+PUT /v1/volumes/<volume-uuid>.json
+```
 
-The passphrase for an already encrypted SNAS ERC volume can be updated
+List of keys:
 
-Key/value-pairs are passed to the HTTP request. The key represents the
-information to be updated. The key/value-pairs can be encoded in the query
-string of the request URL.
+| Key | Description | Rules |
+|-|-|-|
+| `name` |  The name of the volume |  It must begin with 'a-z','A-Z' or '0-9' only. Characters '-' or '_'  allowed to follow. Whitespace not allowed |
+| `description` | The description for the volume | Max 255 Characters |
 
-    curl -X PUT -F "<key>=<value>" https://172.100.51.240/sb-public-api/api/v1/volumes/<volume-uuid>/update_passphrase.json
+### Update passphrase for a SNAS ERC Volume
 
-A `key` can be:
+Updates the passphrase for an already encrypted SNAS ERC volume.
 
-- `passphrase`  The current passphrase of the volume
-- `new_passphrase`  The new passphrase for the volume
+```
+PUT /v1/volumes/<volume-uuid>/update_passphrase.json
+```
 
-Any other keys are ignored
+List of keys:
 
-### Add Bricks To Volume
+| Key | Description |
+|-|-|
+| `passphrase`     | The current passphrase of the volume |
+| `new_passphrase` | The new passphrase for the volume |
 
-Given the brick uuids as an array,assigns them to the given volume
+### Add Bricks to a volume
 
-Key/value-pairs are passed to the HTTP request. The key represents the
-information to be updated. The key/value-pairs can be encoded in the query
-string of the request URL.
+Assigns the specified Bricks to a volume.
 
-    curl -X PUT -F "<key>=<value>" https://172.100.51.240/sb-public-api/api/v1/volumes/<volume-uuid>/assign_bricks.json
+```
+PUT /v1/volumes/<volume-uuid>/assign_bricks.json
+```
 
-A `key` can be:
+List of keys:
 
-- `brick_uuids`  The uuids of the bricks as an array
+| Key | Description |
+|-|-|
+| `brick_uuids` | The uuids of the bricks as an array |
 
-Any other keys are ignored
+### Set volumes online or offline
 
-### Set  volumes online and offline
-
-A volume must be set offline in order to eject the corresponding bricks.
-This means that the shares and data are not accessible in the meantime.
-
-Request:
-
-    PUT https://172.100.51.240/sb-public-api/api/v1/volumes/<volume-uuid>/set_online.json
-    PUT https://172.100.51.240/sb-public-api/api/v1/volumes/<volume-uuid>/set_offline.json
-
-Setting an encrypted volume online will fail, if the passphrase is not passed to the endpoint.
-The passphrase should be form-data encoded in the payload of the HTTP request. See
-[RFC 2388](https://www.ietf.org/rfc/rfc2388.txt) for more details.
-
-    curl -X PUT -F "passphrase=<passphrase>" https://172.100.51.240/sb-public-api/api/v1/volumes/<volume-uuid>/set_online.json
-
-### Unlocking/Locking  partition for eject
-
-Unlock a brick/partition for eject, the brick can be ejected with the touch of the front sensor.
-Only bricks of volumes that are OFFLINE (i.e. no shares online anymore) can be unlocked.
-Trying to unlock a brick that is part of a ONLINE volume will generate an error.
-Unlocking and locking is similar to VTL libraries.Given the volume uuid and the partition uuid a brick can be unlocked and
-locked again so that the touch sensor is disabled.
+To set a volume online/offline. A volume must be set offline in order to eject the corresponding bricks. This means that the shares and data are not accessible in the meantime. Setting an encrypted volume online will fail if the passphrase is not passed to the endpoint.
 
 Request:
 
-    PUT https://172.100.51.240/sb-public-api/api/v1/volumes/<volume-uuid>/partitions/<partition-uuid>/unlock.json
-    PUT https://172.100.51.240/sb-public-api/api/v1/volumes/<volume-uuid>/partitions/<partition-uuid>/lock.json
+```
+PUT /v1/volumes/<volume-uuid>/set_online.json
+```
 
-### Import volumes
+```
+PUT /v1/volumes/<volume-uuid>/set_offline.json
+```
 
-Given the volume uuid, a volume can be imported into the system
+List of keys:
 
-    PUT https://172.100.51.240/sb-public-api/api/v1/volumes/<volume-uuid>/import.json
+| Key | Description |
+|-|-|
+| `passphrase`     | The current passphrase of the volume |
 
-Importing an encrypted volume will fail, if the passphrase is not passed to the endpoint.
-The passphrase should be form-data encoded in the payload of the HTTP request. See
-[RFC 2388](https://www.ietf.org/rfc/rfc2388.txt) for more details.
+### Unlock/Lock partition for eject
 
-    curl -X PUT -F "passphrase=<passphrase>" https://172.100.51.240/sb-public-api/api/v1/volumes/<volume-uuid>/import.json
-
-### Delete Volume
-
-Given the volume uuid, an offline volume can be deleted. Before attempting to delete the volume please make sure of the following,
-
-- The volume is set offline.
-- All the associated snapshots are deleted.
-
-Deleting an encrypted volume will fail, if the passphrase is not passed to the endpoint.
-The passphrase should be form-data encoded in the payload of the HTTP request. See
-[RFC 2388](https://www.ietf.org/rfc/rfc2388.txt) for more details.
+Unlocks a Brick so it can be ejected by touching its front sensor. If the Brick is not unlocked first then the touch sensor will not work.
+Only bricks of volumes that are *offline* can be unlocked. Trying to unlock a brick that is part of an *online* volume will generate an error.
 
 Request:
 
-    curl -X DELETE -F "key=<value>" https://172.100.51.240/sb-public-api/api/v1/volumes/<volume-uuid>.json
+```
+PUT /v1/volumes/<volume-uuid>/partitions/<partition-uuid>/unlock.json
+```
 
- A `key` can be:
+```
+PUT /v1/volumes/<volume-uuid>/partitions/<partition-uuid>/lock.json
+```
 
-- `remove`  To remove the volume and its related partitions from the DB.
-- `passphrase`  The passphrase to delete an encrypted volume.
+### Import a volume (SNAS ERC only)
+
+Starts the import of an SNAS ERC volume. Importing an encrypted volume will fail if the passphrase is not passed to the endpoint.
+
+```
+PUT /v1/volumes/<volume-uuid>/import.json
+```
+
+### Delete a volume
+
+Deletes a volume.
+
+- The volume must be offline.
+- All the associated snapshot volumes must be deleted.
+
+If the volume is encrypted then the passphrase to decrypt must be specified, otherwise the operation will fail.
+
+Request:
+
+```
+DELETE /v1/volumes/<volume-uuid>.json
+```
+
+List of keys:
+
+| Key | Description |
+|-|-|
+| `remove`     | To remove the volume and its related partitions from the DB |
+| `passphrase` | The passphrase to delete an encrypted volume |
 
 ## Share Operations
 
-### Listing shares
+### List shares
 
-With this call you can list all available shares.
+Lists all shares.
 
 Request:
 
-    GET https://172.100.51.240/sb-public-api/api/v1/shares.json
+```
+GET /v1/shares.json
+```
 
 Response body example:
 
-    {
-        "shares":[
-          {
-            "uuid": "645aac61-a54b-46fe-aaeb-a44b047f9565",
-            "volume":"7e40a866-3490-459a-a17c-c5e8d850d0d0",
-            "name":"Test",
-            "path":"/",
-            "fstype":"smb",
-            "nfsid":4,
-       		"options":"browseable,casesens,public",
-       		"nfs_path":null,
-       		"share_clients":[]
-          },
-          {
-            "uuid":"5941d228-e2ab-4093-9b8f-b06a5a399a1b",
-            "volume":"7e40a866-3490-459a-a17c-c5e8d850d0d0",
-            "name":"",
-            "path":"/",
-            "fstype":"nfs",
-            "nfsid":3,
-            "options":"",
-            "nfs_path":"/shares/Test",
-            "share_clients":[{"name":"*","uuid":"c320e59a-cd42-45aa-8dac-85586689045c","options":"rw,no_root_squash"}],      
-          },
-          {
-           ... info for next share
-          }
-        ]
-    }
+```
+{
+	"shares":[
+	  {
+	    "uuid": "645aac61-a54b-46fe-aaeb-a44b047f9565",
+	    "volume":"7e40a866-3490-459a-a17c-c5e8d850d0d0",
+	    "name":"Test",
+	    "path":"/",
+	    "fstype":"smb",
+	    "nfsid":4,
+		"options":"browseable,casesens,public",
+		"nfs_path":null,
+		"share_clients":[]
+	  },
+	  {
+	    "uuid":"5941d228-e2ab-4093-9b8f-b06a5a399a1b",
+	    "volume":"7e40a866-3490-459a-a17c-c5e8d850d0d0",
+	    "name":"",
+	    "path":"/",
+	    "fstype":"nfs",
+	    "nfsid":3,
+	    "options":"",
+	    "nfs_path":"/shares/Test",
+	    "share_clients":[{"name":"*","uuid":"c320e59a-cd42-45aa-8dac-85586689045c","options":"rw,no_root_squash"}],      
+	  },
+	  {
+	   "... info for next share"
+	  }
+	]
+}
+```
 
-### Add Shares
+### Add a share
 
-Given the volume uuid, a share can be added to any online volume
+Adds a share to any *online* volume.
 
 Request:
 
-    curl -X PUT -F "<key>=<value>" https://172.100.51.240/sb-public-api/api/v1/volumes/<volume-uuid>/share.json
+```
+PUT /v1/volumes/<volume-uuid>/share.json
+```
 
-A `key` can be:
+List of keys:
 
-- `name`  The name for the share  ( Must begin with 'a-z','A-Z' or '0-9' only. Characters '-' or '_' allowed to follow. Whitespace not allowed)
-- `path`  The share path
-- `fstype`
+| Key | Description | Rules |
+|-|-|-|
+| `name` 	 | The name of the share. Only for the _smb_ fstype |  It must begin with 'a-z','A-Z' or '0-9' only. Characters '-' or '_'  allowed to follow. Whitespace not allowed |
+| `path` 	 | The share path | |
+| `fstype` | The file system type | see below for allowed values |
 
-    - `smb` For a SMB share
-    - `nfs` For a NFS share
+Available `fstype` values
 
-SMB share type specific keys.
+| Value | Description |
+|-|-|
+| `smb` | For a SMB share |
+| `nfs` | For a NFS share |
 
-- `smb_user`            Restrict access to local SMB user ( Format: username )
-- `smb_client`          Restrict access to AD user ( Format: Domain/username )
+SMB share type specific keys:
 
-Flags specific for the SMB share type.Set to true/false.
+| Value | Description |
+|-|-|
+| `smb_user`   | Restrict access to local SMB user (Format: username) |
+| `smb_client` | Restrict access to AD user (Format: domain/username) |
 
-- `smb_public`          public access flag(Default: true)
-- `smb_read_only`       read-only flag(Default: false)
-- `smb_browseable`      browseable flag(Default: true)
-- `smb_ntfs_acls`       ntfs-acls flag(Default: true)
-- `smb_case_sensitive`  case sensitive flag (Default: true)
+Flags specific for the SMB share type:
 
-NFS share type specific keys.
+| Value | Description | Default Setting |
+|-|-|-|
+| `smb_public`          | public access flag  | true  |
+| `smb_read_only`       | read-only flag      | false |
+| `smb_browseable`      | browseable flag     | true  |
+| `smb_ntfs_acls`       | ntfs-acls flag      | true  |
+| `smb_case_sensitive`  | case sensitive flag | true  |
 
-- `nfs_client`  	NFS share client (Default: '*')
+NFS share type specific keys:
 
-Options specific to the nfs share.Set to true/false.
+| Value | Description |
+|-|-|
+| `nfs_client` | NFS share client |
 
-- `nfs_rw`  		    write access on the NFS share(Default: true)
-- `nfs_sync`   		    synchronize IO on the NFS share(Default: false)
-- `nfs_insecure`   	    access from insecure ports on the NFS share(Default: false)
-- `nfs_subtree_check`   subtree checking NFS share(Default: false)
-- `nfs_root_squash`   	root squashing on the NFS share(Default: true)
+Available `nfs_client` Options
 
-Any other keys are ignored
+| Option | Format |
+|-|-|
+| Share to all IP Addresses ( Default ) | |
+| Share to a single IPv4 Address | xxx:xxx:xxx:xxx |
+| Share to a single IPv6 Address | String  |
+| Share to a subnetwork | xxx:xxx:xxx:xxx / xxx |
+
+Options specific to NFS share clients:
+
+| Value | Description | Default Setting |
+|-|-|-|
+| `nfs_rw`  				| write access on the NFS share                                 | true  |
+| `nfs_sync`   			| synchronize IO on the NFS share (may be bad for performance!) | false |
+| `nfs_insecure`   	  	| allow access from insecure ports on the NFS share             | false |
+| `nfs_subtree_check` 	| subtree checking NFS share                                    | false |
+| `nfs_root_squash`   	| root squashing on the NFS share                               | true  |
 
 Response body example:
 
-    {
-		"uuid": "4f421fba-6d44-4bea-a56c-c63652a04c34",
-		"volume_uuid": "653bf326-a834-47ef-bab9-99ab8e5bcf9f",
-		"name": "SNAS2P-NFS01",
-		"path": "/SNAS2P-NFS01",
-		"fstype": "nfs",
-		"nfsid": 2,
-		"options": "",
-		"nfs_path": null,
-		"share_clients": [{"name": "*","uuid": "bb5c656b-3d06-4cc7-9263-2a6bf6314083","options": "rw,no_root_squash"}]
-	}
+```
+{
+	"uuid": "4f421fba-6d44-4bea-a56c-c63652a04c34",
+	"volume_uuid": "653bf326-a834-47ef-bab9-99ab8e5bcf9f",
+	"name": "SNAS2P-NFS01",
+	"path": "/SNAS2P-NFS01",
+	"fstype": "nfs",
+	"nfsid": 2,
+	"options": "",
+	"nfs_path": null,
+	"share_clients": [{"name": "*","uuid": "bb5c656b-3d06-4cc7-9263-2a6bf6314083","options": "rw,no_root_squash"}]
+}
+```
 
-### Update Shares
+Examples:
 
-Given the share uuid, a share client can be added to the share
+- To create an _smb_ fstype share with default flags and restricting access to a local SMB user
 
-Request:
+```
+curl -X  PUT -F"name=Share01" -F"path=/Share01" -F"fstype=smb" -F"smb_user=smb01" https://<host-ip>/sb-public-api/api/v1/volumes/<volume-uuid>/share.json
+```
 
-    curl -X PUT -F "<key>=<value>" https://172.100.51.240/sb-public-api/api/v1/shares/<share-uuid>/update.json
+- To create an _nfs_ fstype share with read only flag
 
-A `key` can be:
+```
+curl -X  PUT -F"path=/Share02" -F"fstype=nfs" -F"nfs_client=<client-ipv4-address>" -F"nfs_rw=false" https://<host-ip>/sb-public-api/api/v1/volumes/<volume-uuid>/share.json
+```
 
-- `remove`  Set to true to remove the current share clients from the share ( Default: False )
+### Update a share
 
-SMB share type specific keys.
-
-- `smb_user`            Restrict access to local SMB user ( Format: username )
-- `smb_client`          Restrict access to AD user ( Format: Domain/username )
-
-NFS share type specific keys.
-
-- `nfs_client`  	NFS share client (Default: '*')
-
-Options specific to the nfs share client.Set to true/false.
-
-- `nfs_rw`  		    write access on the NFS share(Default: true)
-- `nfs_sync`   		    synchronize IO on the NFS share(Default: false)
-- `nfs_insecure`   	    access from insecure ports on the NFS share(Default: false)
-- `nfs_subtree_check`   subtree checking NFS share(Default: false)
-- `nfs_root_squash`   	root squashing on the NFS share(Default: true)
-
-Any other keys are ignored
-
-### Delete Shares
-
-Given the share uuid, a share client can be deleted
+Removes share clients from a share or adds a new one.
 
 Request:
 
-    curl -X DELETE https://172.100.51.240/sb-public-api/api/v1/shares/<share-uuid>.json
+```
+PUT /v1/shares/<share-uuid>/update.json
+```
+
+List of keys:
+
+| Key | Description |
+|-|-|
+| `remove` |  Set to true to remove the already existing share clients from the share (Default: false) |
+
+SMB share type specific keys:
+
+| Value | Description |
+|-|-|
+| `smb_user`   | Restrict access to local SMB user (Format: username) |
+| `smb_client` | Restrict access to AD user (Format: domain/username) |
+
+| Value | Description |
+|-|-|
+| `nfs_client` | NFS share client |
+
+Available `nfs_client` Options
+
+- Share to all IP Addresses ( Default )
+- Share to a single IPv4 Address
+- Share to a single IPv6 Address
+- Share to a subnetwork
+
+Options specific to NFS share clients:
+
+| Value | Description | Default Setting |
+|-|-|-|
+| `nfs_rw`  				| write access on the NFS share                                 | true  |
+| `nfs_sync`   			| synchronize IO on the NFS share (may be bad for performance!) | false |
+| `nfs_insecure`   	  	| allow access from insecure ports on the NFS share             | false |
+| `nfs_subtree_check` 	| subtree checking NFS share                                    | false |
+| `nfs_root_squash`   	| root squashing on the NFS share                               | true  |
+
+### Delete a share
+
+Deletes a share.
+
+Request:
+
+```
+DELETE /v1/shares/<share-uuid>.json
+```
 
 ## Replication Operations
 
-### List Replications
+### List replications
 
-With this call you can list all available replications.
+Lists all replications.
 
 Request:
 
-    GET https://172.100.51.240/sb-public-api/api/v1/replications.json
+```
+GET /v1/replications.json
+```
 
 Response body example:
 
+```
+{
+  "replications": [
     {
-        "replications": [
-		    {
-			    "replication_uuid": "e14db50b-1f67-47c3-b487-7d278f33d32d",
-			    "source_volume_uuid": "bd056f33-cf07-49eb-a66e-a457f3bd2179",
-			    "target_volume_uuid": "5e9b45c0-09dd-4016-b544-bc3268ebdfa5",
-			    "sync_type": "async",
-			    "status": "running",
-			    "progress": 100,
-			    "source_data_high_watermark": 212992,
-			    "target_volume": {
-			        "name": "SNAS2P-REP01",
-			        "description": "Test Replication Created Using The PublicApi",
-			        "volume_type": "snas_2p",
-			        "mode": "replication",
-			        "status": "online",
-			        "uuid": "5e9b45c0-09dd-4016-b544-bc3268ebdfa5",
-			        "size": 829919573,
-			        "used": 112208
-			      }
-			},
-			{
-			    "replication_uuid": "8880e427-b2df-4fc0-b6d2-7b5694c08b11",
-			    "source_volume_uuid": "8e4b7aa4-0db7-48d8-8b76-dadc78562ae1",
-			    "target_volume_uuid": "65ab57cb-cc5e-452d-893d-a6b957db443b",
-			    "sync_type": "async",
-			    "status": "paused",
-			    "progress": 100,
-			    "source_data_high_watermark": 0,
-			    "target_volume": {
-			        "name": "SNASERC-REP01",
-			        "description": "Test Replication Created Using The PublicApi",
-			        "volume_type": "snas_erc",
-			        "mode": "replication",
-			        "status": "online",
-			        "uuid": "65ab57cb-cc5e-452d-893d-a6b957db443b",
-			        "size": 995903488,
-			        "used": 35205
-			    }
-			}
-		]
-	}
-
-### List Replications for a particular volume
-
-With this call you can list all available replications of a particular volume.
-
-Request:
-
-    GET https://172.100.51.240/sb-public-api/api/v1/volumes/<volume-uuid>/list_replications.json
-
-Response body example:
-
-
-	{
-		"replications": [
-			 {
-			     "replication_uuid": "9bc87a57-c986-4593-b069-8d31ce835782",
-			     "source_volume_uuid": "653bf326-a834-47ef-bab9-99ab8e5bcf9f",
-			     "target_volume_uuid": "fd56da28-6b99-4f04-8200-5ca7b25dfd35",
-			     "sync_type": "async",
-			     "status": "running",
-			     "progress": 100,
-			     "source_data_high_watermark": 385024
-			 },
-			 {
-			     "replication_uuid": "17866248-042c-48d8-879d-75484e15de0d",
-			     "source_volume_uuid": "653bf326-a834-47ef-bab9-99ab8e5bcf9f",
-			     "target_volume_uuid": "de199919-aa1e-4972-915e-45b1a3c00814",
-			     "sync_type": "async",
-			     "status": "running",
-			     "progress": 100,
-			     "source_data_high_watermark": 454656
-			 }
-		]
-	}
-
-### Create Replication
-
-Given the source volume uuid, a local replication can be created.
-
-Request:
-
-    curl -X PUT -F "<key>=<value>" https://172.100.51.240/sb-public-api/api/v1/volumes/<volume-uuid>/replication.json
-
-A `key` can be:
-
-- `name`         The name for replication target  ( Must begin with 'a-z','A-Z' or '0-9' only. Characters '-' or '_' allowed to follow. Whitespace not allowed)
-- `description`  The description for replication target
-- `brick_uuids`  The uuids of the bricks to be added to the replication as an array
-
-Depending on the type of the `source_volume`, additional keys are allowed
-
-SNAS Volume specific options
-
-- `compression` To enable/disable compression for the volume ( Default: depends on the source volume )
-- `protection_level` SNAS protection level (takes values 2 or 3). ( Default: depends on the source volume )
-
-SNAS ERC Volume specific options
-
-- `encrypt` To encrypt the volume
-- `passphrase`  The passphrase for the encryption.
-
-### Pause/Resume Replication
-
-Given the replication uuid, a local replication can be paused and resumed.
-
-Request:
-
-    PUT https://172.100.51.240/sb-public-api/api/v1/replications/<replication-uuid>/pause.json
-    PUT https://172.100.51.240/sb-public-api/api/v1/replications/<replication-uuid>/resume.json
-
-### Convert Replication
-
-Given the replication uuid, a replication target can be converted to a plain volume. Please provide the passphrase if the replication is encrypted.  
-
-    PUT https://172.100.51.240/sb-public-api/api/v1/replications/<replication-uuid>/convert.json
-
-### Get Replication State
-
-Given the replication uuid, the replication state is listed
-
-Request:
-
-    GET https://172.100.51.240/sb-public-api/api/v1/replications/<replication-uuid>/state.json
-
-Response body example:
-
+      "replication_uuid": "e14db50b-1f67-47c3-b487-7d278f33d32d",
+      "source_volume_uuid": "bd056f33-cf07-49eb-a66e-a457f3bd2179",
+      "target_volume_uuid": "5e9b45c0-09dd-4016-b544-bc3268ebdfa5",
+      "sync_type": "async",
+      "status": "running",
+      "progress": 100,
+      "source_data_high_watermark": 212992,
+      "target_volume": {
+        "name": "SNAS2P-REP01",
+        "description": "Test Replication Created Using The PublicApi",
+        "volume_type": "snas_2p",
+        "mode": "replication",
+        "status": "online",
+        "uuid": "5e9b45c0-09dd-4016-b544-bc3268ebdfa5",
+        "size": 829919573,
+        "used": 112208
+      }
+    },
     {
-	  "state": "running",
-      "progress": 100
-	}
+      "replication_uuid": "8880e427-b2df-4fc0-b6d2-7b5694c08b11",
+      "source_volume_uuid": "8e4b7aa4-0db7-48d8-8b76-dadc78562ae1",
+      "target_volume_uuid": "65ab57cb-cc5e-452d-893d-a6b957db443b",
+      "sync_type": "async",
+      "status": "paused",
+      "progress": 100,
+      "source_data_high_watermark": 0,
+      "target_volume": {
+        "name": "SNASERC-REP01",
+        "description": "Test Replication Created Using The PublicApi",
+        "volume_type": "snas_erc",
+        "mode": "replication",
+        "status": "online",
+        "uuid": "65ab57cb-cc5e-452d-893d-a6b957db443b",
+        "size": 995903488,
+        "used": 35205
+      }
+    }
+  ]
+}
+```
 
-### Update Replication Volume
+### List replications for a particular volume
 
-Given the target-volume-uuid a replication volume name/description can be updated. Please note that the target-volume-uuid is to be used and not the
-replication-uuid
+Lists only the replications belonging to a specific volume.
 
-Key/value-pairs are passed to the HTTP request. The key represents the
-information to be updated. The key/value-pairs can be encoded in the query
-string of the request URL.
+Request:
 
-    curl -X PUT -F "<key>=<value>" https://172.100.51.240/sb-public-api/api/v1/volumes/<target-volume-uuid>.json
+```
+GET /v1/volumes/<volume-uuid>/list_replications.json
+```
 
-A `key` can be:
+Response body example:
 
-- `name`  The new name for the volume  ( Must begin with 'a-z','A-Z' or '0-9' only. Characters '-' or '_' allowed to follow. Whitespace not allowed)
-- `description`  The new description for the volume
+```
+{
+  "replications": [
+    {
+      "replication_uuid": "9bc87a57-c986-4593-b069-8d31ce835782",
+      "source_volume_uuid": "653bf326-a834-47ef-bab9-99ab8e5bcf9f",
+      "target_volume_uuid": "fd56da28-6b99-4f04-8200-5ca7b25dfd35",
+      "sync_type": "async",
+      "status": "running",
+      "progress": 100,
+      "source_data_high_watermark": 385024
+    },
+    {
+      "replication_uuid": "17866248-042c-48d8-879d-75484e15de0d",
+      "source_volume_uuid": "653bf326-a834-47ef-bab9-99ab8e5bcf9f",
+      "target_volume_uuid": "de199919-aa1e-4972-915e-45b1a3c00814",
+      "sync_type": "async",
+      "status": "running",
+      "progress": 100,
+      "source_data_high_watermark": 454656
+    }
+  ]
+}
+```
 
-Any other keys are ignored
+### Create replication
 
-### Update Passphrase for a SNAS ERC Replication Volume
+Creates a local replication for a volume.
 
-The passphrase for an already encrypted SNAS ERC replication volume can be updated
+Request:
 
-Key/value-pairs are passed to the HTTP request. The key represents the
-information to be updated. The key/value-pairs can be encoded in the query
-string of the request URL.
+```
+PUT /v1/volumes/<volume-uuid>/replication.json
+```
 
-    curl -X PUT -F "<key>=<value>" https://172.100.51.240/sb-public-api/api/v1/volumes/<target-volume-uuid>/update_passphrase.json
+List of keys:
 
-A `key` can be:
+| Key | Description | Rules |
+|-|-|-|
+| `name` |  The name of the replication |  It must begin with 'a-z','A-Z' or '0-9' only. Characters '-' or '_'  allowed to follow. Whitespace not allowed |
+| `description` | The description for the replication | Max 255 Characters |
+| `brick_uuids` | The uuids of the bricks to be added to the replication as an array  |-|
 
-- `passphrase`  The current passphrase of the volume
-- `new_passphrase`  The new passphrase for the volume
+Depending on the type of the `source_volume`, additional keys are allowed:
 
-Any other keys are ignored
+SNAS Volume specific options:
+
+| Value | Description |
+|-|-|
+| `compression` | To enable/disable compression for the replication volume (Default: depends on the source volume) |
+| `protection_level` | SNAS protection level (2 or 3) (Default: depends on the source volume) |
+
+SNAS ERC Volume specific options:
+
+| Value | Description |
+|-|-|
+| `encrypt` | To encrypt the replication volume |
+| `passphrase` | The passphrase for the encryption |
+
+### Pause/Resume replication
+
+Pauses or resumes a replication.
+
+Request:
+
+```
+PUT /v1/replications/<replication-uuid>/pause.json
+```
+
+```
+PUT /v1/replications/<replication-uuid>/resume.json
+```
+
+### Convert replication
+
+Converts a replication volume to a standard volume. If the replication target is encrypted then the passphrase has to be supplied to the call. The convert operation is a long running task. See [Task Active Status](#Background-task-active-status) or [Job Status](#Get-Job-Status) to check the status of the task .
+
+```
+PUT /v1/replications/<replication-uuid>/convert.json
+```
+
+List of keys:
+
+| Key | Description |
+|-|-|
+| `passphrase`     | The current passphrase of the replication volume |
+
+### Get replication status
+
+Retrieves the status and progress of a particular replication.
+
+Request:
+
+```
+GET /v1/replications/<replication-uuid>/state.json
+```
+
+Response body example:
+
+```
+{
+  "state": "running",
+  "progress": 100
+}
+```
+
+The `state` can be
+
+| Value | Description |
+|-|-|
+| `stopped` | The replication has stopped |
+| `running` | The replication is ready and online |
+| `failed`  | The replication has failed |
+
+### Update replication volume
+
+See [Update a Volume](#Update-a-Volume) for details. Note that the volume UUID has to be used instead of the replication UUID.
+
+### Update passphrase (SNAS ERC)
+
+See [Update Passphrase](#Update-passphrase-for-a-SNAS-ERC-Volume). Use the target volume's UUID in the call.
 
 ### Set Replication volumes online and offline
 
-A replication volume must be set offline in order to eject the corresponding bricks.
-This means that the shares and data are not accessible in the meantime.
+See [Set Volume Online/Offline](#Set-volumes-online-or-offline). Use the target volume's UUID in the call.
 
-Request:
+### Delete replication volume
 
-    PUT https://172.100.51.240/sb-public-api/api/v1/volumes/<volume-uuid>/set_online.json
-    PUT https://172.100.51.240/sb-public-api/api/v1/volumes/<volume-uuid>/set_offline.json
-
-Setting an encrypted volume online will fail, if the passphrase is not passed to the endpoint.
-The passphrase should be form-data encoded in the payload of the HTTP request. See
-[RFC 2388](https://www.ietf.org/rfc/rfc2388.txt) for more details.
-
-    curl -X PUT -F "passphrase=<passphrase>" https://172.100.51.240/sb-public-api/api/v1/volumes/<volume-uuid>/set_online.json
-
-### Delete Replication
-
-Given the replication target volume uuid, the replication can be deleted just like a volume.
-
-Request:
-
-    DELETE https://172.100.51.240/sb-public-api/api/v1/volumes/<target-volume-uuid>.json
+See [Delete a volume](#Delete-a-volume). Use the target volume's UUID in the call.
 
 ## Snapshot Operations
 
 ### List all available snapshots
 
-With this call you can list all available snapshots on the controller.
+Lists all snapshots available on the controller.
 
 Request:
 
-    GET https://172.100.51.240/sb-public-api/api/v1/snapshots.json
+```
+GET /v1/snapshots.json
+```
 
 Response body example:
 
-
+```
 	{
 	  "snapshots": [
 	     {
@@ -1272,18 +1669,21 @@ Response body example:
 	     }
 		]
 	}
+```
 
-### List snapshots for a particular volume
+### List snapshots for a volume
 
-With this call you can list all available snapshots of a particular volume.
+Lists all snapshots for a particular volume.
 
 Request:
 
-    GET https://172.100.51.240/sb-public-api/api/v1/volumes/<volume-uuid>/list_snapshots.json
+```
+GET /v1/volumes/<volume-uuid>/list_snapshots.json
+```
 
 Response body example:
 
-
+```
 	{
 	  "snapshots": [
 	     {
@@ -1310,26 +1710,29 @@ Response body example:
 	     }
 		]
 	}
+```
 
 ### Create snapshot
 
-Given the volume uuid, a snapshot of the volume can be created. 
-Please make sure there is data on the volume before attempting to create a snapshot.
+Creates a snapshot of a specific volume. Snapshots of empty volumes can't be created.
 
 Request:
 
-    curl -X PUT -F "<key>=<value>" https://172.100.51.240/sb-public-api/api/v1/volumes/<source-volume-uuid>/snapshot.json
+```
+PUT /v1/volumes/<source-volume-uuid>/snapshot.json
+```
 
-A `key` can be:
+List of keys:
 
-- `name`         The name for the snapshot  ( Must begin with 'a-z','A-Z' or '0-9' only. Characters '-' or '_' allowed to follow. Whitespace not allowed)
-- `description`  The description
-- `as_volume`    To provide snapshot as volume ( Default:False )
-
-Any other keys are ignored
+| Key | Description | Rules |
+|-|-|-|
+| `name` | The name for the snapshot | Must begin with 'a-z','A-Z' or '0-9' only. Characters '-' or '_' allowed to follow. Whitespaces are not allowed |
+| `description` | The description for the snapshot | Max 255 Characters |
+| `as_volume`   | To provide snapshot as volume (Default: false) |-|
 
 Response body example:
 
+```
 	{
 		"name": "SNAS2P-SNAP02",
 		"description": "Test",
@@ -1341,23 +1744,27 @@ Response body example:
 		"data_hwm": null,
 		"used": 131072
 	}
+```
 
 ### Snapshot as Volume
 
-Given the volume uuid, a snapshot can be provided as a plain volume.
+Mount a snapshot as an accessible volume.
 
 Request:
 
-    curl -X PUT -F "<key>=<value>" https://172.100.51.240/sb-public-api/api/v1/volumes/<volume-uuid>/snapshot_as_volume.json
+```
+PUT /v1/volumes/<volume-uuid>/snapshot_as_volume.json
+```
 
-A `key` can be:
+List of keys:
 
-- `snapshot_uuid` The uuid of the snapshot to be converted
-
-Any other keys are ignored
+| Key | Description |
+|-|-|
+| `snapshot_uuid` | The uuid of the snapshot to be mounted |
 
 Response body example:
 
+```
 	{
 	  "name": "SNAS2P-SNAP02",
 	  "description": "Test",
@@ -1379,145 +1786,146 @@ Response body example:
 		"used": 0
 	  }
 	}
+```
 
-Note: Please use the snapshot_volume `uuid` to delete the snapshot volume. 	
+Examples:
 
-### Delete Snapshot
+- To mount a snapshot(_snap1-uuid_) of volume(_vol1-uuid_)
 
-Given the snapshot uuid, the snapshots can be deleted. If the snapshot has an associated volume, please delete that first before attempting to remove the snapshot.
+```
+curl -X  PUT -F"snapshot_uuid=<snap1-uuid>" https://<host-ip>/sb-public-api/api/v1/volumes/<vol1-uuid>/snapshot_as_volume.json
+```
+
+### Delete snapshot volume
+
+See [Delete a volume](#Delete-a-volume). Use the snapshot volume's UUID in the call.
+
+### Delete a snapshot
+
+Deletes a snapshot. All mounted volumes of this snapshot have to be deleted first.
 
 Request:
 
-    DELETE https://172.100.51.240/sb-public-api/api/v1/snapshots/<snapshot-uuid>.json
+```
+DELETE /v1/snapshots/<snapshot-uuid>.json
+```
 
 ## Clone Operations
-### Create Clone
 
-Given the volume uuid, a volume can be cloned. Please make sure there is data on the 
-volume before attempting to clone it.
+### Create a clone
 
-Request:
-
-    curl -X PUT -F "<key>=<value>" https://172.100.51.240/sb-public-api/api/v1/volumes/<source-volume-uuid>/clone_from_now.json
-
-A `key` can be:
-
-- `name`         The name for replication target  ( Must begin with 'a-z','A-Z' or '0-9' only. Characters '-' or '_' allowed to follow. Whitespace not allowed)
-- `description`  The description for clone
-- `brick_uuids`  The uuids of the bricks to be added to the clone as an array
-
-Depending on the type of the `source_volume`, additional keys are allowed
-
-SNAS Volume specific options
-
-- `compression` To enable/disable compression for the volume ( Default: depends on the source volume )
-- `protection_level` SNAS protection level (takes values 2 or 3). ( Default: depends on the source volume )
-
-SNAS ERC Volume specific options
-
-- `encrypt` To encrypt the volume
-- `passphrase`  The passphrase for the encryption.
-
-Any other keys are ignored
-
-## Controller Operations
-
-### Updating the controller
-
-The controller can be updated with this call:
-
-    PUT https://172.100.51.240/sb-public-api/api/v1/controller.json
-
-A key/value-pair is passed to the HTTP request. The key represents the
-information to be updated, which can be encoded in the query string of the
-request URL.
-
-    curl -X PUT https://172.100.51.240/sb-public-api/api/v1/controller.json?<key>=<value>
-
-The update-information can also be form-data encoded in the payload of the HTTP
-request. See [RFC 2388](https://www.ietf.org/rfc/rfc2388.txt) for more details.
-
-    curl -X PUT -F "<key>=<value>" https://172.100.51.240/sb-public-api/api/v1/controller.json
-
-
-A `key` can be:
-
-- `qr_logo` Enables resp. disables the QR logo overlay. A value of `true`, `t`,
-  `yes`, `y` or `1` enables the overlay. Any other value disables the logo.
-
-Any other keys are ignored.
-
-## Brick Archive Operations
-
-### Listing Brick Archives
-With this call you can list all available brick archives.
+Creates a clone of a non-empty volume. The clone will have a copy of the data of the volume at the moment where the cloning process is started.
 
 Request:
 
-    GET https://172.100.51.240/sb-public-api/api/v1/brick_archives.json
+```
+PUT /v1/volumes/<source-volume-uuid>/clone_from_now.json
+```
+
+List of keys:
+
+| Key | Description | Rules |
+|-|-|-|
+| `name` | The name for the clone | Must begin with 'a-z','A-Z' or '0-9' only. Characters '-' or '_' allowed to follow. Whitespaces are not allowed |
+| `description` | The description for the clone | Max 255 Characters |
+| `brick_uuids` | The uuids of the bricks to be added to the clone as an array |
+
+Depending on the type of the `source_volume`, additional keys are allowed.
+
+SNAS Volume specific options:
+
+| Value | Description |
+|-|-|
+| `compression` | To enable/disable compression for the clone volume (Default: depends on the source volume) |
+| `protection_level` | SNAS protection level (2 or 3) (Default: depends on the source volume) |
+
+SNAS ERC Volume specific options:
+
+| Value | Description |
+|-|-|
+| `encrypt` | To encrypt the clone volume |
+| `passphrase` | The passphrase for the encryption |
+
+## Compliant Archive Operations
+
+### List Compliant Archives
+
+Lists all available Compliant Archives.
+
+Request:
+
+```
+GET /v1/brick_archives.json
+```
 
 Response body example:
 
+```
+{
+  "brick_archives": [
     {
-	    "brick_archives": [
-			{
-			  "brick_archive_uuid": "9a8e4326-8a80-11e8-9ecd-ccf0d678e953",
-			  "revision": 1,
-			  "name": "Arch01",
-			  "description": "Test Brick Archive",
-			  "status": "running",
-			  "rfa_status": "inactive",
-			  "recovery_status": "inactive",
-			  "type": "plain",
-			  "stageless": false,
-			  "read_only": false,
-			  "can_start": true,
-			  "can_archive_start": true,
-			  "can_stage_start": true,
-			  "rfa_possible": false,
-			  "stages": [
-			    {
-			      "stage_uuid": "cc3aa51a-f695-4c29-bc75-ed08b874d5ab",
-			      "brick_archive_uuid": "9a8e4326-8a80-11e8-9ecd-ccf0d678e953",
-			      "current_stage": true,
-			      "stage_volume": {
-			        "name": "stage-9a8e4326-8a80-11e8-9ecd-ccf0d678e953-8f882e7f17a7ca2f",
-			        "description": "",
-			        "volume_type": "snas_3p",
-			        "mode": "plain",
-			        "status": "ok",
-			        "uuid": "8832e635-406f-4787-ac25-a656dd2a1ef3",
-			        "size": 2993855232,
-			        "used": 412432
-			        }
-			    }
-			  ],
-			  "archive_volume": {
-			      "name": "archive-9a8e4326-8a80-11e8-9ecd-ccf0d678e953",
-			      "description": "",
-			      ""volume_type": "snas_erc",
-			      "mode": "plain",
-			      "status": "ok",
-			      "uuid": "5ba7f0b1-cc95-4ab6-9c26-c0bb00d1ca16",
-			      "size": 1995903488,
-			      "used": 206074
-			    }
-			},
-            {
-              ... info for next archive
-            }
-        ]
+      "brick_archive_uuid": "9a8e4326-8a80-11e8-9ecd-ccf0d678e953",
+      "revision": 1,
+      "name": "Arch01",
+      "description": "Test Brick Archive",
+      "status": "running",
+      "rfa_status": "inactive",
+      "recovery_status": "inactive",
+      "type": "plain",
+      "stageless": false,
+      "read_only": false,
+      "can_start": true,
+      "can_archive_start": true,
+      "can_stage_start": true,
+      "rfa_possible": false,
+      "stages": [
+        {
+          "stage_uuid": "cc3aa51a-f695-4c29-bc75-ed08b874d5ab",
+          "brick_archive_uuid": "9a8e4326-8a80-11e8-9ecd-ccf0d678e953",
+          "current_stage": true,
+          "stage_volume": {
+            "name": "stage-9a8e4326-8a80-11e8-9ecd-ccf0d678e953-8f882e7f17a7ca2f",
+            "description": "",
+            "volume_type": "snas_3p",
+            "mode": "plain",
+            "status": "online",
+            "uuid": "8832e635-406f-4787-ac25-a656dd2a1ef3",
+            "size": 2993855232,
+            "used": 412432
+          }
+        }
+      ],
+      "archive_volume": {
+        "name": "archive-9a8e4326-8a80-11e8-9ecd-ccf0d678e953",
+        "description": "",
+        "volume_type": "snas_erc",
+        "mode": "plain",
+        "status": "online",
+        "uuid": "5ba7f0b1-cc95-4ab6-9c26-c0bb00d1ca16",
+        "size": 1995903488,
+        "used": 206074
+      }
+    },
+    {
+      "... info for next archive"
     }
+  ]
+}
+```
 
-### Listing Specific Brick Archive
-With this call you can list a specific brick archive including sub volumes if any.
+### Show specific Compliant Archive
+
+Retrieves the information (including Sub Volumes) for a particular Compliant Archive.
 
 Request:
 
-    GET https://172.100.51.240/sb-public-api/api/v1/brick_archives/<brick-archive-uuid>.json
+```
+GET /v1/brick_archives/<brick-archive-uuid>.json
+```
 
 Response body example:
 
+```
 	{
 	  "brick_archive_uuid": "9a8e4326-8a80-11e8-9ecd-ccf0d678e953",
 	  "revision": 1,
@@ -1543,7 +1951,7 @@ Response body example:
 		        "description": "",
 		        "volume_type": "snas_3p",
 		        "mode": "plain",
-		        "status": "ok",
+		        "status": "online",
 		        "uuid": "8832e635-406f-4787-ac25-a656dd2a1ef3",
 		        "size": 2993855232,
 		        "used": 412432
@@ -1555,7 +1963,7 @@ Response body example:
 		"description": "",
 		"volume_type": "snas_erc",
 		"mode": "plain",
-		"status": "ok",
+		"status": "online",
 		"uuid": "5ba7f0b1-cc95-4ab6-9c26-c0bb00d1ca16",
 		"size": 1995903488,
 		"used": 206074
@@ -1566,7 +1974,7 @@ Response body example:
 		  "description": "Test SubVol",
 		  "volume_type": "sub_volume",
 		  "mode": "plain",
-		  "status": "ok",
+		  "status": "online",
 		  "uuid": "b91c5741-8373-4977-abc9-aafc8df278d6",
 		  "size": 0,
 		  "used": 0,
@@ -1586,11 +1994,12 @@ Response body example:
       	  ]
 	    }
 	 ]
-    }
+   }
+```
 
 ## Subvolume Operations
 
-Using the `uuid` of a sub_volume, the name and description can be updated just like a standard volume. But all other volume operations are not allowed for a sub_volume.
+Using the `uuid` of a sub volume, the name and description can be updated just like a standard volume. But all other volume operations are not allowed for a sub volume.
 
 ## Privilege Delete Operations
 
@@ -1601,32 +2010,35 @@ See [Listing Volumes](#list-volumes) for instructions on how to list the Sub Vol
 If the user account has only the ComplianceAdmin role for the Compliant Archive of the Sub Volume then the response will be a stripped down JSON array of the volumes.
 
 Response body example:
-        
+
+```
+ {
+    "volumes" : [
     {
-     "volumes" : [
-        {
-           "name" : "vt2",
-           "brick_archive_uuid" : "b752c88c-6672-11e9-8fc1-b213ea58c339",
-           "uuid" : "24e89a4b-3f11-447b-b046-6c860b939086",
-           "config" : {
-                "privDelMode" : "enterprise",
-           }
-        },
-        {
-           "name" : "vt2-compliance"
-           "brick_archive_uuid" : "b752c88c-6672-11e9-8fc1-b213ea58c339",
-           "sub_volume_uuid" : "ba189522-275b-4c78-8d2e-3e019145881d",
-           "config" : {
-                "privDelMode" : "compliance",
-           }
+       "name" : "vt2",
+       "brick_archive_uuid" : "b752c88c-6672-11e9-8fc1-b213ea58c339",
+       "uuid" : "24e89a4b-3f11-447b-b046-6c860b939086",
+       "config" : {
+            "privDelMode" : "enterprise",
+       }
+    },
+    {
+       "name" : "vt2-compliance",
+       "brick_archive_uuid" : "b752c88c-6672-11e9-8fc1-b213ea58c339",
+       "sub_volume_uuid" : "ba189522-275b-4c78-8d2e-3e019145881d",
+       "config" : {
+            "privDelMode" : "compliance",
         }
-     ]
-    } 
-    
-If user has mixed roles (e.g. it's also a Compliant Archive Admin), all volumes to which the user has access will be returned with details for each volume according to the corresponding access permissions.
-    
+     }
+  ]
+}
+```
+
+If the user has mixed roles (e.g. it's also a Compliant Archive Admin), all volumes to which the user has access will be returned with details for each volume according to the corresponding access permissions.
+
 Response body example:
-        
+
+```
     {
      "volumes" : [
         {
@@ -1638,7 +2050,7 @@ Response body example:
            }
         },
         {
-           "name" : "vt2-compliance"
+           "name" : "vt2-compliance",
            "brick_archive_uuid" : "b752c88c-6672-11e9-8fc1-b213ea58c339",
            "sub_volume_uuid" : "ba189522-275b-4c78-8d2e-3e019145881d",
            "config" : {
@@ -1661,97 +2073,111 @@ Response body example:
             "volume_type": "sub_volume"
         },
      ]
-    } 
+    }
+```
 
 The `privDelMode` can be
 
-- `enterprise`  Enterprise mode
-- `compliance`  Compliance mode
-  
+| Value | Description |
+|-|-|
+|`enterprise`  | Enterprise mode |
+|`compliance`  | Compliance mode |
+
 ### Delete a file
 
 Uses a privileged delete to delete the file before its retention. Only available to API users that have the ComplianceAdmin role.
 
-    curl -k -X POST -F "<key>=<value>" https://172.100.51.240/sb-public-api/api/v1/volumes/<volume_uuid>/privdel.json
+```
+POST /v1/volumes/<sub_volume_uuid>/privdel.json
+```
 
-`volume_uuid`: The Sub Volume's UUID. Can be retrieved by listing the Sub Volumes (see above).
+where `sub_volume_uuid`is the Sub Volume's UUID. Can be retrieved by listing the Sub Volumes (see above).
 
-A `key` can be:
+List of keys:
 
-- `path` The file path relative to the root path of the specific volume (**not** necessarily the share root!).
+| Key | Description |
+|-|-|
+|`path`| The file path relative to the root path of the specific volume (**not** necessarily the share root!)|
 
-For instance, if the volume is accessed through a share on the directory `/invoices` and the file to delete within that share is `/2018/12/invoice1.doc`, then the `path` parameter should be `/invoices/2018/12/invoice1.doc`. 
-   
+For instance, if the volume is accessed through a share on the directory `/invoices` and the file to delete within that share is `/2018/12/invoice1.doc`, then the `path` parameter should be `/invoices/2018/12/invoice1.doc`.
+
 Response for a successful operation:
 
+```
     {
         "code": 200,
         "msg": "ok"
     }
-	
+```
+
 Responses for failed attempts:
 
+```
     {
         "code": 400,
         "msg": "The request is malformed."
     }
-    
+
     {
         "code": 400,
         "msg": "The Sub Volume is not in enterprise mode."
     }
-    
+
     {
         "code": 400,
         "msg": "The delete operation is currently unavailable, please try later."
     }
-    
+
     {
         "code": 403,
         "msg": "The file is not under retention."
     }
-    
+
     {
         "code": 403,
         "msg": "File can not be deleted, because the Compliance Archive is not running. Please set it online."
     }
-    
+
     {
         "code": 403,
         "msg": "File can not be deleted, because the Compliance Archive is read-only."
     }
-    
+
     {
         "code": 403,
         "msg": "The given file path is not allowed."
     }
-    
-    
+
+
     {
         "code": 404,
         "msg": "The file is not found in the given sub volume."
     }
-    
+
     {
         "code": 404,
         "msg": "The Sub Volume is not found."
     }
-    
+
     {
         "code": 500,
         "msg": "Internal server error."
     }     
+```
 
-## SMB User
+## SMB Users
 
-### List SMB Users
+### List SMB users
 
-All the local SMB users can be listed using:
+Lists all local SMB users.
 
-    GET https://172.100.51.240/sb-public-api/api/v1/users.json
+```
+GET /v1/users.json
+```
 
- Response body example:
+Response body example:
 
+```
     {
         "users": [
          {
@@ -1760,249 +2186,70 @@ All the local SMB users can be listed using:
             "description": ""
          },
          {
-            ... info for the next user
+            "... info for the next user"
          }
       ]
     }
+```
 
-### Create SMB User
+### Create SMB user
 
 Creates a local SMB user.
 
-Key/value-pairs are passed to the HTTP request. The key represents the
-information to be updated. The key/value-pairs can be encoded in the query
-string of the request URL.
+```
+POST /v1/users/smb_user.json
+```
 
-    curl -X POST -F "<key>=<value>" https://172.100.51.240/sb-public-api/api/v1/users/smb_user.json
+List of keys:
 
-A `key` can be:
-
-- `name`  The name of the volume
-- `description`  The description for the volume
-- `password`  The password for the user
-
-Any other keys are ignored
+| Key | Description | Rules |
+|-|-|-|
+| `name` | The name of the user | Must begin with '\_', 'a-z' or '0-9' only. Characters '-' or '_' or '.' are allowed to follow. Whitespaces are not allowed. Max length allowed is 64 characters|
+| `description` | The description for the user | Max length allowed is 64 characters |
+| `password` | The password for the user | - |
 
 Response body example:
 
-    {
-	   "id": 980190976,
-       "name": "smb01",
-       "description": "Test User One"
-	}
+```
+{
+  "id": 980190976,
+  "name": "smb01",
+  "description": "Test User One"
+}
+```
 
-### Update SMB User
+### Update SMB user
+
 Updates a local SMB user.
 
-Key/value-pairs are passed to the HTTP request. The key represents the
-information to be updated. The key/value-pairs can be encoded in the query
-string of the request URL.
+```
+PUT /v1/users/<user-id>.json
+```
 
-    curl -X PUT -F "<key>=<value>" https://172.100.51.240/sb-public-api/api/v1/users/<user-id>.json
+List of keys:
 
-A `key` can be:
-
-- `description`  The description for the volume
-- `password`  The password for the user
-
-Any other keys are ignored
+| Key | Description |
+|-|-|
+| `description` |  The description for the user |
+| `password` |  The password for the user |
 
 Response body example:
 
-    {
-	   "id": 980190976,
-       "name": "smb01",
-       "description": "Test SMB User One"
-	}
+```
+{
+  "id": 980190976,
+  "name": "smb01",
+  "description": "Test SMB User One"
+}
+```
 
-### Delete SMB User
+### Delete SMB user
+
 Delete a local SMB user.
 
-Key/value-pairs are passed to the HTTP request. The key represents the
-information to be updated. The key/value-pairs can be encoded in the query
-string of the request URL.
+```
+DELETE /v1/users/<user-id>.json
+```
+## Notes
 
-    curl -X DELETE -F "<key>=<value>" https://172.100.51.240/sb-public-api/api/v1/users/<user-id>.json
-    
-## General SB Information
-
-### Background Task Active Status
-
-Check if any of the background tasks are still active with this call:
-
-    GET https://172.100.51.240/sb-public-api/api/v1/tasks_active.json
-
- Response body example:
-
-        {
-       		"tasks_active":false
-       		"job_ids": [
-    							"b7d9343cf809cbf18c129aa6f3cf3756",
-    							"81341b5df9a3466edf86d47c8b04a04c",
-    							"0d1d76694b000f0ae5a48ab1a91cab75"
-  				       ]
-        }
-The `tasks_active` can be
-
-- `true`  If any tasks are working/queued in the background
-- `false` If the system is idle, with no tasks running in the background.
-
-Please make sure there are no tasks active, before making changes to the Bricks,Libraries or Volumes.
-
-### Get Job Status
-With this call you can get the job status of a specific job
-Request:
-
-    GET https://172.100.51.240/sb-public-api/api/v1/jobs/<job-id>.json
-
- Response body example:
-
-        {
-  			"status": "completed",
-  			"id": "b7d9343cf809cbf18c129aa6f3cf3756"
-		}
-		
-The `Status` can be
-
-- `working`
-- `queued`
-- `killed`
-- `failed`
-- `completed`
-
-
-
-### Listing Open Issues
-
-All the open issues of the day can be listed with this call:
-
-    GET https://172.100.51.240/sb-public-api/api/v1/open_issues.json
-
- Response body example:
-
-        [
-            {
-                "URC":"S17017",
-                "Error Level":"Error",
-                "Title":"Service failed",
-                "Data":"Service ID: S17017",
-                "Status":"Open",
-                "Date Opened":"2017-09-25T14:02:21.000+00:00",
-                "Date Closed":"-",
-                "Ticket Number":null,
-                "Technician":null
-            }
-        ]
-
-The `Error Level` can be
-
-- `Error`
-- `Warning`
-- `Info`
-
-### Listing the hardware info
-
-All the available serial numbers and other hardware information can be listed with this call:
-
-    GET https://172.100.51.240/sb-public-api/api/v1/hardware_info.json
-
- Response body example:
-
-
-     {
-       "system":
-                {"id":"6c1cc3bb-874f-4661-8db0-ba69f4e74b73",
-                "creation_data":"2017-09-25T14:06:23+02:00",
-                "hardware":{"site":{"id":"1","main_board":{"manufacturer":" ","pn":" ","serial":" ","version":" "},
-                            "devices":{"device":
-                                        [
-                                            {"shortname":"G5","type":null,"serial":"3000-9990-0640","version":"2.0.2928","fw": "2.258",components":{"mc_units":null,"psus":null,"rtcs":null,"ssds":null,"gpus":null,"nics":null}},
-                                            {"shortname":"EXTSHELF","type":null,"serial":"1000-9990-0511","fw": "2.258","components":{"mc_units":null,"psus":null,"rtcs":null}},
-                                            {"shortname":"EXTSHELF","type":null,"serial":"1000-9991-0533","fw": "2.258","components":{"mc_units":null,"psus":null,"rtcs":null}},
-                                            {"shortname":"EXTSHELF","type":null,"serial":"1000-9992-0500","fw": "2.258","components":{"mc_units":null,"psus":null,"rtcs":null}}
-                                        ]}}},
-                "software":{"used":"35 KB",
-                            "bricks":{"brick":
-                                        [  
-                                            {"shortname":"SB","type":"hdd","serial":"V10AFDEB","fw":"0.0.0","used":"35 KB","slot":"0"},
-                                            {"shortname":"SB","type":"hdd","serial":"V10AFDE9","fw":"0.0.0","used":"-","slot":"0"},
-                                            {"shortname":"SB","type":"hdd","serial":"V10AFDED","fw":"0.0.0","used":"-","slot":"1"},
-                                            {"shortname":"SB","type":"hdd","serial":"V10AFDEA","fw":"0.0.0","used":"-","slot":"0"},
-                                            {"shortname":"SB","type":"hdd","serial":"V10AFDE8","fw":"0.0.0","used":"-","slot":"0"},
-                                            {"shortname":"SB","type":"hdd","serial":"V10AFDEC","fw":"0.0.0","used":"-","slot":"1"}
-                                         ]}},
-                "eventhistory":{"events":null}}}
-     }
-
-### Listing Network Info
-
-The network info can be listed with this call:
-
-    GET https://172.100.51.240/sb-public-api/api/v1/network.json
-
- Response body example:
-
-        {
-          "hostname": "vm-controller-7c429f75",
-          "domain_name": "fast-lta.intra",
-          "gateway": "172.100.50.254",
-          "dns_server_one": "172.100.50.254",
-          "dns_server_two": "172.20.60.254",
-          "nic": [
-            {
-              "name": "management",
-              "dhcp": true,
-              "ipaddr_v4": "172.100.51.240",
-              "subnet_mask": "255.255.254.0",
-              "bonding_mode": "1 (active-backup)"
-            },
-            {
-              "name": "data",
-              "dhcp": true,
-              "ipaddr_v4": "172.20.61.120",
-              "subnet_mask": "255.255.254.0",
-              "bonding_mode": "1 (active-backup)",
-              "link_auto_neg": true,
-              "link_speed": 10000,
-              "link_duplex": "full",
-              "jumbo_frames": "off"
-            }
-          ],
-          "routing": [
-            {
-              "target_addr": "172.100.51.50",
-              "target_mask": "255.255.254.0",
-              "gateway": "172.100.50.254"
-            }
-          ],
-          "ipmi": {
-            "ipaddr_v4": 172.20.60.50,
-            "gateway_v4":172.20.60.254,
-            "netmask_v4": 255.255.254.0
-          }
-        }
-
-The `bonding_mode` can be
-
-- `0 (balance-rr)`
-- `1 (active-backup)`
-- `2 (balance-xor)`
-- `3 (broadcast)`
-- `4 (802.3ad)`
-- `5 (balance-tlb)`
-
-
-### Identification
-
-The system can be identified using this call:
-
-    GET https://172.100.51.240/sb-public-api/api/v1/identification.json
-
- Response body example:
-
-        {
-  			"shortname": "G5000",
-  			"swversion": "2.20.0.5",
-  			"systemid":  "9000"
-		 }
-            
+Note: All other product and company names should be considered trademarks of their respective owners. ©
