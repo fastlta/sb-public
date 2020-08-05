@@ -1,0 +1,1164 @@
+{
+   "controllers" : [
+      {
+         "ad_config" : {
+            "enable_smb" : false,
+            "ntlmv2" : false,
+            "use_wins" : false
+         },
+         "brick_archives" : [],
+         "brick_containers" : [
+            {
+               "bc_uuid" : "00000000-4614-4600-02d2-050250e65916",
+               "brick" : {
+                  "bc_uuid" : "00000000-4614-4600-02d2-050250e65916",
+                  "brick_mode" : "FULL_BRICK",
+                  "brick_uuid" : "00000000-33d8-497d-8ee0-81cac1490f73",
+                  "disks" : [
+                     {
+                        "erc_index" : 0,
+                        "firmware" : "30WD",
+                        "model" : "WDC  WDS500G2B0A ATA",
+                        "power_status" : 0,
+                        "power_status_str" : "off",
+                        "serial" : "xxxx",
+                        "size" : 500107862016,
+                        "slot_index" : 0,
+                        "status" : 0,
+                        "status_str" : "ok",
+                        "temperature" : -274,
+                        "wwn" : "<wwn>"
+                     },
+                     {
+                        "erc_index" : 1,
+                        "firmware" : "30WD",
+                        "model" : "WDC  WDS500G2B0A ATA",
+                        "power_status" : 0,
+                        "power_status_str" : "off",
+                        "serial" : "xxxx",
+                        "size" : 500107862016,
+                        "slot_index" : 1,
+                        "status" : 0,
+                        "status_str" : "ok",
+                        "temperature" : -274,
+                        "wwn" : "<wwn>"
+                     },
+                     {
+                        "erc_index" : 2,
+                        "firmware" : "30WD",
+                        "model" : "WDC  WDS500G2B0A ATA",
+                        "power_status" : 0,
+                        "power_status_str" : "off",
+                        "serial" : "xxxx",
+                        "size" : 500107862016,
+                        "slot_index" : 2,
+                        "status" : 0,
+                        "status_str" : "ok",
+                        "temperature" : -274,
+                        "wwn" : "<wwn>"
+                     },
+                     {
+                        "erc_index" : 3,
+                        "firmware" : "30WD",
+                        "model" : "WDC  WDS500G2B0A ATA",
+                        "power_status" : 0,
+                        "power_status_str" : "off",
+                        "serial" : "xxxx",
+                        "size" : 500107862016,
+                        "slot_index" : 3,
+                        "status" : 0,
+                        "status_str" : "ok",
+                        "temperature" : -274,
+                        "wwn" : "<wwn>"
+                     },
+                     {
+                        "erc_index" : 4,
+                        "firmware" : "30WD",
+                        "model" : "WDC  WDS500G2B0A ATA",
+                        "power_status" : 0,
+                        "power_status_str" : "off",
+                        "serial" : "xxxx",
+                        "size" : 500107862016,
+                        "slot_index" : 4,
+                        "status" : 0,
+                        "status_str" : "ok",
+                        "temperature" : -274,
+                        "wwn" : "<wwn>"
+                     },
+                     {
+                        "erc_index" : 5,
+                        "firmware" : "30WD",
+                        "model" : "WDC  WDS500G2B0A ATA",
+                        "power_status" : 0,
+                        "power_status_str" : "off",
+                        "serial" : "xxxx",
+                        "size" : 500107862016,
+                        "slot_index" : 5,
+                        "status" : 0,
+                        "status_str" : "ok",
+                        "temperature" : -274,
+                        "wwn" : "<wwn>"
+                     },
+                     {
+                        "erc_index" : 6,
+                        "firmware" : "30WD",
+                        "model" : "WDC  WDS500G2B0A ATA",
+                        "power_status" : 0,
+                        "power_status_str" : "off",
+                        "serial" : "xxxx",
+                        "size" : 500107862016,
+                        "slot_index" : 6,
+                        "status" : 0,
+                        "status_str" : "ok",
+                        "temperature" : -274,
+                        "wwn" : "<wwn>"
+                     },
+                     {
+                        "erc_index" : 7,
+                        "firmware" : "30WD",
+                        "model" : "WDC  WDS500G2B0A ATA",
+                        "power_status" : 0,
+                        "power_status_str" : "off",
+                        "serial" : "xxxx",
+                        "size" : 500107862016,
+                        "slot_index" : 7,
+                        "status" : 0,
+                        "status_str" : "ok",
+                        "temperature" : -274,
+                        "wwn" : "<wwn>"
+                     },
+                     {
+                        "erc_index" : 8,
+                        "firmware" : "30WD",
+                        "model" : "WDC  WDS500G2B0A ATA",
+                        "power_status" : 0,
+                        "power_status_str" : "off",
+                        "serial" : "xxxx",
+                        "size" : 500107862016,
+                        "slot_index" : 8,
+                        "status" : 0,
+                        "status_str" : "ok",
+                        "temperature" : -274,
+                        "wwn" : "<wwn>"
+                     },
+                     {
+                        "erc_index" : 9,
+                        "firmware" : "30WD",
+                        "model" : "WDC  WDS500G2B0A ATA",
+                        "power_status" : 0,
+                        "power_status_str" : "off",
+                        "serial" : "xxxx",
+                        "size" : 500107862016,
+                        "slot_index" : 9,
+                        "status" : 0,
+                        "status_str" : "ok",
+                        "temperature" : -274,
+                        "wwn" : "<wwn>"
+                     },
+                     {
+                        "erc_index" : 10,
+                        "firmware" : "30WD",
+                        "model" : "WDC  WDS500G2B0A ATA",
+                        "power_status" : 0,
+                        "power_status_str" : "off",
+                        "serial" : "xxxx",
+                        "size" : 500107862016,
+                        "slot_index" : 10,
+                        "status" : 0,
+                        "status_str" : "ok",
+                        "temperature" : -274,
+                        "wwn" : "<wwn>"
+                     },
+                     {
+                        "erc_index" : 11,
+                        "firmware" : "30WD",
+                        "model" : "WDC  WDS500G2B0A ATA",
+                        "power_status" : 0,
+                        "power_status_str" : "off",
+                        "serial" : "xxxxx",
+                        "size" : 500107862016,
+                        "slot_index" : 11,
+                        "status" : 0,
+                        "status_str" : "ok",
+                        "temperature" : -274,
+                        "wwn" : "<wwn>"
+                     }
+                  ],
+                  "highest_sector_size" : 512,
+                  "library_uuid" : null,
+                  "max_disks" : 12,
+                  "net_capacity" : 3992238096384,
+                  "raw_capacity" : 6001294344192,
+                  "sblid" : "00000000-f41c-40b9-9531-5de2422c4eee",
+                  "smallest_sector_size" : 512,
+                  "status" : 0,
+                  "status_str" : "ok",
+                  "temperature" : 29.28
+               },
+               "firmware" : "1.21.332",
+               "issues" : [],
+               "last_power_status_change" : "2020-07-28T14:10:07.000Z",
+               "online_status" : 8,
+               "online_status_str" : "online",
+               "power_ref_count" : 0,
+               "power_status" : "off",
+               "redetect" : false,
+               "serial" : "F000000",
+               "shelf_uuid" : "00000000-1010-0107-0186-000000000000",
+               "slot_index" : 4,
+               "status" : 0,
+               "status_str" : "ok",
+               "type" : "ssd",
+               "type_name" : "SBF",
+               "worm" : "N/A"
+            },
+            {
+               "bc_uuid" : "717f800b-4214-4600-1572-050250e65916",
+               "brick" : {
+                  "bc_uuid" : "717f800b-4214-4600-1572-050250e65916",
+                  "brick_mode" : "FULL_BRICK",
+                  "brick_uuid" : "9d8ca77a-3e7a-465e-ae2c-96dacdda0eba",
+                  "disks" : [
+                     {
+                        "erc_index" : 0,
+                        "firmware" : "1A01",
+                        "model" : "WDC WD10SPZX-00Z ATA",
+                        "power_status" : 0,
+                        "power_status_str" : "off",
+                        "serial" : "WD-xxxx",
+                        "size" : 1000204886016,
+                        "slot_index" : 0,
+                        "status" : 0,
+                        "status_str" : "ok",
+                        "temperature" : -274,
+                        "wwn" : "<wwn>"
+                     },
+                     {
+                        "erc_index" : 1,
+                        "firmware" : "1A01",
+                        "model" : "WDC WD10SPZX-00Z ATA",
+                        "power_status" : 0,
+                        "power_status_str" : "off",
+                        "serial" : "WD-xxxx",
+                        "size" : 1000204886016,
+                        "slot_index" : 1,
+                        "status" : 0,
+                        "status_str" : "ok",
+                        "temperature" : -274,
+                        "wwn" : "<wwn>"
+                     },
+                     {
+                        "erc_index" : 2,
+                        "firmware" : "1A01",
+                        "model" : "WDC WD10SPZX-00Z ATA",
+                        "power_status" : 0,
+                        "power_status_str" : "off",
+                        "serial" : "WD-xxxx",
+                        "size" : 1000204886016,
+                        "slot_index" : 2,
+                        "status" : 0,
+                        "status_str" : "ok",
+                        "temperature" : -274,
+                        "wwn" : "<wwn>"
+                     },
+                     {
+                        "erc_index" : 3,
+                        "firmware" : "1A01",
+                        "model" : "WDC WD10SPZX-00Z ATA",
+                        "power_status" : 0,
+                        "power_status_str" : "off",
+                        "serial" : "WD-xxxx",
+                        "size" : 1000204886016,
+                        "slot_index" : 3,
+                        "status" : 0,
+                        "status_str" : "ok",
+                        "temperature" : -274,
+                        "wwn" : "<wwn>"
+                     },
+                     {
+                        "erc_index" : 4,
+                        "firmware" : "1A01",
+                        "model" : "WDC WD10SPZX-00Z ATA",
+                        "power_status" : 0,
+                        "power_status_str" : "off",
+                        "serial" : "WD-xxxx",
+                        "size" : 1000204886016,
+                        "slot_index" : 4,
+                        "status" : 0,
+                        "status_str" : "ok",
+                        "temperature" : -274,
+                        "wwn" : "<wwn>"
+                     },
+                     {
+                        "erc_index" : 5,
+                        "firmware" : "1A01",
+                        "model" : "WDC WD10SPZX-00Z ATA",
+                        "power_status" : 0,
+                        "power_status_str" : "off",
+                        "serial" : "WD-xxxx",
+                        "size" : 1000204886016,
+                        "slot_index" : 5,
+                        "status" : 0,
+                        "status_str" : "ok",
+                        "temperature" : -274,
+                        "wwn" : "<wwn>"
+                     },
+                     {
+                        "erc_index" : 6,
+                        "firmware" : "1A01",
+                        "model" : "WDC WD10SPZX-00Z ATA",
+                        "power_status" : 0,
+                        "power_status_str" : "off",
+                        "serial" : "WD-xxxx",
+                        "size" : 1000204886016,
+                        "slot_index" : 6,
+                        "status" : 0,
+                        "status_str" : "ok",
+                        "temperature" : -274,
+                        "wwn" : "<wwn>"
+                     },
+                     {
+                        "erc_index" : 7,
+                        "firmware" : "1A01",
+                        "model" : "WDC WD10SPZX-00Z ATA",
+                        "power_status" : 0,
+                        "power_status_str" : "off",
+                        "serial" : "WD-xxxx",
+                        "size" : 1000204886016,
+                        "slot_index" : 7,
+                        "status" : 0,
+                        "status_str" : "ok",
+                        "temperature" : -274,
+                        "wwn" : "<wwn>"
+                     },
+                     {
+                        "erc_index" : 8,
+                        "firmware" : "1A01",
+                        "model" : "WDC WD10SPZX-00Z ATA",
+                        "power_status" : 0,
+                        "power_status_str" : "off",
+                        "serial" : "WD-xxxx",
+                        "size" : 1000204886016,
+                        "slot_index" : 8,
+                        "status" : 0,
+                        "status_str" : "ok",
+                        "temperature" : -274,
+                        "wwn" : "<wwn>"
+                     },
+                     {
+                        "erc_index" : 9,
+                        "firmware" : "1A01",
+                        "model" : "WDC WD10SPZX-00Z ATA",
+                        "power_status" : 0,
+                        "power_status_str" : "off",
+                        "serial" : "WD-xxxx",
+                        "size" : 1000204886016,
+                        "slot_index" : 9,
+                        "status" : 0,
+                        "status_str" : "ok",
+                        "temperature" : -274,
+                        "wwn" : "<wwn>"
+                     },
+                     {
+                        "erc_index" : 10,
+                        "firmware" : "1A01",
+                        "model" : "WDC WD10SPZX-00Z ATA",
+                        "power_status" : 0,
+                        "power_status_str" : "off",
+                        "serial" : "WD-xxxx",
+                        "size" : 1000204886016,
+                        "slot_index" : 10,
+                        "status" : 0,
+                        "status_str" : "ok",
+                        "temperature" : -274,
+                        "wwn" : "<wwn>"
+                     },
+                     {
+                        "erc_index" : 11,
+                        "firmware" : "1A01",
+                        "model" : "WDC WD10SPZX-00Z ATA",
+                        "power_status" : 0,
+                        "power_status_str" : "off",
+                        "serial" : "WD-xxx",
+                        "size" : 1000204886016,
+                        "slot_index" : 11,
+                        "status" : 0,
+                        "status_str" : "ok",
+                        "temperature" : -274,
+                        "wwn" : "<wwn>"
+                     }
+                  ],
+                  "highest_sector_size" : 4096,
+                  "library_uuid" : null,
+                  "max_disks" : 12,
+                  "net_capacity" : 7993014288384,
+                  "raw_capacity" : 12002458632192,
+                  "sblid" : "00000000-be22-4042-9cb6-4cf21c000000",
+                  "smallest_sector_size" : 4096,
+                  "status" : 0,
+                  "status_str" : "ok",
+                  "temperature" : 28.33
+               },
+               "firmware" : "1.21.332",
+               "issues" : [],
+               "last_power_status_change" : "2020-07-28T14:56:50.000Z",
+               "online_status" : 8,
+               "online_status_str" : "online",
+               "power_ref_count" : 0,
+               "power_status" : "off",
+               "redetect" : false,
+               "serial" : "B000000",
+               "shelf_uuid" : "00000000-1010-0107-0186-000000000000",
+               "slot_index" : 1,
+               "status" : 0,
+               "status_str" : "ok",
+               "type" : "hdd",
+               "type_name" : "SB",
+               "worm" : "N/A"
+            }
+         ],
+         "brick_events" : [
+            {
+               "bc_uuid" : "00000000-4214-4600-1572-050250e65916",
+               "created_at" : "2020-07-28T14:56:33.000Z",
+               "event_result" : "success",
+               "event_type" : "new",
+               "shelf_uuid" : "00000000-1010-0107-0186-000000000000",
+               "slot_index" : 1
+            },
+            {
+               "bc_uuid" : "00000000-4614-4600-02d2-050250e65916",
+               "created_at" : "2020-07-28T14:09:52.000Z",
+               "event_result" : "success",
+               "event_type" : "new",
+               "shelf_uuid" : "00000000-1010-0107-0186-000000000000",
+               "slot_index" : 4
+            }
+         ],
+         "config" : {
+            "bigbricks_per_volume_limit" : 4,
+            "bricks_per_volume_limit" : 9,
+            "certificate" : false,
+            "container_repull_only" : false,
+            "fc_global_export" : 0,
+            "io_slot_over_storage_slot" : true,
+            "iscsi_global_export" : 0,
+            "sla_required_disks_fullbrick" : 10,
+            "snmp_enabled" : false,
+            "system_brand" : "FAST"
+         },
+         "date_time_settings" : {
+            "current_timezone" : "Europe/Berlin",
+            "ntp_server1" : "+a809785260e6f91cc1324d2b9441234c",
+            "ntp_server2" : "+9e2385da0ff2a47559170420360961fe"
+         },
+         "flags" : {
+            "DLC" : "0",
+            "EOC" : "0",
+            "WVC" : "0",
+            "otp_enabled" : false,
+            "tape_encryption_mode" : null,
+            "total_custom_route_count" : 0,
+            "total_customer_users" : 3,
+            "total_ip_whitelist_count" : 0,
+            "total_samba_users" : 0,
+            "worm_integration" : "false"
+         },
+         "ganesha" : {
+            "connection_info" : []
+         },
+         "gpu" : {
+            "firmware" : "Undefined",
+            "memory" : "8119 MiB",
+            "product_name" : "GeForce GTX 1070",
+            "serial" : "GPU-xxxxxx-365d-18e9-6427-877405b3d3ec",
+            "type" : "TX1070"
+         },
+         "host_connections" : [],
+         "info" : {
+            "hostname" : "controller-f9566f1c",
+            "sblid" : "000000-8995-4cca-870a-d01cd300000",
+            "silent_brick_drive" : false,
+            "single_drive" : false,
+            "started" : "2020-07-28T13:11:55.168+02:00",
+            "system_id" : "0000-9028-0000",
+            "uptime" : 546145.12,
+            "version" : {
+               "build" : 3,
+               "feature" : "",
+               "major" : 2,
+               "minor" : 33,
+               "patch" : 0,
+               "version_string" : "2.33.0.3"
+            }
+         },
+         "libraries" : [],
+         "mainboard" : {
+            "baseboard" : {
+               "manufacturer" : "Supermicro",
+               "product_name" : "X9SRG-F",
+               "serial" : "xxx",
+               "version" : "0123456789"
+            },
+            "bios" : {
+               "release_date" : "08/01/2013",
+               "vendor" : "American Megatrends Inc.",
+               "version" : "3.00"
+            }
+         },
+         "memory" : {
+            "ce" : "0",
+            "ue" : "0"
+         },
+         "messages" : [
+            {
+               "category" : 0,
+               "library_uuid" : "00000000-0000-0000-0000-012345678901",
+               "message_type" : "daily_status",
+               "params" : {
+                  "bricks" : [
+                     {
+                        "bc_serial" : "B0000000"
+                     },
+                     {
+                        "bc_serial" : "F0000000"
+                     }
+                  ],
+                  "default_properties" : {},
+                  "hostname" : "+a7877fcdc3fd9687ffce2ffa3b167a14",
+                  "shelves" : [
+                     {}
+                  ]
+               },
+               "sequence_number" : 8,
+               "severity" : 1
+            },
+            {
+               "category" : 0,
+               "library_uuid" : "00000000-0000-0000-0000-012345678901",
+               "message_type" : "daily_status",
+               "params" : {
+                  "bricks" : [
+                     {
+                        "bc_serial" : "B0000000"
+                     },
+                     {
+                        "bc_serial" : "F0000000"
+                     }
+                  ],
+                  "default_properties" : {},
+                  "hostname" : "+a7877fcdc3fd9687ffce2ffa3b167a14",
+                  "shelves" : [
+                     {}
+                  ]
+               },
+               "sequence_number" : 7,
+               "severity" : 1
+            },
+            {
+               "category" : 0,
+               "library_uuid" : "00000000-0000-0000-0000-012345678901",
+               "message_type" : "daily_status",
+               "params" : {
+                  "bricks" : [
+                     {
+                        "bc_serial" : "B0000000"
+                     },
+                     {
+                        "bc_serial" : "F0000000"
+                     }
+                  ],
+                  "default_properties" : {},
+                  "hostname" : "+a7877fcdc3fd9687ffce2ffa3b167a14",
+                  "shelves" : [
+                     {}
+                  ]
+               },
+               "sequence_number" : 6,
+               "severity" : 1
+            },
+            {
+               "category" : 0,
+               "library_uuid" : "00000000-0000-0000-0000-012345678901",
+               "message_type" : "daily_status",
+               "params" : {
+                  "bricks" : [
+                     {
+                        "bc_serial" : "B0000000"
+                     },
+                     {
+                        "bc_serial" : "F0000000"
+                     }
+                  ],
+                  "default_properties" : {},
+                  "hostname" : "+a7877fcdc3fd9687ffce2ffa3b167a14",
+                  "shelves" : [
+                     {}
+                  ]
+               },
+               "sequence_number" : 5,
+               "severity" : 1
+            },
+            {
+               "category" : 0,
+               "library_uuid" : "00000000-0000-0000-0000-012345678901",
+               "message_type" : "daily_status",
+               "params" : {
+                  "bricks" : [
+                     {
+                        "bc_serial" : "B0000000"
+                     },
+                     {
+                        "bc_serial" : "F0000000"
+                     }
+                  ],
+                  "default_properties" : {},
+                  "hostname" : "+a7877fcdc3fd9687ffce2ffa3b167a14",
+                  "shelves" : [
+                     {}
+                  ]
+               },
+               "sequence_number" : 4,
+               "severity" : 1
+            },
+            {
+               "category" : 0,
+               "library_uuid" : "00000000-0000-0000-0000-012345678901",
+               "message_type" : "daily_status",
+               "params" : {
+                  "bricks" : [
+                     {
+                        "bc_serial" : "B0000000"
+                     },
+                     {
+                        "bc_serial" : "F0000000"
+                     }
+                  ],
+                  "default_properties" : {},
+                  "hostname" : "+a7877fcdc3fd9687ffce2ffa3b167a14",
+                  "shelves" : [
+                     {}
+                  ]
+               },
+               "sequence_number" : 3,
+               "severity" : 1
+            },
+            {
+               "category" : 10,
+               "library_uuid" : "00000000-0000-0000-0000-012345678901",
+               "message_type" : "el_brick_added",
+               "params" : {
+                  "bc_serial" : "B00000000",
+                  "default_properties" : {},
+                  "slot_no" : 2
+               },
+               "sequence_number" : 3,
+               "severity" : 1
+            },
+            {
+               "category" : 10,
+               "library_uuid" : "00000000-0000-0000-0000-012345678901",
+               "message_type" : "el_brick_added",
+               "params" : {
+                  "bc_serial" : "F14F02D2",
+                  "default_properties" : {},
+                  "slot_no" : 5
+               },
+               "sequence_number" : 2,
+               "severity" : 1
+            },
+            {
+               "category" : 0,
+               "library_uuid" : "00000000-0000-0000-0000-012345678901",
+               "message_type" : "fan_siu_fail",
+               "params" : {
+                  "default_properties" : {},
+                  "fan_group" : "Rear fan",
+                  "fans_info" : [
+                     {
+                        "fan_group" : "GPU Fan"
+                     },
+                     {
+                        "fan_group" : "Main board fan"
+                     },
+                     {
+                        "fan_group" : "Main board fan"
+                     },
+                     {
+                        "fan_group" : "Main board fan"
+                     },
+                     {
+                        "fan_group" : "PSU  Fan"
+                     },
+                     {
+                        "fan_group" : "PSU  Fan"
+                     },
+                     {
+                        "fan_group" : "Rear fan"
+                     },
+                     {
+                        "fan_group" : "Rear fan"
+                     }
+                  ]
+               },
+               "sequence_number" : 2,
+               "severity" : 1
+            },
+            {
+               "category" : 10,
+               "library_uuid" : "00000000-0000-0000-0000-012345678901",
+               "message_type" : "el_shelf_successfully_added",
+               "params" : {
+                  "brick_slots" : 5,
+                  "default_properties" : {},
+                  "position" : 0
+               },
+               "sequence_number" : 1,
+               "severity" : 1
+            },
+            {
+               "category" : 0,
+               "library_uuid" : "00000000-0000-0000-0000-012345678901",
+               "message_type" : "daily_status",
+               "params" : {
+                  "bricks" : [],
+                  "default_properties" : {},
+                  "hostname" : "+a7877fcdc3fd9687ffce2ffa3b167a14",
+                  "shelves" : [
+                     {}
+                  ]
+               },
+               "sequence_number" : 1,
+               "severity" : 1
+            }
+         ],
+         "messaging_config" : {
+            "authentication" : "plain",
+            "custom_daily_time_minutes" : 0,
+            "custom_txt_set" : false,
+            "daily_time_offset_minutes" : 30,
+            "email_customer" : true,
+            "email_customer_err_set" : false,
+            "email_customer_info_set" : false,
+            "email_customer_warn_set" : false,
+            "email_fast" : true,
+            "email_lang" : "EN",
+            "email_smtp_sasl" : false,
+            "enable_starttls_auto" : false,
+            "https_post_enabled" : false,
+            "https_proxy_enabled" : false
+         },
+         "nics" : {
+            "ipmi" : {
+               "gateway_v4" : "+2e3f2e4ee23bb36d530832bff3af1f1c",
+               "ipaddr_v4" : "+dc0f69dd85b8e143e0453eecce4376da",
+               "mac" : "0c:c4:7a:42:b9:a2",
+               "netmask_v4" : "+454a105061438b142842c0ef875cfbfe",
+               "user" : "+73acd9a5972130b75066c82595a1fae3"
+            },
+            "networks" : [
+               {
+                  "custom_route_count" : 0,
+                  "domain_v4" : "+66966642be49d8f3edde2ab7111c5ee8",
+                  "domain_v6" : "+d41d8cd98f00b204e9800998ecf8427e",
+                  "hostname" : "+a7877fcdc3fd9687ffce2ffa3b167a14",
+                  "id" : 1,
+                  "ip_whitelist_count" : 0,
+                  "use_ip_whitelist" : false,
+                  "use_separate_networks" : false
+               }
+            ],
+            "physical" : [
+               {
+                  "description" : "Ethernet interface",
+                  "mac" : "ccc",
+                  "product_name" : "Ethernet Controller 10-Gigabit X540-AT2",
+                  "settings" : {
+                     "autonegotiation" : true,
+                     "broadcast" : true,
+                     "firmware" : "0x80000389",
+                     "latency" : 0,
+                     "link" : false,
+                     "multicast" : true,
+                     "port" : "twisted pair",
+                     "slave" : true
+                  },
+                  "shortname" : "enp4s0f0",
+                  "type" : "Network Interface",
+                  "vendor" : "Intel Corporation"
+               },
+               {
+                  "description" : "Ethernet interface",
+                  "mac" : "bbb",
+                  "product_name" : "Ethernet Controller 10-Gigabit X540-AT2",
+                  "settings" : {
+                     "autonegotiation" : true,
+                     "broadcast" : true,
+                     "duplex" : "full",
+                     "firmware" : "0x80000389",
+                     "latency" : 0,
+                     "link" : true,
+                     "multicast" : true,
+                     "port" : "twisted pair",
+                     "slave" : true,
+                     "speed" : "10Gbit/s"
+                  },
+                  "shortname" : "enp4s0f1",
+                  "type" : "Network Interface",
+                  "vendor" : "Intel Corporation"
+               },
+               {
+                  "description" : "Ethernet interface",
+                  "mac" : "aaa",
+                  "product_name" : "I350 Gigabit Network Connection",
+                  "settings" : {
+                     "autonegotiation" : true,
+                     "broadcast" : true,
+                     "firmware" : "1.52.0",
+                     "latency" : 0,
+                     "link" : false,
+                     "multicast" : true,
+                     "port" : "twisted pair"
+                  },
+                  "shortname" : "enp7s0f0",
+                  "type" : "Network Interface",
+                  "vendor" : "Intel Corporation"
+               },
+               {
+                  "description" : "Ethernet interface",
+                  "mac" : "xxx",
+                  "product_name" : "I350 Gigabit Network Connection",
+                  "settings" : {
+                     "autonegotiation" : true,
+                     "broadcast" : true,
+                     "firmware" : "1.52.0",
+                     "ip" : "+36436544852139732c64836561c7f7ea",
+                     "latency" : 0,
+                     "link" : false,
+                     "multicast" : true,
+                     "port" : "twisted pair"
+                  },
+                  "shortname" : "enp7s0f1",
+                  "type" : "Network Interface",
+                  "vendor" : "Intel Corporation"
+               },
+               {
+                  "description" : "Ethernet interface",
+                  "mac" : "yyy",
+                  "product_name" : null,
+                  "settings" : {
+                     "autonegotiation" : true,
+                     "broadcast" : true,
+                     "duplex" : "half",
+                     "firmware" : "ASIX AX88772B USB 2.0 Ethernet",
+                     "link" : false,
+                     "multicast" : true,
+                     "port" : "MII",
+                     "speed" : "10Mbit/s"
+                  },
+                  "shortname" : "ethfm2",
+                  "type" : "Network Interface",
+                  "vendor" : null
+               },
+               {
+                  "description" : "Ethernet interface",
+                  "mac" : "zzz",
+                  "product_name" : null,
+                  "settings" : {
+                     "autonegotiation" : true,
+                     "broadcast" : true,
+                     "duplex" : "full",
+                     "firmware" : "ASIX AX88772B USB 2.0 Ethernet",
+                     "link" : true,
+                     "multicast" : true,
+                     "port" : "MII",
+                     "slave" : true,
+                     "speed" : "100Mbit/s"
+                  },
+                  "shortname" : "ethfc2",
+                  "type" : "Network Interface",
+                  "vendor" : null
+               },
+               {
+                  "description" : "Ethernet interface",
+                  "mac" : "uuu",
+                  "product_name" : null,
+                  "settings" : {
+                     "autonegotiation" : true,
+                     "broadcast" : true,
+                     "duplex" : "half",
+                     "firmware" : "ASIX AX88772B USB 2.0 Ethernet",
+                     "link" : false,
+                     "multicast" : true,
+                     "port" : "MII",
+                     "speed" : "10Mbit/s"
+                  },
+                  "shortname" : "ethfm1",
+                  "type" : "Network Interface",
+                  "vendor" : null
+               },
+               {
+                  "description" : "Ethernet interface",
+                  "mac" : "00:0f:8d:80:08:d3",
+                  "product_name" : null,
+                  "settings" : {
+                     "autonegotiation" : true,
+                     "broadcast" : true,
+                     "duplex" : "half",
+                     "firmware" : "ASIX AX88772B USB 2.0 Ethernet",
+                     "link" : false,
+                     "multicast" : true,
+                     "port" : "MII",
+                     "slave" : true,
+                     "speed" : "10Mbit/s"
+                  },
+                  "shortname" : "ethfc1",
+                  "type" : "Network Interface",
+                  "vendor" : null
+               }
+            ],
+            "virtual" : [
+               {
+                  "autoneg" : true,
+                  "bonding_mode" : 1,
+                  "dhcp" : false,
+                  "dns1" : "+2e3f2e4ee23bb36d530832bff3af1f1c",
+                  "dns2" : null,
+                  "duplex" : "full",
+                  "gateway_v4" : "+454a105061438b142842c0ef875cfbfe",
+                  "ipaddr_v4" : "+007d5d111d3f10570dee316c335060f1",
+                  "ipaddr_v6" : "+490f3fb4589f0e028737f8414e953556",
+                  "mtu" : 1500,
+                  "name" : "management/data",
+                  "network_id" : 1,
+                  "physical_slaves" : [
+                     "enp4s0f0",
+                     "enp4s0f1"
+                  ],
+                  "router_v6" : null,
+                  "search" : "",
+                  "serial" : "",
+                  "speed" : 10000
+               },
+               {
+                  "autoneg" : true,
+                  "bonding_mode" : 3,
+                  "dhcp" : false,
+                  "dns1" : "+d41d8cd98f00b204e9800998ecf8427e",
+                  "dns2" : "+d41d8cd98f00b204e9800998ecf8427e",
+                  "duplex" : "full",
+                  "gateway_v4" : "+d41d8cd98f00b204e9800998ecf8427e",
+                  "ipaddr_v4" : "+d41d8cd98f00b204e9800998ecf8427e",
+                  "ipaddr_v6" : "+7daabe5490b97c5f8441d17f2b4459cb",
+                  "mtu" : 1500,
+                  "name" : "internal",
+                  "network_id" : 1,
+                  "physical_slaves" : [
+                     "ethfc1",
+                     "ethfc2"
+                  ],
+                  "router_v6" : null,
+                  "search" : "",
+                  "serial" : "",
+                  "speed" : 100
+               }
+            ]
+         },
+         "replications" : [],
+         "samba" : {
+            "connections" : {},
+            "processes" : {}
+         },
+         "shelves" : [
+            {
+               "boss_last_seen" : "2020-08-03T18:54:16.000Z",
+               "boss_version" : 2.536,
+               "brick_containers" : [
+                  {
+                     "slot_index" : 1,
+                     "uuid" : "00000000-4214-4600-1572-050250e65916"
+                  },
+                  {
+                     "slot_index" : 4,
+                     "uuid" : "00000000-4614-4600-02d2-050250e65916"
+                  }
+               ],
+               "components" : {
+                  "mc_units" : [
+                     {
+                        "firmware" : "1.11.332",
+                        "serial" : "00000000-1010-0107-0186-000000000000_00"
+                     },
+                     {
+                        "firmware" : "1.11.332",
+                        "serial" : "00000000-1010-0107-0186-000000000000_01"
+                     },
+                     {
+                        "firmware" : "1.11.332",
+                        "serial" : "00000000-1010-0107-0186-000000000000_02"
+                     },
+                     {
+                        "firmware" : "1.11.332",
+                        "serial" : "00000000-1010-0107-0186-000000000000_03"
+                     },
+                     {
+                        "firmware" : "1.11.332",
+                        "serial" : "00000000-1010-0107-0186-000000000000_04"
+                     }
+                  ],
+                  "psus" : [
+                     {
+                        "firmware_pri" : "02.00.00",
+                        "firmware_sec" : "02.10.00",
+                        "index" : 0,
+                        "manufacturer" : "EMERSON",
+                        "present" : true,
+                        "product_name" : "DS750PED-3-001",
+                        "serial" : "xxxx"
+                     },
+                     {
+                        "firmware_pri" : "02.00.00",
+                        "firmware_sec" : "02.10.00",
+                        "index" : 1,
+                        "manufacturer" : "EMERSON",
+                        "present" : true,
+                        "product_name" : "DS750PED-3-001",
+                        "serial" : "xxxx"
+                     }
+                  ],
+                  "rtc" : {
+                     "battery" : "OK",
+                     "oscillator" : "OK",
+                     "present" : true,
+                     "setup" : "Yes",
+                     "version" : 1.8
+                  }
+               },
+               "device" : {
+                  "firmware" : "2.536",
+                  "hw_type" : "CONTROLLER_2",
+                  "model" : "G5000",
+                  "serial" : "xxxx",
+                  "uuid" : "00000000-1010-0107-0186-000000000000"
+               },
+               "height_units" : 3,
+               "index_in_rack" : 0,
+               "num_slots" : 5
+            }
+         ],
+         "system_disks" : [
+            {
+               "firmware" : "00RL",
+               "product_name" : "SanDisk Ultra II 960GB",
+               "serial" : "xxxxxx"
+            }
+         ],
+         "system_events" : [
+            {
+               "action" : "Installation of version 2.33.0.3",
+               "moment" : "2020-07-28T11:14:28.000Z"
+            }
+         ],
+         "system_partitions" : [
+            {
+               "block_size" : 4096,
+               "bytes_available" : 4647890944,
+               "bytes_free" : 4933103616,
+               "bytes_total" : 5150212096,
+               "bytes_used" : 217108480,
+               "device" : "/dev/sda2",
+               "files" : 327680,
+               "files_available" : 321039,
+               "files_free" : 321039,
+               "fragment_size" : 4096,
+               "path" : "/",
+               "percent_used" : 4.21552502990355,
+               "type" : "ext4"
+            },
+            {
+               "block_size" : 1024,
+               "bytes_available" : 466570240,
+               "bytes_free" : 496978944,
+               "bytes_total" : 499355648,
+               "bytes_used" : 2376704,
+               "device" : "/dev/mapper/systemvg-homelv",
+               "files" : 128016,
+               "files_available" : 128000,
+               "files_free" : 128000,
+               "fragment_size" : 1024,
+               "path" : "/home",
+               "percent_used" : 0.475954164035002,
+               "type" : "ext4"
+            },
+            {
+               "block_size" : 4096,
+               "bytes_available" : 841232932864,
+               "bytes_free" : 887166853120,
+               "bytes_total" : 903797493760,
+               "bytes_used" : 16630640640,
+               "device" : "/dev/mapper/systemvg-optlv",
+               "files" : 56057856,
+               "files_available" : 56036534,
+               "files_free" : 56036534,
+               "fragment_size" : 4096,
+               "path" : "/opt",
+               "percent_used" : 1.84008483701507,
+               "type" : "ext4"
+            },
+            {
+               "block_size" : 1024,
+               "bytes_available" : 466552832,
+               "bytes_free" : 496961536,
+               "bytes_total" : 499355648,
+               "bytes_used" : 2394112,
+               "device" : "/dev/mapper/systemvg-tmplv",
+               "files" : 128016,
+               "files_available" : 127972,
+               "files_free" : 127972,
+               "fragment_size" : 1024,
+               "path" : "/tmp",
+               "percent_used" : 0.47944025657641,
+               "type" : "ext4"
+            },
+            {
+               "block_size" : 4096,
+               "bytes_available" : 972664832,
+               "bytes_free" : 1311563776,
+               "bytes_total" : 6207111168,
+               "bytes_used" : 4895547392,
+               "device" : "/dev/mapper/systemvg-usrlv",
+               "files" : 393216,
+               "files_available" : 59361,
+               "files_free" : 59361,
+               "fragment_size" : 4096,
+               "path" : "/usr",
+               "percent_used" : 78.869980889635,
+               "type" : "ext4"
+            },
+            {
+               "block_size" : 4096,
+               "bytes_available" : 2365419520,
+               "bytes_free" : 2543255552,
+               "bytes_total" : 3103539200,
+               "bytes_used" : 560283648,
+               "device" : "/dev/mapper/systemvg-varlv",
+               "files" : 196608,
+               "files_available" : 136003,
+               "files_free" : 136003,
+               "fragment_size" : 4096,
+               "path" : "/var",
+               "percent_used" : 18.053055298931,
+               "type" : "ext4"
+            }
+         ],
+         "volumes" : []
+      }
+   ],
+   "creation_date" : "2020-08-03T20:54:20.286+02:00",
+   "creation_date_epoche" : 1596480860,
+   "sender" : {
+      "sblid" : "00000000-8995-4cca-870a-d01cd3000000",
+      "system_id" : "0000-9028-0000"
+   },
+   "version" : 3
+}
