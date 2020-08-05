@@ -1,8 +1,7 @@
 # FAST LTA AG - Silent Bricks Public REST API Description
 
 __Version:__ API Version 3.0  for Silent Bricks Software R 2.31 (Version 2.31.0.3)  
-__Date:__ July 2020
-
+__Date:__ August 2020
 
 ## Glossary
 
@@ -243,87 +242,7 @@ Retrieves all the available serial numbers and other hardware information.
 GET /v1/hardware_info.json
 ```
 
-Response body example:
-
-```
-{
-  "system": {
-    "id": null,
-    "sblid": "1e3018a0-0d83-4a7f-88b3-d404a47082ff",
-    "creation_data": "2019-12-04T15:38:07+01:00",
-    "bundle_version": "V2",
-    "hardware": {
-      "site": {
-        "id": "1",
-        "memory_status": { "ce": "0","ue": "0" },
-        "devices": {
-          "device": [
-            {
-              "systemtype": "G5000","type": "CONTROLLER_1","serial": "3000-9990-0640","fw": "0.100",
-              "components": {
-                "component": { "shortname": "MainBoard","manufacturer": "", "pn": "", "serial": "", "version": "" }},
-              "bricks": {
-                "brick": [
-                  { "shortname": "SB","type": "hdd","bc_uuid":<UUID>,"serial":<Serial>,"fw": "1.2.100","used": "-","slot": "0" },
-                  {"shortname": "SBW","type": "worm","bc_uuid":<UUID>,"serial":<Serial>,"fw": "1.2.100","used": "-","slot": "4"}
-                 ]}},
-            {
-              "systemtype": "EXTSHELF", "type": "SHELF_1","serial": "1000-9990-0511","fw": "0.100",
-              "components": null,
-              "bricks": {
-                "brick": [
-                  { "shortname": "SB","type": "hdd","bc_uuid":<UUID>,"serial":<Serial>,"fw": "1.2.100","used": "-","slot": "0" },
-                  {"shortname": "SBW","type": "worm","bc_uuid":<UUID>,"serial":<Serial>"fw": "1.2.100","used": "-","slot": "3"}
-                ]
-              }
-            },
-            {
-              "systemtype": "EXTSHELF","type": "SHELF_1","serial": "1000-9991-0533","fw": "0.100",
-              "components": null,
-              "bricks": {
-                "brick": [
-                  { "shortname": "SB","type": "hdd","bc_uuid":<UUID>,"serial":<Serial>,"fw": "1.2.100","used": "-","slot": "0" },
-                  {"shortname": "SBW","type": "worm","bc_uuid":<UUID>,"serial":<Serial>,"fw": "1.2.100","used": "-","slot": "3"}
-                ]
-              }
-            },
-            {
-              "systemtype": "EXTSHELF","type": "SHELF_1","serial": "1000-9992-0500", "fw": "0.100",
-              "components": null,
-              "bricks": {
-                "brick": [
-                  { "shortname": "SB","type": "hdd","bc_uuid":<UUID>,"serial":<Serial>,"fw": "1.2.100","used": "-","slot": "1" },
-                  {"shortname": "SBW","type": "worm","bc_uuid":<UUID>,"serial":<Serial>,"fw": "1.2.100","used": "-","slot": "2"}
-                ]
-              }
-            },
-            {
-              "systemtype": "SBDS","type": "DS","serial": "5100-0100-0100","fw": "1.2.145",
-              "components": null,
-              "bricks": {
-                "brick": { "shortname": "SBDS","type": "dshdd","bc_uuid":<UUID>,"serial":<Serial>,"fw": "1.2.145","used": "-","slot": "0" }}
-            },
-            {
-              "systemtype": "SBDS","type": "DS","serial": "5100-0200-0200","fw": "1.2.177",
-              "components": null,
-              "bricks": {
-                "brick": {
-                  "shortname": "SBWDS","type": "dsworm","bc_uuid":<UUID>,"serial":<Serial>,"fw": "1.2.177","used": "-","slot": "0" }}
-            },
-          ]
-        }
-      }
-    },
-    "software": { "used_space": "0", "worm_integration": "false", "version": "",
-      "bios": { "version": "6.00", "vendor": "", "release_date": "", "hardware": ""},
-      "EOC": "0","DLC": "0","WVC": "0",
-      "migrations": null,
-      "boss_versions": { "boss_version": [{},{},{},{}] }
-    },
-    "eventhistory": { "events": null }
-  }
-}
-```
+Response body example: [click](hardware_info_example.json)
 
 The `systemtype` and the `type` can be
 
