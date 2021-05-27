@@ -1,6 +1,6 @@
 #! /usr/bin/perl
 ##################################################################
-# Copyright 2018 FAST LTA AG
+# Copyright 2020 FAST LTA GmbH
 # 
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
