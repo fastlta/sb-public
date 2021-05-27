@@ -1,7 +1,7 @@
 # FAST LTA AG - Silent Bricks Public REST API Description
 
-__Version:__ API Version 3.0  for Silent Bricks Software R 2.31 (Version 2.31.0.3)  
-__Date:__ August 2020
+__Version:__ API Version 3.0  for Silent Bricks Software R 2.37 (Version 2.37.0.4)  
+__Date:__ March 2021
 
 ## Glossary
 
@@ -173,6 +173,17 @@ The `Status` can be
 | `completed` | job has been completed successfully |
 
 
+The job id can be retrieved directly after a successful API call (from release version 2.33).
+For those actions, which start a job in background, the API will return its job id in following format:
+
+```
+{
+    "code": "200",
+    "msg": "ok",
+    "job_id": "b7d9343cf809cbf18c129aa6f3cf3756"
+}
+```
+
 ### List open issues
 
 Lists all open service issues of the support area.
@@ -278,6 +289,7 @@ Response body example:
       "name": "management",
       "dhcp": true,
       "ipaddr_v4": "172.100.51.240",
+      "gateway_v4": "172.100.50.254",
       "subnet_mask": "255.255.254.0",
       "bonding_mode": "1 (active-backup)"
     },
@@ -285,6 +297,7 @@ Response body example:
       "name": "data",
       "dhcp": true,
       "ipaddr_v4": "172.20.61.120",
+      "gateway_v4": "172.20.60.254",
       "subnet_mask": "255.255.254.0",
       "bonding_mode": "1 (active-backup)",
       "link_auto_neg": true,
@@ -319,6 +332,40 @@ The `bonding_mode` can be
 | `4 (802.3ad)`       | 802.3ad mode is an IEEE standard also called LACP (Link Aggregation Control Protocol). LACP balances outgoing traffic across the active ports and accepts incoming traffic from any active port. |
 | `5 (balance-tlb)`   | This mode ensures that the outgoing traffic distribution is set according to the load on each interface and that the current interface receives all the incoming traffic. If the assigned interface fails to receive traffic, another interface is assigned to the receiving role. It provides fault tolerance and load balancing. |
 
+
+## System Operations
+
+### Reboot the Controller
+
+Reboots the Silent Brick Controller.
+
+Request:
+
+```
+POST /v1/system/reboot.json
+```
+
+Example:
+
+```
+curl -X POST "https://<host-ip>/sb-public-api/api/v1/system/reboot.json"
+```
+
+### Shutdown the Controller
+
+Shuts down the Silent Brick Controller. 
+
+Request:
+
+```
+POST /v1/system/shutdown.json
+```
+
+Example:
+
+```
+curl -X POST "https://<host-ip>/sb-public-api/api/v1/system/shutdown.json"
+```
 
 ## Basic Brick Operations
 
@@ -1168,21 +1215,18 @@ List of keys:
 
 #### Restrictions for _SNAS ERC_ volumes
 
-- You can only add _Silent Brick_ and _Silent Brick Flash_ bricks.
-- You are advised not to assign more than 9 bricks. (Starting with release 2.29, this limit is enforced.)
-- You cannot mix bricks of different brick types.
+- You can only add _Silent Brick_, _Silent Brick Flash_ and _Silent Brick DS_ bricks.
 
 #### Restrictions for _SNAS 2P_ volumes
 
 - You can only add _Silent Brick_ and _Silent Brick Flash_ bricks.
-- You are advised not to assign more than 9 bricks. (Starting with release 2.29, this limit is enforced.)
+- You cannot assign more than 9 bricks.
 - You cannot mix bricks of different brick types.
 
 #### Restrictions for _SNAS 3P_ volumes
 
 - You can only add _Silent Brick_, _Silent Brick Flash_ and _Silent Brick DS_ bricks.
-- You are advised not to assign more than 9 bricks of type _Silent Brick_ and
-  _Silent Brick Flash_. (Starting with release 2.29, this limit is enforced.)
+- You cannot assign more than 9 bricks of type _Silent Brick_ and _Silent Brick Flash_.
 - You cannot add more than 4 _Silent Brick DS_ bricks.
 - You cannot mix bricks of different brick types.
 
@@ -1277,6 +1321,8 @@ Response body example:
       "nfsid":4,
     "options":"browseable,casesens,public",
     "nfs_path":null,
+    "access_key":null,
+    "port":0,
     "share_clients":[]
     },
     {
@@ -1288,8 +1334,33 @@ Response body example:
       "nfsid":3,
       "options":"",
       "nfs_path":"/shares/Test",
+      "access_key":null,
+    "port":0,
       "share_clients":[{"name":"*","uuid":"c320e59a-cd42-45aa-8dac-85586689045c","options":"rw,no_root_squash"}],      
     },
+    {
+      "uuid": "5312f112-b480-4c9a-8154-5c41d9ecf915",
+      "volume_uuid": "e6af3ff8-78e3-46a5-b1a1-d0211960c1a5",
+      "name": "sss01",
+      "path": "/sss01",
+      "fstype": "sss",
+      "nfsid": 4,
+      "options": "browseable",
+      "nfs_path": null,
+      "access_key": "abc123",
+      "port": 9000,
+      "share_clients": [],
+      "s3_buckets": [
+        {
+          "key": "bucket01/",
+          "in_use": true,
+          "url": "<url>",
+          "type": "folder",
+          "size": 0,
+          "status": "success"
+        }
+      ]
+     },
     {
      "... info for next share"
     }
@@ -1299,7 +1370,7 @@ Response body example:
 
 ### Add a share
 
-Adds a share to any *online* volume.
+Adds a share to an *online* volume. NFS and SMB shares can be added to any *online* volume. S3 share can only be added to _SNAS 2P_ or _SNAS 3P_ volumes. 
 
 Request:
 
@@ -1311,8 +1382,8 @@ List of keys:
 
 | Key | Description | Rules |
 |-|-|-|
-| `name`   | The name of the share. Only for the _smb_ fstype |  It must begin with 'a-z','A-Z' or '0-9' only. Characters '-' or '_'  allowed to follow. Whitespace not allowed |
-| `path`   | The share path | |
+| `name`   | The name of the share. Not for the _nfs_ fstype |  It must begin with 'a-z','A-Z' or '0-9' only. Characters ' - ' or ' _ '  allowed to follow. Whitespace not allowed |
+| `path`   | The share path. Not for the _sss_ fstype | |
 | `fstype` | The file system type | see below for allowed values |
 
 Available `fstype` values
@@ -1321,6 +1392,7 @@ Available `fstype` values
 |-|-|
 | `smb` | For a SMB share |
 | `nfs` | For a NFS share |
+| `sss` | For an S3 share |
 
 SMB share type specific keys:
 
@@ -1371,6 +1443,16 @@ Options specific to NFS share clients:
 | `nfs_subtree_check`   | subtree checking NFS share                                    | false |
 | `nfs_root_squash`     | root squashing on the NFS share                               | true  |
 
+
+S3 share type specific keys:
+
+| Key | Description | Rules |
+|-|-|-|
+| `access_key` | S3 Username | Must contain only characters 'a-z','A-Z' or '0-9' and be between 5 and 20 characters long. Whitespace not allowed. |
+| `secret_key` | S3 Password | Must contain only characters 'a-z','A-Z','0-9','+' or '/' and be between 8 and 40 characters long. Whitespace not allowed. |
+| `port` | TCP Port on which to provide the S3 service |  |
+
+
 Response body example:
 
 ```
@@ -1383,6 +1465,8 @@ Response body example:
   "nfsid": 2,
   "options": "",
   "nfs_path": null,
+  "access_key":"",
+  "port": 0
   "share_clients": [{"name": "*","uuid": "bb5c656b-3d06-4cc7-9263-2a6bf6314083","options": "rw,no_root_squash"}]
 }
 ```
@@ -1401,6 +1485,13 @@ curl -X  PUT -F"name=Share01" -F"path=/Share01" -F"fstype=smb" -F"smb_user=smb01
 curl -X  PUT -F"path=/Share02" -F"fstype=nfs" -F"nfs_client=<client-ipv4-address>" -F"nfs_rw=false" https://<host-ip>/sb-public-api/api/v1/volumes/<volume-uuid>/share.json
 ```
 
+- To create an _sss_ fstype share 
+
+```
+curl -X  PUT -F"name=Share03" -F"access_key=s3share01" -F"fstype=sss" -F"secret_key=<password>" -F"port=9000" https://<host-ip>/sb-public-api/api/v1/volumes/<volume-uuid>/share.json
+```
+
+
 ### Update a share
 
 Removes share clients from a share or adds a new one.
@@ -1415,7 +1506,7 @@ List of keys:
 
 | Key | Description |
 |-|-|
-| `remove` |  Set to true to remove the already existing share clients from the share (Default: false) |
+| `remove` |  Set to true to remove the already existing share clients from the share. Not valid for S3 share type (Default: false) |
 
 SMB share type specific keys:
 
@@ -1459,6 +1550,15 @@ Options specific to NFS share clients:
 | `nfs_subtree_check`   | subtree checking NFS share                                    | false |
 | `nfs_root_squash`     | root squashing on the NFS share                               | true  |
 
+
+S3 share type specific keys:
+
+| Key | Description | Rules |
+|-|-|-|
+| `access_key` | S3 Username | Must contain only characters 'a-z','A-Z' or '0-9' and be between 5 and 20 characters long. Whitespace not allowed. |
+| `secret_key` | S3 Password | Must contain only characters 'a-z','A-Z','0-9','+' or '/' and be between 8 and 40 characters long. Whitespace not allowed. |
+| `port` | TCP Port on which to provide the S3 service |  |
+
 ### Delete a share
 
 Deletes a share.
@@ -1468,6 +1568,89 @@ Request:
 ```
 DELETE /v1/shares/<share-uuid>.json
 ```
+
+### S3 Bucket Operations
+
+#### List Buckets 
+
+Lists all buckets for a particular _sss_ share.
+
+Request:
+
+```
+GET /v1/shares/<share-uuid>.json
+```
+
+Response body example:
+
+```
+{
+  "s3_buckets": [
+    {
+      "key": "bucket01/",
+      "in_use": false,
+      "url": "<url>",
+      "type": "folder",
+      "size": 0,
+      "status": "success"
+    }
+    {
+     "... info for next bucket"
+    }
+  ]
+}
+```
+
+
+#### Add a Bucket
+
+Buckets can be added only to an _sss_ file system type share. 
+
+Request:
+
+```
+POST /v1/shares/<share-uuid>/s3_buckets.json
+```
+
+List of keys:
+
+| Key | Description | Rules |
+|-|-|-|
+| `bucket`   | The name of the bucket.| It must begin with 'a-z' or '0-9' only. Character ' - ' is allowed to follow. Must end with 'a-z' or '0-9' only.Whitespace not allowed. Minimum length is 3 |
+
+Response body example:
+
+```
+{
+  "code": 200,
+  "msg": "ok",
+  "job_id": "de0352d37b3f9ba52a703a31df175d8f"
+}
+```
+
+Example:
+
+```
+curl -X  POST -F"bucket=s3-bucket" https://<host-ip>/sb-public-api/api/v1/shares/<share-uuid>/s3_buckets.json
+```
+
+
+#### Delete a Bucket
+
+Only empty buckets can be deleted.  
+
+Request:
+
+```
+DELETE /v1/shares/<share-uuid>/s3_buckets.json
+```
+
+List of keys:
+
+| Key | Description | 
+|-|-|
+| `bucket`   | The name of the bucket. |
+
 
 ## Replication Operations
 
@@ -1871,6 +2054,15 @@ List of keys:
 | `name` | The name for the clone | Must begin with 'a-z','A-Z' or '0-9' only. Characters '-' or '_' allowed to follow. Whitespaces are not allowed |
 | `description` | The description for the clone | Max 255 Characters |
 | `brick_uuids` | The uuids of the bricks to be added to the clone as an array |
+| `action_on_finish` | The action to perform when the clone is done. | Must be one of: "none", "set_offline" or "eject_bricks"
+
+Possible values for `action_on_finish`:
+
+| Value | Action |
+|-|-|
+| `none` | (Used by default) Do nothing after cloning is done.
+| `set_offline` | Set the cloned volume offline.
+| `eject_bricks` | Set the cloned volume offline and eject all bricks assigned to that volume.
 
 Depending on the type of the `source_volume`, additional keys are allowed.
 
@@ -1955,7 +2147,7 @@ Response body example:
 }
 ```
 
-### Show specific Compliant Archive
+### Show Specific Compliant Archive
 
 Retrieves the information (including Sub Volumes) for a particular Compliant Archive.
 
@@ -2062,9 +2254,190 @@ List of keys:
 |---|---|
 | `passphrase`     | The current passphrase of the Compliant Archive |
 
-## Subvolume Operations
+
+## Sub Volume Operations
 
 Using the `uuid` of a sub volume, the name and description can be updated just like a standard volume. But all other volume operations are not allowed for a sub volume.
+
+### List Sub Volume Cache Policies
+
+List cache policies of all Sub Volumes of the current user.
+
+```
+GET /v1/volumes/caches.json
+```
+
+Response body example:
+
+```
+{
+    "caches": [
+        {
+            "sub_volume_uuid": "b91c5741-8373-4977-abc9-aafc8df278d6",
+            "sub_volume_name": "sample volume",
+            "rule": true,
+            "eviction_period": 30,
+            "enabled": true
+        },
+    
+        ...
+    ]
+}
+```
+
+### Show Sub Volume Cache Policy
+
+Show the cache policy for one Sub Volume
+
+```
+GET /v1/volumes/<sub-volume-uuid>/cache.json
+```
+
+Response body example:
+
+```
+{
+    "sub_volume_name": "sample volume",
+    "rule": true,
+    "eviction_period": 30,
+    "enabled": true
+}
+```
+
+### Create or Update Sub Volume Cache Policies 
+
+Create or update the same cache policies for one or more Sub Volumes.
+
+```
+POST /v1/volumes/caches/bulk_create_or_update.json
+```
+
+List of keys:
+
+| Key | Description |
+|---|---|
+| `volume_ids` | Array, a list of Sub Volume IDs |
+| `rule` | JSON formatted string, the matching rules for the caching policy, see following description, default: ""|
+| `eviction_period` | Integer, the max period in days allowed to keep the cache, clipped at the maximum of 10 years, default: 0|
+| `enabled` | Boolean, to enable the cache and cleanup rule, default: false|
+
+Rules:
+
+Cache Rules are persisted using JSON formatted strings.
+
+Supported logic predicates: true, false, "and", "or", "not"
+
+Supported ingest object predicates: "size", "name"
+
+Rule examples:
+
+* all files
+
+    `true`
+    
+* all files smaller 2MB 
+
+   `{ "size": [0, 2000] } or { "size": 2000 }`
+    
+* all files not between 1MB and 2MB in size
+
+    `{ "not": {"size": [1000, 2000]} }`
+
+* all files smaller 2MB or all ".png" files
+
+    `{ "or": [{"size": [0, 2000]}, {"name": ["*.png"]} ]}`
+
+* all non-".png" files smaller 2MB
+
+    `{ "and": [{"size": [0, 2000]}, {"not": {"name": ["*.png"]}} ]}`
+
+* all xrays between 50 and 100MB
+
+    `{ "and": [{"size": [50000, 100000]}, {"name": ["*xray*"]} ]}`
+
+* all ".jpg"/".jpeg" files smaller 2MB or all ".pdf"
+
+    `{ "or": [{ "and": [{"size": [0, 2000]}, {"name": ["*.jpg","*.jpeg"]} ]}, {"name": ["*.pdf"]} ]}`
+
+
+Response for a successful operation:
+
+```
+{
+    "code": 200,
+    "msg": "ok"
+}
+```
+
+Response for a failed operation:
+
+```
+If volume_ids is blank:
+
+{
+    "code": 400,
+    "msg": "volume ids missing"
+}
+
+If volume_ids has a non-existing volume_id:
+
+{
+    "code": 404,
+    "msg": "no such volume"
+}
+
+If the stage volume that does not utilize an SSD drive:
+
+{
+    "code": 400,
+    "msg": "Archive caching is not possible. The stage brick must be a SSD brick."
+}
+
+If all rule, eviction_period and enabled there parameters are left empty:
+
+{
+    "code": 400,
+    "msg": "Missing parameter for API call."
+}
+
+If rule is invalid, e.g. "{}" :
+
+{
+    "code": 400,
+    'msg": "Invalid cache policy rule."
+}
+
+If enabled is invalid, e.g. enabled set true when the rule is empty:
+
+{
+    "code": 400,
+    'msg": "Invalid value for cache policy enabled field."
+}
+
+```
+
+Examples of "error details" for "i18n_sub_volume_cache_bad_rule":
+
+"Unexpected 'name' predicate", "Invalid encoding for 'name' predicate", "Expecting hash", "Invalid json format", 
+"'and' predicate expects array with exact 2 members", "'and' predicate not allowed on a layer > 2" ... 
+
+### Validate Sub Volume Cache Policy
+
+Validate given cache policy for a Sub Volume.
+
+```
+GET /v1/volumes/<sub-volume-uuid>/cache/validate.json
+```
+
+List of keys:
+
+| Key | Description |
+|---|---|
+| `rule` | formatted string (Mandatory), the matching rules for the caching policy |
+| `eviction_period` | Integer, the max period in days allowed to keep the cache, max 10 years|
+| `enabled` | Boolean, to enable the cache and cleanup policy |
+
+Response is same as for #bulk_create_or_update, see before.
 
 ## Privilege Delete Operations
 
