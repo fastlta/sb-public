@@ -1,9 +1,8 @@
 # FAST LTA AG - Silent Bricks Public REST API Description
 
-__Version:__ API Version 3.0 for Silent Bricks Software R 2.37 (Version 2.37.0.4)  
-__Date:__ May 2021
+__Version:__ API Version 3.0  for Silent Bricks Software R 2.37 (Version 2.37.0.4)  
+__Date:__ March 2021
 
-# Silent Bricks API
 
 ## Glossary
 
@@ -291,6 +290,7 @@ Response body example:
       "name": "management",
       "dhcp": true,
       "ipaddr_v4": "172.100.51.240",
+      "gateway_v4": "172.100.50.254",
       "subnet_mask": "255.255.254.0",
       "bonding_mode": "1 (active-backup)"
     },
@@ -298,6 +298,7 @@ Response body example:
       "name": "data",
       "dhcp": true,
       "ipaddr_v4": "172.20.61.120",
+      "gateway_v4": "172.20.60.254",
       "subnet_mask": "255.255.254.0",
       "bonding_mode": "1 (active-backup)",
       "link_auto_neg": true,
@@ -1321,6 +1322,8 @@ Response body example:
       "nfsid":4,
     "options":"browseable,casesens,public",
     "nfs_path":null,
+    "access_key":null,
+    "port":0,
     "share_clients":[]
     },
     {
@@ -1332,8 +1335,33 @@ Response body example:
       "nfsid":3,
       "options":"",
       "nfs_path":"/shares/Test",
+      "access_key":null,
+    "port":0,
       "share_clients":[{"name":"*","uuid":"c320e59a-cd42-45aa-8dac-85586689045c","options":"rw,no_root_squash"}],      
     },
+    {
+      "uuid": "5312f112-b480-4c9a-8154-5c41d9ecf915",
+      "volume_uuid": "e6af3ff8-78e3-46a5-b1a1-d0211960c1a5",
+      "name": "sss01",
+      "path": "/sss01",
+      "fstype": "sss",
+      "nfsid": 4,
+      "options": "browseable",
+      "nfs_path": null,
+      "access_key": "abc123",
+      "port": 9000,
+      "share_clients": [],
+      "s3_buckets": [
+        {
+          "key": "bucket01/",
+          "in_use": true,
+          "url": "<url>",
+          "type": "folder",
+          "size": 0,
+          "status": "success"
+        }
+      ]
+     },
     {
      "... info for next share"
     }
@@ -1343,7 +1371,7 @@ Response body example:
 
 ### Add a share
 
-Adds a share to any *online* volume.
+Adds a share to an *online* volume. NFS and SMB shares can be added to any *online* volume. S3 share can only be added to _SNAS 2P_ or _SNAS 3P_ volumes. 
 
 Request:
 
@@ -1355,8 +1383,8 @@ List of keys:
 
 | Key | Description | Rules |
 |-|-|-|
-| `name`   | The name of the share. Only for the _smb_ fstype |  It must begin with 'a-z','A-Z' or '0-9' only. Characters '-' or '_'  allowed to follow. Whitespace not allowed |
-| `path`   | The share path | |
+| `name`   | The name of the share. Not for the _nfs_ fstype |  It must begin with 'a-z','A-Z' or '0-9' only. Characters ' - ' or ' _ '  allowed to follow. Whitespace not allowed |
+| `path`   | The share path. Not for the _sss_ fstype | |
 | `fstype` | The file system type | see below for allowed values |
 
 Available `fstype` values
@@ -1365,6 +1393,7 @@ Available `fstype` values
 |-|-|
 | `smb` | For a SMB share |
 | `nfs` | For a NFS share |
+| `sss` | For an S3 share |
 
 SMB share type specific keys:
 
@@ -1415,6 +1444,16 @@ Options specific to NFS share clients:
 | `nfs_subtree_check`   | subtree checking NFS share                                    | false |
 | `nfs_root_squash`     | root squashing on the NFS share                               | true  |
 
+
+S3 share type specific keys:
+
+| Key | Description | Rules |
+|-|-|-|
+| `access_key` | S3 Username | Must contain only characters 'a-z','A-Z' or '0-9' and be between 5 and 20 characters long. Whitespace not allowed. |
+| `secret_key` | S3 Password | Must contain only characters 'a-z','A-Z','0-9','+' or '/' and be between 8 and 40 characters long. Whitespace not allowed. |
+| `port` | TCP Port on which to provide the S3 service |  |
+
+
 Response body example:
 
 ```
@@ -1427,6 +1466,8 @@ Response body example:
   "nfsid": 2,
   "options": "",
   "nfs_path": null,
+  "access_key":"",
+  "port": 0
   "share_clients": [{"name": "*","uuid": "bb5c656b-3d06-4cc7-9263-2a6bf6314083","options": "rw,no_root_squash"}]
 }
 ```
@@ -1445,6 +1486,13 @@ curl -X  PUT -F"name=Share01" -F"path=/Share01" -F"fstype=smb" -F"smb_user=smb01
 curl -X  PUT -F"path=/Share02" -F"fstype=nfs" -F"nfs_client=<client-ipv4-address>" -F"nfs_rw=false" https://<host-ip>/sb-public-api/api/v1/volumes/<volume-uuid>/share.json
 ```
 
+- To create an _sss_ fstype share 
+
+```
+curl -X  PUT -F"name=Share03" -F"access_key=s3share01" -F"fstype=sss" -F"secret_key=<password>" -F"port=9000" https://<host-ip>/sb-public-api/api/v1/volumes/<volume-uuid>/share.json
+```
+
+
 ### Update a share
 
 Removes share clients from a share or adds a new one.
@@ -1459,7 +1507,7 @@ List of keys:
 
 | Key | Description |
 |-|-|
-| `remove` |  Set to true to remove the already existing share clients from the share (Default: false) |
+| `remove` |  Set to true to remove the already existing share clients from the share. Not valid for S3 share type (Default: false) |
 
 SMB share type specific keys:
 
@@ -1503,6 +1551,15 @@ Options specific to NFS share clients:
 | `nfs_subtree_check`   | subtree checking NFS share                                    | false |
 | `nfs_root_squash`     | root squashing on the NFS share                               | true  |
 
+
+S3 share type specific keys:
+
+| Key | Description | Rules |
+|-|-|-|
+| `access_key` | S3 Username | Must contain only characters 'a-z','A-Z' or '0-9' and be between 5 and 20 characters long. Whitespace not allowed. |
+| `secret_key` | S3 Password | Must contain only characters 'a-z','A-Z','0-9','+' or '/' and be between 8 and 40 characters long. Whitespace not allowed. |
+| `port` | TCP Port on which to provide the S3 service |  |
+
 ### Delete a share
 
 Deletes a share.
@@ -1512,6 +1569,89 @@ Request:
 ```
 DELETE /v1/shares/<share-uuid>.json
 ```
+
+### S3 Bucket Operations
+
+#### List Buckets 
+
+Lists all buckets for a particular _sss_ share.
+
+Request:
+
+```
+GET /v1/shares/<share-uuid>.json
+```
+
+Response body example:
+
+```
+{
+  "s3_buckets": [
+    {
+      "key": "bucket01/",
+      "in_use": false,
+      "url": "<url>",
+      "type": "folder",
+      "size": 0,
+      "status": "success"
+    }
+    {
+     "... info for next bucket"
+    }
+  ]
+}
+```
+
+
+#### Add a Bucket
+
+Buckets can be added only to an _sss_ file system type share. 
+
+Request:
+
+```
+POST /v1/shares/<share-uuid>/s3_buckets.json
+```
+
+List of keys:
+
+| Key | Description | Rules |
+|-|-|-|
+| `bucket`   | The name of the bucket.| It must begin with 'a-z' or '0-9' only. Character ' - ' is allowed to follow. Must end with 'a-z' or '0-9' only.Whitespace not allowed. Minimum length is 3 |
+
+Response body example:
+
+```
+{
+  "code": 200,
+  "msg": "ok",
+  "job_id": "de0352d37b3f9ba52a703a31df175d8f"
+}
+```
+
+Example:
+
+```
+curl -X  POST -F"bucket=s3-bucket" https://<host-ip>/sb-public-api/api/v1/shares/<share-uuid>/s3_buckets.json
+```
+
+
+#### Delete a Bucket
+
+Only empty buckets can be deleted.  
+
+Request:
+
+```
+DELETE /v1/shares/<share-uuid>/s3_buckets.json
+```
+
+List of keys:
+
+| Key | Description | 
+|-|-|
+| `bucket`   | The name of the bucket. |
+
 
 ## Replication Operations
 
