@@ -1,8 +1,9 @@
 # FAST LTA AG - Silent Bricks Public REST API Description
 
-__Version:__ API Version 3.0  for Silent Bricks Software R 2.37 (Version 2.37.0.4)  
-__Date:__ March 2021
+__Version:__ API Version 3.0  for Silent Bricks Software R 2.37 (Version 2.39.0.4)  
+__Date:__ Juli 2021
 
+# Silent Bricks API
 
 ## Glossary
 
@@ -1319,11 +1320,7 @@ Response body example:
       "name":"Test",
       "path":"/",
       "fstype":"smb",
-      "nfsid":4,
     "options":"browseable,casesens,public",
-    "nfs_path":null,
-    "access_key":null,
-    "port":0,
     "share_clients":[]
     },
     {
@@ -1335,8 +1332,6 @@ Response body example:
       "nfsid":3,
       "options":"",
       "nfs_path":"/shares/Test",
-      "access_key":null,
-    "port":0,
       "share_clients":[{"name":"*","uuid":"c320e59a-cd42-45aa-8dac-85586689045c","options":"rw,no_root_squash"}],      
     },
     {
@@ -1345,11 +1340,10 @@ Response body example:
       "name": "sss01",
       "path": "/sss01",
       "fstype": "sss",
-      "nfsid": 4,
       "options": "browseable",
-      "nfs_path": null,
       "access_key": "abc123",
       "port": 9000,
+      "s3_domain": "<dns-name>"
       "share_clients": [],
       "s3_buckets": [
         {
@@ -1452,6 +1446,7 @@ S3 share type specific keys:
 | `access_key` | S3 Username | Must contain only characters 'a-z','A-Z' or '0-9' and be between 5 and 20 characters long. Whitespace not allowed. |
 | `secret_key` | S3 Password | Must contain only characters 'a-z','A-Z','0-9','+' or '/' and be between 8 and 40 characters long. Whitespace not allowed. |
 | `port` | TCP Port on which to provide the S3 service |  |
+| `s3_domain` | Service point DNS name  |  |
 
 
 Response body example:
@@ -1465,9 +1460,7 @@ Response body example:
   "fstype": "nfs",
   "nfsid": 2,
   "options": "",
-  "nfs_path": null,
-  "access_key":"",
-  "port": 0
+  "nfs_path": /shares/Test,
   "share_clients": [{"name": "*","uuid": "bb5c656b-3d06-4cc7-9263-2a6bf6314083","options": "rw,no_root_squash"}]
 }
 ```
@@ -1489,7 +1482,7 @@ curl -X  PUT -F"path=/Share02" -F"fstype=nfs" -F"nfs_client=<client-ipv4-address
 - To create an _sss_ fstype share 
 
 ```
-curl -X  PUT -F"name=Share03" -F"access_key=s3share01" -F"fstype=sss" -F"secret_key=<password>" -F"port=9000" https://<host-ip>/sb-public-api/api/v1/volumes/<volume-uuid>/share.json
+curl -X  PUT -F"name=Share03" -F"access_key=s3share01" -F"fstype=sss" -F"secret_key=<password>" -F"port=9000" -F"s3_domain=<dns-name>" https://<host-ip>/sb-public-api/api/v1/volumes/<volume-uuid>/share.json
 ```
 
 
@@ -1559,6 +1552,7 @@ S3 share type specific keys:
 | `access_key` | S3 Username | Must contain only characters 'a-z','A-Z' or '0-9' and be between 5 and 20 characters long. Whitespace not allowed. |
 | `secret_key` | S3 Password | Must contain only characters 'a-z','A-Z','0-9','+' or '/' and be between 8 and 40 characters long. Whitespace not allowed. |
 | `port` | TCP Port on which to provide the S3 service |  |
+| `s3_domain` | Service point DNS name  |  |
 
 ### Delete a share
 
