@@ -1,7 +1,7 @@
 # FAST LTA GmbH - Silent Bricks Public REST API Description
 
-__Version:__ API Version 3.0  for Silent Bricks Software Version 2.39.0.4  
-__Date:__ Juli 2021
+__Version:__ API Version 3.0  for Silent Bricks Software Version 2.41.0.2 
+__Date:__ October 2021
 
 # Silent Bricks API
 
@@ -1273,6 +1273,18 @@ Starts the import of an SNAS ERC volume. Importing an encrypted volume will fail
 
 ```
 PUT /v1/volumes/<volume-uuid>/import.json
+```
+
+### Erase a volume (SNAS 2P or SNAS 3P only)
+
+Starts the erase of all data of an SNAS 2P/3P volume. Before starting the operation make sure that,  
+
+- All the bricks of the volume are accessible
+- All the associated snapshot volumes are deleted
+- The volume is offline.
+
+```
+DELETE /v1/volumes/<volume-uuid>/erase.json
 ```
 
 ### Delete a volume
@@ -2705,7 +2717,10 @@ Response body example:
          "description": "",
          "remote_mgmt_address": "172.100.51.91",
          "remote_data_address": "172.20.61.51",
+         "remote_data_nat_address": "172.20.20.1"
+         "remote_data_nat_port": 122,
          "own_role": "endpoint",
+         "behind_nat": false,
          "deleted": false,
          "ssh_status": "not_connected",
          "api_status": "not_connected",
@@ -2742,7 +2757,10 @@ GET /v1/host_connections/<host-connection-uuid>.json
          "description": "",
          "remote_mgmt_address": "172.100.51.91",
          "remote_data_address": "172.20.61.51",
+         "remote_data_nat_address": "172.20.20.1"
+         "remote_data_nat_port": 122,
          "own_role": "endpoint",
+         "behind_nat": false,
          "deleted": false,
          "ssh_status": "not_connected",
          "api_status": "not_connected",
