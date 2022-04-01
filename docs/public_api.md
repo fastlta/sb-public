@@ -1,7 +1,7 @@
 # FAST LTA GmbH - Silent Bricks Public REST API Description
 
-__Version:__ API Version 3.0  for Silent Bricks Software Version 2.41.0.2 
-__Date:__ October 2021
+__Version:__ API Version 3.2.43  for Silent Bricks Software Version 2.43.0.3 
+__Date:__ March 2022
 
 # Silent Bricks API
 
@@ -992,7 +992,8 @@ Response body example:
       "mode": "plain",
       "uuid": "26e10c4b-7823-400e-8b3a-f9e29f64ca60",
       "size": 1496927616,
-      "used": 76743
+      "used": 76743,
+      "used_percentage" : 0.01
     },
     {
       "name": "Vol02",
@@ -1002,7 +1003,8 @@ Response body example:
       "mode": "plain",
       "uuid": "f35dc74e-0ce9-440b-b9ac-0ec7603ebaf5",
       "size": 1995903488,
-      "used": 35079
+      "used": 35079,
+      "used_percentage" : 0.0
     },
     {
       "... info for next volume"
@@ -1151,7 +1153,8 @@ Response body example:
   "status": "incomplete",
   "uuid": "653bf326-a834-47ef-bab9-99ab8e5bcf9f",
   "size": 0,
-  "used": 0
+  "used": 0,
+  "used_percentage" : 0
 }
 ```
 
@@ -1406,7 +1409,7 @@ SMB share type specific keys:
 | Value | Description |
 |-|-|
 | `smb_user`   | Restrict access to local SMB user (Format: username) |
-| `smb_client` | Restrict access to AD user (Format: domain/username) |
+| `smb_client` | Restrict access to AD user (Format: domain/username) or AD Group (Format: @domain/name)|
 
 Flags specific for the SMB share type:
 
@@ -1416,8 +1419,13 @@ Flags specific for the SMB share type:
 | `smb_read_only`       | read-only flag                            | false |
 | `smb_browseable`      | browseable flag                           | true  |
 | `smb_ntfs_acls`       | ntfs-acls flag                            | true  |
-| `smb_case_sensitive`  | case sensitive flag                       | true  |
+| `smb_case_sensitive`  | case sensitive flag                       | volume dependent |
 | `smb_admin`           | If set to true, an admin user is created. | false |
+
+Note: `smb_case_sensitive` flag: For an `snas_erc` Volume: Depends on user input ( Default: true )
+                                 For an `snas_2p/snas_3p` Volume: If `case_sensitive` flag for the volume is set to false, Set to false ( User Input Ignored )
+                                                                  If `case_sensitive` flag for the volume is set to true, Depends on user input ( Default: true )
+
 
 NFS share type specific keys:
 
@@ -1519,7 +1527,7 @@ SMB share type specific keys:
 | Value | Description |
 |-|-|
 | `smb_user`   | Restrict access to local SMB user (Format: username) |
-| `smb_client` | Restrict access to AD user (Format: domain/username) |
+| `smb_client` | Restrict access to AD user (Format: domain/username) or AD Group (Format: @domain/name)|
 
 Flags specific for the SMB share type:
 
@@ -1578,7 +1586,7 @@ DELETE /v1/shares/<share-uuid>.json
 
 ### S3 Bucket Operations
 
-#### List Buckets 
+#### List Buckets
 
 Lists all buckets for a particular _sss_ share.
 
@@ -1692,7 +1700,8 @@ Response body example:
         "status": "online",
         "uuid": "5e9b45c0-09dd-4016-b544-bc3268ebdfa5",
         "size": 829919573,
-        "used": 112208
+        "used": 112208,
+        "used_percentage" : 0.01
       }
     },
     {
@@ -1711,7 +1720,8 @@ Response body example:
         "status": "online",
         "uuid": "65ab57cb-cc5e-452d-893d-a6b957db443b",
         "size": 995903488,
-        "used": 35205
+        "used": 35205,
+        "used_percentage" : 0.0
       }
     }
   ]
@@ -2015,7 +2025,8 @@ Response body example:
     "status": "incomplete",
     "uuid": "2bddcb51-363b-4272-a5d8-eb38c851a931",
     "size": 0,
-    "used": 0
+    "used": 0,
+    "used_percentage": 0.0
     }
   }
 ```
@@ -2195,7 +2206,10 @@ Response body example:
             "status": "online",
             "uuid": "8832e635-406f-4787-ac25-a656dd2a1ef3",
             "size": 2993855232,
-            "used": 412432
+            "used": 412432,
+            "brick_uuids": [
+                    "cbce8c55-9b28-4d92-a99c-689f88c0351a",
+                    "b176b695-7027-4ebf-925a-7fb1691c3f81" ]
         }
     }
     ],
@@ -2207,7 +2221,10 @@ Response body example:
     "status": "online",
     "uuid": "5ba7f0b1-cc95-4ab6-9c26-c0bb00d1ca16",
     "size": 1995903488,
-    "used": 206074
+    "used": 206074,
+    "brick_uuids": [
+              "b8ba2eb5-33ac-48c2-a8a0-29429e6dbe93",
+              "6d74d1f7-880a-45bf-b17f-1392c9083106" ]
     },
     "sub_volumes": [
     {
@@ -2311,7 +2328,7 @@ Response body example:
 }
 ```
 
-### Create or Update Sub Volume Cache Policies 
+### Create or Update Sub Volume Cache Policies
 
 Create or update the same cache policies for one or more Sub Volumes.
 
