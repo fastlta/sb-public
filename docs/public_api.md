@@ -1,8 +1,9 @@
-# FAST LTA AG - Silent Bricks Public REST API Description
+# FAST LTA GmbH - Silent Bricks Public REST API Description
 
-__Version:__ API Version 3.0  for Silent Bricks Software R 2.37 (Version 2.37.0.4)  
-__Date:__ March 2021
+__Version:__ API Version 3.0  for Silent Bricks Software Version 2.41.0.2 
+__Date:__ October 2021
 
+# Silent Bricks API
 
 ## Glossary
 
@@ -1274,6 +1275,18 @@ Starts the import of an SNAS ERC volume. Importing an encrypted volume will fail
 PUT /v1/volumes/<volume-uuid>/import.json
 ```
 
+### Erase a volume (SNAS 2P or SNAS 3P only)
+
+Starts the erase of all data of an SNAS 2P/3P volume. Before starting the operation make sure that,  
+
+- All the bricks of the volume are accessible
+- All the associated snapshot volumes are deleted
+- The volume is offline.
+
+```
+DELETE /v1/volumes/<volume-uuid>/erase.json
+```
+
 ### Delete a volume
 
 Deletes a volume.
@@ -1319,11 +1332,7 @@ Response body example:
       "name":"Test",
       "path":"/",
       "fstype":"smb",
-      "nfsid":4,
     "options":"browseable,casesens,public",
-    "nfs_path":null,
-    "access_key":null,
-    "port":0,
     "share_clients":[]
     },
     {
@@ -1335,8 +1344,6 @@ Response body example:
       "nfsid":3,
       "options":"",
       "nfs_path":"/shares/Test",
-      "access_key":null,
-    "port":0,
       "share_clients":[{"name":"*","uuid":"c320e59a-cd42-45aa-8dac-85586689045c","options":"rw,no_root_squash"}],      
     },
     {
@@ -1345,11 +1352,10 @@ Response body example:
       "name": "sss01",
       "path": "/sss01",
       "fstype": "sss",
-      "nfsid": 4,
       "options": "browseable",
-      "nfs_path": null,
       "access_key": "abc123",
       "port": 9000,
+      "s3_domain": "<dns-name>"
       "share_clients": [],
       "s3_buckets": [
         {
@@ -1452,6 +1458,7 @@ S3 share type specific keys:
 | `access_key` | S3 Username | Must contain only characters 'a-z','A-Z' or '0-9' and be between 5 and 20 characters long. Whitespace not allowed. |
 | `secret_key` | S3 Password | Must contain only characters 'a-z','A-Z','0-9','+' or '/' and be between 8 and 40 characters long. Whitespace not allowed. |
 | `port` | TCP Port on which to provide the S3 service |  |
+| `s3_domain` | Service point DNS name  |  |
 
 
 Response body example:
@@ -1465,9 +1472,7 @@ Response body example:
   "fstype": "nfs",
   "nfsid": 2,
   "options": "",
-  "nfs_path": null,
-  "access_key":"",
-  "port": 0
+  "nfs_path": /shares/Test,
   "share_clients": [{"name": "*","uuid": "bb5c656b-3d06-4cc7-9263-2a6bf6314083","options": "rw,no_root_squash"}]
 }
 ```
@@ -1489,7 +1494,7 @@ curl -X  PUT -F"path=/Share02" -F"fstype=nfs" -F"nfs_client=<client-ipv4-address
 - To create an _sss_ fstype share 
 
 ```
-curl -X  PUT -F"name=Share03" -F"access_key=s3share01" -F"fstype=sss" -F"secret_key=<password>" -F"port=9000" https://<host-ip>/sb-public-api/api/v1/volumes/<volume-uuid>/share.json
+curl -X  PUT -F"name=Share03" -F"access_key=s3share01" -F"fstype=sss" -F"secret_key=<password>" -F"port=9000" -F"s3_domain=<dns-name>" https://<host-ip>/sb-public-api/api/v1/volumes/<volume-uuid>/share.json
 ```
 
 
@@ -1559,6 +1564,7 @@ S3 share type specific keys:
 | `access_key` | S3 Username | Must contain only characters 'a-z','A-Z' or '0-9' and be between 5 and 20 characters long. Whitespace not allowed. |
 | `secret_key` | S3 Password | Must contain only characters 'a-z','A-Z','0-9','+' or '/' and be between 8 and 40 characters long. Whitespace not allowed. |
 | `port` | TCP Port on which to provide the S3 service |  |
+| `s3_domain` | Service point DNS name  |  |
 
 ### Delete a share
 
@@ -2711,7 +2717,10 @@ Response body example:
          "description": "",
          "remote_mgmt_address": "172.100.51.91",
          "remote_data_address": "172.20.61.51",
+         "remote_data_nat_address": "172.20.20.1"
+         "remote_data_nat_port": 122,
          "own_role": "endpoint",
+         "behind_nat": false,
          "deleted": false,
          "ssh_status": "not_connected",
          "api_status": "not_connected",
@@ -2748,7 +2757,10 @@ GET /v1/host_connections/<host-connection-uuid>.json
          "description": "",
          "remote_mgmt_address": "172.100.51.91",
          "remote_data_address": "172.20.61.51",
+         "remote_data_nat_address": "172.20.20.1"
+         "remote_data_nat_port": 122,
          "own_role": "endpoint",
+         "behind_nat": false,
          "deleted": false,
          "ssh_status": "not_connected",
          "api_status": "not_connected",

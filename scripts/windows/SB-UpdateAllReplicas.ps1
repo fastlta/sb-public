@@ -1,5 +1,5 @@
 # 
-# Author: Rene Weber, FAST LTA AG, 2021
+# Author: Rene Weber, FAST LTA GmbH, 2021
 #
 # Script: UpdateAllReplicas
 #
