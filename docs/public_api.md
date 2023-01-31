@@ -1,7 +1,7 @@
 # FAST LTA GmbH - Silent Bricks Public REST API Description
 
-__Version:__ API Version 3.0  for Silent Bricks Software Version 2.47.0.4
-__Date:__ November 2022
+__Version:__ API Version 3.0  for Silent Bricks Software Version 2.49.0.4
+__Date:__ January 2023
 
 # Silent Bricks API
 
@@ -1632,7 +1632,7 @@ DELETE /v1/shares/<share-uuid>.json
 
 ### S3 Bucket Operations
 
-#### List Buckets 
+#### List Buckets
 
 Lists all buckets for a particular _sss_ share.
 
@@ -2378,7 +2378,7 @@ Response body example:
 }
 ```
 
-### Create or Update Sub Volume Cache Policies 
+### Create or Update Sub Volume Cache Policies
 
 Create or update the same cache policies for one or more Sub Volumes.
 
