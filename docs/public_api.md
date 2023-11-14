@@ -1,7 +1,7 @@
 # FAST LTA GmbH - Silent Bricks Public REST API Description
 
-__Version:__ API Version 3.2.43  for Silent Bricks Software Version 2.43.0.3 
-__Date:__ March 2022
+__Version:__ API Version v1 for Silent Bricks Software Version 2.53.0.3
+__Date:__ August 2023
 
 # Silent Bricks API
 
@@ -369,6 +369,50 @@ Example:
 curl -X POST "https://<host-ip>/sb-public-api/api/v1/system/shutdown.json"
 ```
 
+### Restart Share Service
+Restarts NFS or SMB services.
+The NFS service can only be restarted if at least one NFS share exists.
+
+Request:
+
+```
+POST v1/system/restart_share_service.json
+```
+
+List of keys:
+
+| Key  | Description | Rules |
+|-|-|-|
+| `service` | The name of the share service. | Must be 'nfs' or 'smb' |
+
+Response body example:
+
+```
+{ 
+      "code": 200,
+      "msg": "ok",
+      "job_id": "de0352d37b3f9ba52a703a31df175d8f"
+}
+```
+
+Example:
+
+To restart the NFS services:
+```
+curl -X POST -F"service=nfs" https://<host-ip>/sb-public-api/api/v1/system/restart_share_service.json
+```
+
+Request the status of the job as described in [this section](#get-job-status) to know whether the 
+services successfully restarted.
+
+Additional explanation of specific values for `Status`:
+
+| Value | Description |
+|-|-|
+| `failed`    | restart timeouted or failed |
+| `completed` | successfully restarted |
+
+
 ## Basic Brick Operations
 
 ### List free Bricks
@@ -392,7 +436,10 @@ Response body example:
         "type":"HDD",
         "gross_capacity":3995903488,
         "net_capacity":3990496256,
-        "status":"online",
+        "media_status": "ok",
+        "state": "",
+        "status": "online",
+        "power_status": "off",
         "unassigned":"Yes",
       },
       {
@@ -401,6 +448,27 @@ Response body example:
               ]
 }
 ```
+
+The `media_status` is determined based on the usable disk count
+
+| Value | Notes |
+|-|-|
+| `ok` |  Required disks available |
+| `degraded`     | Usable disk count is less than required |
+| `degraded read only`   |   |
+| `low redundancy`  |  |
+| `defective`      |  |
+
+The `status` can be
+
+| Value | Notes |
+|-|-|
+| `online` |   |
+| `transport`| Pending brick validation after reinsert/redetect |
+| `unlocked` | Brick eject requested |
+| `ejected` | Brick is ejected  |
+| `error`  |  |
+
 
 ### List all Bricks
 
@@ -423,7 +491,9 @@ Response body example:
         "type":"HDD",
         "gross_capacity":3995903488,
         "net_capacity":3990496256,
-        "status":"online",
+        "media_status": "ok",
+        "state": "Available",
+        "status": "online",
       "unassigned":"No",
         "partitions": [
           {
@@ -441,7 +511,9 @@ Response body example:
         "type":"HDD",
         "gross_capacity":3995903488,
         "net_capacity":3990496256,
-        "status":"online",
+        "media_status": "ok",
+        "state": "Available in Slot 1",
+        "status": "online",
       "unassigned":"No",
         "tapes": [
           {
@@ -460,7 +532,9 @@ Response body example:
         "type":"HDD",
         "gross_capacity":3995903488,
         "net_capacity":3990496256,
-        "status":"online",
+        "media_status": "ok",
+        "state": "Empty",
+        "status": "online",
       "unassigned":"No",
         "partitions": [
           {
@@ -488,6 +562,117 @@ The `type` can be
 | `WORM`   | Silent Brick Worm  |
 | `DSHDD`  | Silent Brick DS |
 | `DSWORM`      | Silent Brick DS Worm |
+
+The `state` can be
+
+| Value | Description | Notes |
+|-|-|-|
+| `""` |  Un assigned brick |  |
+| `Available`     | Partitioned Brick |  |
+| `Empty`   | Unpartitioned Brick  |  |
+| `Loaded in Drive`  | Loaded Brick | Also includes the drive name |
+| `Available in slot`  | Partitioned Brick | Also includes the slot info for tapes |
+| `Empty in slot`  | Unpartitioned Brick | Also includes the slot info for tapes |
+| `Exported in slot`  | Brick in export slot | Also includes the export slot info for tapes |
+| `Loading Failed` | Loading the tape failed |  |
+| `Unloading Failed` | unloading the tape failed |  |
+
+
+### List all Brick Disks
+
+Returns all brick disks in the system (ok and faulty).
+
+Request:
+
+```
+GET /v1/bricks/disks.json
+```
+
+Response body example:
+
+```
+{
+    "bricks": [
+      {
+        "uuid": "645aac61-a54b-46fe-aaeb-a44b047f9565",
+        "serial":"V10AFDF1",
+        "type":"HDD",
+        "gross_capacity":3995903488,
+        "net_capacity":3990496256,
+        "status":"online",
+        "unassigned":"Yes",
+        "disks": [
+          {
+            "pos": 0,
+            "power_status": "on",
+            "status": "ok",
+            "size": 3000000000,
+            "temp": 32.0,
+            "model": "B9AD5C5247F48295",
+            "firmware": "D60F7030",
+            "serial": "6330502A8ED",
+            "wwn": "77110f667e2f06fb"
+          },
+          {
+            "... info for next disk"
+          }
+        ]
+      },
+      {
+        "... info for next brick"
+      }
+    ]
+}
+
+```
+
+### List faulty Brick Disks
+
+Returns only faulty brick disks and the associated brick.
+
+Request:
+
+```
+GET /v1/bricks/disks.json?notok
+```
+
+Response body example:
+
+```
+{
+    "bricks": [
+      {
+        "uuid": "645aac61-a54b-46fe-aaeb-a44b047f9565",
+        "serial":"V10AFDF1",
+        "type":"HDD",
+        "gross_capacity":3995903488,
+        "net_capacity":3990496256,
+        "status":"online",
+        "unassigned":"Yes",
+        "disks": [
+          {
+            "pos": 0,
+            "power_status": "on",
+            "status": "inconsistent",
+            "size": 3000000000,
+            "temp": 32.0,
+            "model": "B9AD5C5247F48295",
+            "firmware": "D60F7030",
+            "serial": "6330502A8ED",
+            "wwn": "77110f667e2f06fb"
+          },
+          {
+            "... info for next disk"
+          }
+        ]
+      },
+      {
+        "... info for next brick"
+      }
+    ]
+}
+
+```
 
 ### Edit Brick information
 
@@ -988,6 +1173,7 @@ Response body example:
       "name": "Vol01",
       "description": "Test Volume One",
       "volume_type": "snas_3p",
+      "nas_engine": "nas",
       "status": "online",
       "mode": "plain",
       "uuid": "26e10c4b-7823-400e-8b3a-f9e29f64ca60",
@@ -999,6 +1185,7 @@ Response body example:
       "name": "Vol02",
       "description": "Test Volume Two",
       "volume_type": "snas_erc",
+      "nas_engine": "secure_nas",
       "status": "online",
       "mode": "plain",
       "uuid": "f35dc74e-0ce9-440b-b9ac-0ec7603ebaf5",
@@ -1006,6 +1193,20 @@ Response body example:
       "used": 35079,
       "used_percentage" : 0.0
     },
+    {
+      "name": "Sub01",
+      "uuid": "1d9cec60-6ad6-4169-93d9-33513155320d",
+      "description": "Test Subvolume One",
+      "nas_engine": "sub",
+      "mode": "plain",
+      "used": 0,
+      "config": {
+        "privDelMode": "enterprise"
+      },
+      "status": "online",
+      "volume_type": "sub_volume",
+      "brick_archive_uuid": "30b22160-8077-11ed-a400-39b9de331148"
+    }
     {
       "... info for next volume"
     }
@@ -1020,6 +1221,7 @@ The `volume_type` can be
 | `snas_2p` |  SNAS with protection level of 2 |
 | `snas_3p` |  SNAS with protection level of 3 |
 | `snas_erc`|  SNAS ERC |
+| `sub_volume`|  Brick Archive, sub volume |
 
 The `status` can be
 
@@ -1132,6 +1334,7 @@ SNAS Volume specific options
 |-|-|
 | `compression`       | To enable/disable compression for the volume ( Default: true )    |
 | `case_sensitive`  | To enable/disable case sensitive for the volume ( Default: true ) |
+| `optimize`  | To enable/disable optimization for large files ( Default: false ) |
 
 SNAS ERC Volume specific options
 
@@ -1162,10 +1365,16 @@ Note: The `nas_engine` key from the response is deprecated, although still avail
 
 Examples:
 
-- To create an empty volume with default settings ( volume of type _snas_3p_ with _compression_ and _case_sentitive_ values enabled )
+- To create an empty volume with default settings ( volume of type _snas_3p_ with _compression_ and _case_sentitive_ values enabled and optimize option disabled )
 
 ```
 curl -X POST -F"name=Volume01" -F"description=Test volume sb-public-api" https://<host-ip>/sb-public-api/api/v1/volumes.json
+```
+
+- To create an empty volume with optimize option enabled ( volume of type _snas_3p_ with _compression_ and _case_sentitive_ values enabled )
+
+```
+curl -X POST -F"name=Volume03" -F"description=Test volume sb-public-api" -F"optimize=1" https://<host-ip>/sb-public-api/api/v1/volumes.json
 ```
 
 - To create an encrypted _snas_erc_ volume and assign _2_ bricks to it
@@ -1467,7 +1676,9 @@ S3 share type specific keys:
 | `secret_key` | S3 Password | Must contain only characters 'a-z','A-Z','0-9','+' or '/' and be between 8 and 40 characters long. Whitespace not allowed. |
 | `port` | TCP Port on which to provide the S3 service |  |
 | `s3_domain` | Service point DNS name  |  |
+| `objectlocking` | S3 object locking feature  | set to true to enable the feature. Default:false |
 
+Note: Object locking feature can only be set during creation
 
 Response body example:
 
@@ -1593,7 +1804,7 @@ Lists all buckets for a particular _sss_ share.
 Request:
 
 ```
-GET /v1/shares/<share-uuid>.json
+GET /v1/shares/<share-uuid>/s3_buckets.json
 ```
 
 Response body example:
@@ -1608,6 +1819,8 @@ Response body example:
       "type": "folder",
       "size": 0,
       "status": "success"
+      "object_locking": "not_enabled"
+      "veeam_integrated: "no"
     }
     {
      "... info for next bucket"
@@ -1632,6 +1845,10 @@ List of keys:
 | Key | Description | Rules |
 |-|-|-|
 | `bucket`   | The name of the bucket.| It must begin with 'a-z' or '0-9' only. Character ' - ' is allowed to follow. Must end with 'a-z' or '0-9' only.Whitespace not allowed. Minimum length is 3 |
+| `locked_bucket` | Creates a bucket with object locking  | set to true to enable the feature. Default:false |
+| `veeam_integrated` | Creates a bucket with veeam SOSAPI enabled   | set to true to enable the feature. Default:false |
+
+Note: Bucket with object locking can only be created if the share has object locking enabled! 
 
 Response body example:
 
@@ -1791,6 +2008,7 @@ SNAS Volume specific options:
 |-|-|
 | `compression` | To enable/disable compression for the replication volume (Default: depends on the source volume) |
 | `protection_level` | SNAS protection level (2 or 3) (Default: depends on the source volume) |
+| `optimize`  | To enable/disable optimization for large files ( Default: false ) |
 
 SNAS ERC Volume specific options:
 
@@ -2090,6 +2308,7 @@ SNAS Volume specific options:
 |-|-|
 | `compression` | To enable/disable compression for the clone volume (Default: depends on the source volume) |
 | `protection_level` | SNAS protection level (2 or 3) (Default: depends on the source volume) |
+| `optimize`  | To enable/disable optimization for large files ( Default: false ) |
 
 SNAS ERC Volume specific options:
 
@@ -2234,7 +2453,6 @@ Response body example:
       "mode": "plain",
       "status": "online",
       "uuid": "b91c5741-8373-4977-abc9-aafc8df278d6",
-      "size": 0,
       "used": 0,
       "sub_devices": [
           {
@@ -2526,7 +2744,6 @@ Response body example:
             "description": "",
             "nas_engine": "sub",
             "mode": "plain",
-            "size": 389362,
             "used": 389362,
             "config": {
                 "privDelMode": "enterprise"
