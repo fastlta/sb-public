@@ -1590,7 +1590,7 @@ Response body example:
 	"shares":[
 	  {
 	    "uuid": "645aac61-a54b-46fe-aaeb-a44b047f9565",
-	    "volume":"7e40a866-3490-459a-a17c-c5e8d850d0d0",
+	    "volume_uuid":"7e40a866-3490-459a-a17c-c5e8d850d0d0",
 	    "name":"Test",
 	    "path":"/",
 	    "fstype":"smb",
@@ -1599,7 +1599,7 @@ Response body example:
 	  },
 	  {
 	    "uuid":"5941d228-e2ab-4093-9b8f-b06a5a399a1b",
-	    "volume":"7e40a866-3490-459a-a17c-c5e8d850d0d0",
+	    "volume_uuid":"7e40a866-3490-459a-a17c-c5e8d850d0d0",
 	    "name":"",
 	    "path":"/",
 	    "fstype":"nfs",
