@@ -181,8 +181,9 @@ sub getCall {
     $client->setHost($target);
 
     my $response = $client->GET($get_string, $headers);
-
+    
     if ($response->{'_res'}{'_rc'} == 200) {
+
         my $data = decode_json($response->{'_res'}{'_content'});
         return { rc=>1, content=>$data };
     }else {
