@@ -111,8 +111,7 @@ my $object = FAST::ApiPublic->new({
 
 
 
-my $ret 		= $object->getVolumes( );
-
+my $ret 		= $object->getVolumes();
 
 if( $ret->{rc} != 1 ){
 	print "Failed to read volumes\n";
@@ -135,7 +134,7 @@ my $exit_state_prefix = {  0 => "OK",
 						};
 
 
-foreach( @{$ret->{volumes}} ){
+foreach( @{$ret->{content}->{volumes}} ){
 
 	if( $_->{status} ne 'online'){
 		next;
@@ -144,7 +143,9 @@ foreach( @{$ret->{volumes}} ){
 	$vol_uuid = $_->{uuid};
 	$vol_name = $_->{name};
 
+
 	my $get_details = $object->getVolumeDetails( { volume_uuid => $vol_uuid } );
+
 
 	if( $get_details->{rc} != 1 ){
 		print "Failed to read details for $vol_name";
@@ -152,8 +153,9 @@ foreach( @{$ret->{volumes}} ){
 	}
 
 
-	$vol_net  = $get_details->{content}[0]->{net_size};
-	$vol_used = $get_details->{content}[0]->{net_used};
+
+	$vol_net  = $get_details->{content}->{partitions}[0]->{net_size};
+	$vol_used = $get_details->{content}->{partitions}[0]->{net_used};
 	$vol_perc = int( $vol_used / $vol_net * 100 );
 
 	$volume_usages->{$vol_name} = { 'used' => $vol_used,
