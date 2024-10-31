@@ -1,7 +1,8 @@
 # FAST LTA GmbH - Silent Bricks Public REST API Description
 
-__Version:__ API Version v1 for Silent Bricks Software Version 2.57.0.9
-__Date:__ April 2024
+__Version:__ API Version v1 for Silent Bricks Software Version 2.61.0.4
+__Date:__ October 2024
+
 
 # Silent Bricks API
 
@@ -110,9 +111,9 @@ Response body example:
 
 ```
 {
-  "shortname": "G5000",
-  "swversion": "2.20.0.5",
-  "systemid":  "9000"
+	"shortname": "G5000",
+	"swversion": "2.20.0.5",
+	"systemid":  "9000"
 }
 ```
 
@@ -260,17 +261,19 @@ GET /v1/hardware_info.json
 
 Response body example: [click](hardware_info_example.json)
 
-The `systemtype` and the `type` can be
+`device` data with `model` and `hw_type` can be
 
 
-| Systemtype | Type | Description |
-|-|-|-|
-| G5000 | CONTROLLER_x | Silent Brick Controller |
-| G2000 | PB | Silent Brick Drive |
-| G1000 | PB_H | Silent Brick Single Drive  |
-| SBDS | DS | Silent Brick Max / Silent Brick Max WORM |
-| EXTSHELF | SHELF_x | Silent Brick Shelf  |
-
+| Model    | Hw Type                                            | Description                            |
+|----------|----------------------------------------------------|----------------------------------------|
+| G5000    | ControllerG5000Vx                                  | Silent Brick Controller                |
+| G2000    | ControllerG2000                                    | Silent Brick Drive                     |
+| G1000    | ControllerG1000                                    | Silent Brick Single Drive              |
+| SBDS     | SilentBrickDSWORMShelf / SilentBrickDSNonWORMShelf | Silent Brick DS / Silent Brick DS WORM |
+| G5000V2  | ControllerG5200Vx                                  | Silent Brick Controller                |
+| EXTSHELF | ExternalShelf                                      | Silent Brick Shelf                     |
+| SBCPRO_V1 | ControllerProV1                                    | Silent Brick Pro Controller            |
+| BAY_V1    | BayShelfV1                                         | Silent Brick Pro Bay                   |
 
 ### Listing Network Info
 
@@ -337,7 +340,7 @@ The `bonding_mode` can be
 | `4 (802.3ad)`       | 802.3ad mode is an IEEE standard also called LACP (Link Aggregation Control Protocol). LACP balances outgoing traffic across the active ports and accepts incoming traffic from any active port. |
 | `5 (balance-tlb)`   | This mode ensures that the outgoing traffic distribution is set according to the load on each interface and that the current interface receives all the incoming traffic. If the assigned interface fails to receive traffic, another interface is assigned to the receiving role. It provides fault tolerance and load balancing. |
 
-### VTL Serial Offset
+### VTL Serial Offset 
 
 ### Retrieving the value
 
@@ -506,23 +509,24 @@ Response body example:
 
 The `media_status` is determined based on the usable disk count
 
-| Value | Notes |
-|-|-|
-| `ok` |  Required disks available |
-| `degraded`     | Usable disk count is less than required |
-| `degraded read only`   |   |
-| `low redundancy`  |  |
-| `defective`      |  |
+| Value | Notes                                                                                                        |
+|------ |--------------------------------------------------------------------------------------------------------------|
+| `ok`  | Required disks available                                                                                     |
+| `degraded`     | Usable disk count is less than required                                                                      |
+| `degraded read only`   | degraded and read only                                                                                       |
+| `low redundancy`  | Parity disks have failed                                                                                     |
+| `defective`    | Not enough usable disks  |
 
 The `status` can be
 
-| Value | Notes |
-|-|-|
-| `online` |   |
-| `transport`| Pending Silent Brick validation after reinsert/redetect |
-| `unlocked` | Silent Brick eject requested |
-| `ejected` | Silent Brick is ejected  |
-| `error`  |  |
+| Value       | Notes                                                   | Supported Hardware |
+|-------------|---------------------------------------------------------|--------------------|
+| `online`    | Silent Brick is online                                  |All                 |
+| `transport` | Pending Silent Brick validation after reinsert/redetect |All                 |
+| `unlocked`  | Silent Brick eject requested                            |SBC/SB Drives only  |
+| `removed`   | Silent Brick is ejected from the system                 |SBC Pro Only        |
+| `ejected`   | Silent Brick is ejected and removed from the system     |All                 |
+| `error`     | An error occurred on the Silent Brick                   |All                 |
 
 
 ### List all Silent Bricks
@@ -549,7 +553,7 @@ Response body example:
         "media_status": "ok",
         "state": "Available",
         "status": "online",
-      "unassigned":"No",
+    	"unassigned":"No",
         "partitions": [
           {
             "uuid":"8dd53317-ef74-4869-a2f0-5e162d2d5c0b",
@@ -569,7 +573,7 @@ Response body example:
         "media_status": "ok",
         "state": "Available in Slot 1",
         "status": "online",
-      "unassigned":"No",
+    	"unassigned":"No",
         "tapes": [
           {
             "uuid":"52c99404-00b1-46d6-adf8-f710d6bfe1bc",
@@ -590,7 +594,7 @@ Response body example:
         "media_status": "ok",
         "state": "Empty",
         "status": "online",
-      "unassigned":"No",
+    	"unassigned":"No",
         "partitions": [
           {
             "uuid":"8dd53317-ef74-4869-a2f0-5e162d2d5c0b",
@@ -610,13 +614,14 @@ Response body example:
 
 The `type` can be
 
-| Value | Description |
-|-|-|
-| `HDD` |  Silent Brick Air|
-| `SSD`     | Silent Brick Flash/Plus |
-| `WORM`   | Silent Brick WORM  |
-| `DSHDD`  | Silent Brick Max |
-| `DSWORM`      | Silent Brick Max WORM |
+| Value      | Description             |
+|------------|-------------------------|
+| `HDD`      | Silent Brick Air        |
+| `SSD`      | Silent Brick Flash/Plus |
+| `WORM`     | Silent Brick WORM       |
+| `DSHDD`    | Silent Brick Max        |
+| `DSWORM`   | Silent Brick Max WORM   |
+| `BRICKPRO` | Silent Brick Pro        |
 
 The `state` can be
 
@@ -731,7 +736,7 @@ Response body example:
 
 ### Edit Silent Brick information
 
-Updates a Silent Brick's description and status.
+Updates a Silent Brick's description and status. Silent Brick Pro doesn't have a display, so this cannot be used to edit information for a Silent Brick Pro.
 
 ```
 PUT /v1/bricks/<brick-uuid>.json
@@ -784,6 +789,89 @@ curl -X PUT -F "description=Brick001" -F"display_mode=3" https://<host-ip>/sb-pu
 curl -X PUT -F "qr=BrickContainer 001" https://<host-ip>/sb-public-api/api/v1/bricks/<brick-uuid>.json
 ```
 
+### Edit Silent Brick Pro information
+
+Updates the Silent Brick Pro's NFC tag. 
+
+```
+PUT /v1/bricks/<brick-uuid>/nfc_update.json
+```
+
+List of keys:
+
+| Key | Description |
+|-|-|
+| `description` | The description for the Silent Brick |
+| `display_mode` |  The description display mode (see below) |
+
+
+The `display_mode` parameter can have the following values:
+
+| Value | Setting | Notes
+|-|-|
+| `0` |  Don’t write any NFC information | |
+| `1` |  Description as text | Includes the Silent Brick serial number and description ( Default ) |
+| `2` |  Description as text + Silent Brick Info Link | Includes the serial number and the description set by the customer as text and as query parameter to the Silent Brick Info Link|
+| `3` |  Rich information as text | Includes the Silent Brick extended info and description |
+| `4` |  Rich information as text + Silent Brick Info Link | Includes the Silent Brick extended info and description as text and as query parameter to the Silent Brick Info Link|
+
+Example:
+
+- To display the description as text + Info Link ( and the response on a successful update ) 
+
+```
+curl -X PUT -F "description=Brick001" -F"display_mode=2" https://<host-ip>/sb-public-api/api/v1/bricks/<brick-uuid>/nfc_update.json
+```
+
+Response body example:
+
+```
+{
+   "txt" : {
+      "data" : "Serial: S10AFDE8\nDescription: Brick001\nNet capacity: 5 GB",
+      "trimmed" : false
+   },
+   "url" : {
+      "data" : "https://fast-pro-bricks.fast-lta.de?c=0&d=Brick001&s=S10AFDE8&v=1",
+      "trimmed" : false
+   }
+}
+```
+
+#### Silent Brick Pro information preview
+
+Can be used to preview any Silent Brick Pro's NFC tag information. When no keys are provided, it shows the current NFC tag information of the selected Silent Brick Pro. 
+Note: This only shows the preview, does not update the Silent Brick Pro NFC tag.
+
+```
+GET /v1/bricks/<brick-uuid>/nfc_preview.json
+```
+
+For accepted keys and their descriptions see [Edit Silent Brick Pro information](#Edit Silent Brick Pro information)
+
+Example:
+
+- To display the description and Rich Information as text
+
+```
+curl -X GET https://<host-ip>/sb-public-api/api/v1/bricks/<brick-uuid>/nfc_preview.json
+```
+
+Response body example:
+
+```
+{
+   "txt" : {
+      "data" : "Serial: S10AFDE8\nDescription: Brick001\nNet capacity: 5 GB",
+      "trimmed" : false
+   },
+   "url" : {
+      "data" : "https://fast-pro-bricks.fast-lta.de?c=0&d=Brick001&s=S10AFDE8&v=1",
+      "trimmed" : false
+   }
+}
+```
+
 ### Unassign Bricks
 
 Removes one or more Silent Bricks from their associated library or volume. A Silent Brick can only be removed from volume/libraries if it doesn't contain any partitions (i.e. it wasn't used yet).
@@ -810,7 +898,8 @@ curl -X PUT -F "brick_uuids[]=brick_uuid_1" -F"brick_uuids[]=brick_uuid_2" https
 
 ### Enable/disable the QR logo overlay
 
-Enables or disables the QR logo overlay.
+Enables or disables the QR logo overlay. 
+Please note that Silent Brick Pro Controller doesn't support QR overlay.
 
 ```
 PUT /v1/controller.json
@@ -900,11 +989,11 @@ A `key` can be:
 
 | Key | Description | Comments |
 |-|-|-|
-| `library_name`        | The name of the library | Must be provided to create the library |
-| `library_description` | The description for the library | Optional key |
-| `library_type`        | The type of the library to be created | Optional key, Default: LBL |
-| `library_vendor`      | The library vendor | Optional key, Default: FAST-LTA |
-| `library_product`     | The library product | Optional key, Default: SBL 2000 |
+| `library_name`				| The name of the library | Must be provided to create the library |
+| `library_description`	| The description for the library | Optional key |
+| `library_type`				| The type of the library to be created | Optional key, Default: LBL |
+| `library_vendor`			| The library vendor | Optional key, Default: FAST-LTA |
+| `library_product`			| The library product | Optional key, Default: SBL 2000 |
 | `custom_library_revision` | The custom revision of the library | Optional key |
 | `barcode_start`  <br/>  `barcode_end` | The start pattern for tape barcode <br/> The end pattern for tape barcode <br/> | Set the barcode range to use for new media.|
 
@@ -987,13 +1076,13 @@ A `key` can be:
 
 | Key | Description |
 |-|-|
-| `library_name`        | The name of the library |
-| `library_description` | The description for the library |
-| `library_vendor`      | The library vendor (Default: FAST-LTA) |
-| `library_product`     | The library product (Default: SBL 2000) |
+| `library_name`				| The name of the library |
+| `library_description`	| The description for the library |
+| `library_vendor`			| The library vendor (Default: FAST-LTA) |
+| `library_product`			| The library product (Default: SBL 2000) |
 | `custom_library_revision` | The custom revision of the library |
 | `barcode_start`  <br/>  `barcode_end` | The start pattern for tape barcode <br/> The end pattern for tape barcode <br/> Set the barcode range to use for new media.
-| `storage_slots`  | The number of storage slots to set |
+| `storage_slots`	 | The number of storage slots to set |
 | `export_slots` | The number of export slots to set |
 
 See [Create a Library](#Create-a-library) for details on the barcodes.
@@ -1039,6 +1128,7 @@ You can only add the following Silent Brick types to a library:
 - _Silent Brick Flash_
 - _Silent Brick Plus_
 - _Silent Brick Max_
+- _Silent Brick Pro_
 
 You are allowed to mix Silent Bricks of all supported Silent Brick types.
 
@@ -1173,7 +1263,7 @@ The current audit position is found in the value `audit_location`. Because the c
 
 ### Updating tapes
 
-Updates tape information.
+Updates tape information. Please note that Silent Brick Pro doesn't support `qr` display.
 
 ```
 PUT /v1/libraries/<library-uuid>/tapes/<tape-uuid>.json
@@ -1186,9 +1276,36 @@ List of keys:
 | `qr` | Updates the string encoded in the QR code displayed in front of the Silent Brick. When the `value` starts with a `=`, then the complete string is replaced.Otherwise the string is prepended to the QR code |
 
 
+### Updating Silent Brick Pro tapes
+
+```
+PUT /v1/libraries/<library-uuid>/tapes/<tape-uuid>/nfc_update.json
+```
+
+For accepted keys and their descriptions see [Edit Silent Brick Pro information](#Edit Silent Brick Pro information)
+
+
+- To display the description as text( and the response on a successful update )
+
+```
+curl -X PUT -F "description=Tape001" -F"display_mode=1" https://<host-ip>/sb-public-api/api/v1/libraries/<library-uuid>/tapes/<tape-uuid>/nfc_update.json
+```
+
+Response body example:
+
+```
+{
+   "txt" : {
+      "data" : "Serial: S10AFDE8\nDescription: Brick001\nNet capacity: 5 GB",
+      "trimmed" : false
+   }
+}
+```
+
 ### Unlocking/Locking tapes for eject
 
-Unlock/Lock a tape for eject (i.e.) the tape can be ejected with the touch of the front sensor. A tape that is loaded into a drive can NOT be unlocked and the call will generate an error.
+Unlock/Lock a tape for eject, i.e. enable the touch sensor on the Silent Brick so that it can be ejected by tapping on it. A tape that is loaded into a drive can NOT be unlocked and the call will generate an error. 
+Please note that Silent Brick Pro doesn't support unlock/lock operations.
 
 ```
 PUT /v1/libraries/<library-uuid>/tapes/<tape-uuid>/unlock.json
@@ -1196,6 +1313,16 @@ PUT /v1/libraries/<library-uuid>/tapes/<tape-uuid>/unlock.json
 
 ```
 PUT /v1/libraries/<library-uuid>/tapes/<tape-uuid>/lock.json
+```
+
+### Eject a tape
+
+Only possible for a Silent Brick Pro. Trying to eject any Silent Bricks that are not Silent Brick Pro type will generate an error.
+A tape that is loaded into a drive can NOT be ejected and the call will generate an error. 
+Note: Please ensure there is enough (physical) space in front of the Silent Brick Pro before attempting an eject.
+
+```
+PUT /v1/libraries/<library-uuid>/tapes/<tape-uuid>/eject.json
 ```
 
 ### Delete library
@@ -1366,7 +1493,8 @@ The `state` can be
 
 ### Create a volume
 
-Creates a volume (except Sub Volumes). Volumes cannot be used without assigning Silent Bricks.
+Creates a volume (except Sub Volumes). Volumes cannot be used without assigning Silent Bricks. 
+Please note that the Silent Brick Pro Controller doesn't support SNAS 2P volume type.
 
 ```
 POST /v1/volumes.json
@@ -1380,8 +1508,8 @@ List of keys:
 | `description` | The description for the volume | Max 255 Characters |
 | `volume_type` | The type of the volume to be created |-|
 | `brick_uuids` | The uuids of the Silent Bricks as an array. If brick_uuids are not given an empty volume is created. See [Add Silent Bricks to a volume](#Add-Bricks-to-a-volume) for type restrictions. |-|
-| `encrypt`   | To encrypt the volume. Set this key to encrypt the volume |
-| `passphrase`  | The passphrase for the encryption | It must be at least 8 characters. Characters "'", "\", "<", ">", "&", '"', "`" are not allowed |
+| `encrypt` 	| To encrypt the volume. Set this key to encrypt the volume |
+| `passphrase`	| The passphrase for the encryption | It must be at least 8 characters. Characters "'", "\", "<", ">", "&", '"', "`" are not allowed |
 
 Available `volume_type` values
 
@@ -1395,9 +1523,15 @@ SNAS 2P/3P Volume specific options
 
 | Value | Description |
 |-|-|
-| `compression`       | To enable/disable compression for the volume ( Default: true )    |
-| `case_sensitive`  | To enable/disable case sensitive for the volume ( Default: true ) |
-| `optimize`  | To enable/disable optimization for large files ( Default: false ) |
+| `compression` 	  	| To enable/disable compression for the volume ( Default: true )    |
+| `case_sensitive` 	| To enable/disable case sensitive for the volume ( Default: true ) |
+| `optimize` 	| To enable/disable optimization for large files ( Default: false ) |
+
+SNAS 3P Volume specific options
+| Value | Description |
+|-|-|
+| `fast_clone_support` 	  	| To enable/disable fast clone support for the volume ( Default: false )    |
+
 
 
 Any other keys are ignored
@@ -1415,6 +1549,7 @@ Response body example:
   "size": 0,
   "used": 0,
   "used_percentage" : 0
+  "fast_clone_support" : false
 }
 ```
 
@@ -1455,7 +1590,7 @@ List of keys:
 | `name` |  The name of the volume |  It must begin with 'a-z','A-Z' or '0-9' only. Characters '-' or '_'  allowed to follow. Whitespace not allowed |
 | `description` | The description for the volume | Max 255 Characters |
 
-### Update passphrase
+### Update passphrase 
 
 Updates the passphrase for an already encrypted Volume. Please make sure the SNAS 2P/3P volumes are online to update the passphrase. 
 
@@ -1491,6 +1626,7 @@ List of keys:
     - _Silent Brick Flash_
     - _Silent Brick Plus_
     - _Silent Brick Max_
+    - _Silent Brick Pro_
 
 #### Restrictions for _SNAS 2P_ volumes
 
@@ -1508,8 +1644,10 @@ List of keys:
     - _Silent Brick Flash_
     - _Silent Brick Plus_
     - _Silent Brick Max_
+    - _Silent Brick Pro_
 - You cannot assign more than 9 Silent Bricks of type these types.
 - You cannot add more than 4 _Silent Brick Max_ bricks.
+- You cannot add more than 4 _Silent Brick Pro_ bricks.
 - You cannot mix different Silent Brick types.
 
 ### Set volumes online or offline
@@ -1537,6 +1675,8 @@ List of keys:
 Unlocks a Silent Brick so it can be ejected by touching its front sensor. If the Silent Brick is not unlocked first then the touch sensor will not work.
 Only Silent Bricks of volumes that are *offline* can be unlocked. Trying to unlock a Silent Brick that is part of an *online* volume will generate an error.
 
+Please note that Silent Brick Pro doesn't support unlock/lock operations.
+
 Request:
 
 ```
@@ -1545,6 +1685,18 @@ PUT /v1/volumes/<volume-uuid>/partitions/<partition-uuid>/unlock.json
 
 ```
 PUT /v1/volumes/<volume-uuid>/partitions/<partition-uuid>/lock.json
+```
+
+### Eject a partition
+
+Only possible for a Silent Brick Pro. Trying to eject any Silent Bricks that are not Silent Brick Pro type will generate an error.
+Only Silent Brick Pros of volumes that are *offline* can be ejected. Trying to eject a Silent Brick Pro that is part of an *online* volume will generate an error.
+Note: Please ensure there is enough (physical) space in front of the Silent Brick Pro before attempting an eject.
+
+Request:
+
+```
+PUT /v1/volumes/<volume-uuid>/partitions/<partition-uuid>/eject.json
 ```
 
 ### Import a volume (SNAS ERC only)
@@ -1605,28 +1757,28 @@ Response body example:
 
 ```
 {
-  "shares":[
-    {
-      "uuid": "645aac61-a54b-46fe-aaeb-a44b047f9565",
-      "volume":"7e40a866-3490-459a-a17c-c5e8d850d0d0",
-      "name":"Test",
-      "path":"/",
-      "fstype":"smb",
-    "options":"browseable,casesens,public",
-    "share_clients":[]
-    },
-    {
-      "uuid":"5941d228-e2ab-4093-9b8f-b06a5a399a1b",
-      "volume":"7e40a866-3490-459a-a17c-c5e8d850d0d0",
-      "name":"",
-      "path":"/",
-      "fstype":"nfs",
-      "nfsid":3,
-      "options":"",
-      "nfs_path":"/shares/Test",
-      "share_clients":[{"name":"*","uuid":"c320e59a-cd42-45aa-8dac-85586689045c","options":"rw,no_root_squash"}],      
-    },
-    {
+	"shares":[
+	  {
+	    "uuid": "645aac61-a54b-46fe-aaeb-a44b047f9565",
+	    "volume":"7e40a866-3490-459a-a17c-c5e8d850d0d0",
+	    "name":"Test",
+	    "path":"/",
+	    "fstype":"smb",
+		"options":"browseable,casesens,public",
+		"share_clients":[]
+	  },
+	  {
+	    "uuid":"5941d228-e2ab-4093-9b8f-b06a5a399a1b",
+	    "volume":"7e40a866-3490-459a-a17c-c5e8d850d0d0",
+	    "name":"",
+	    "path":"/",
+	    "fstype":"nfs",
+	    "nfsid":3,
+	    "options":"",
+	    "nfs_path":"/shares/Test",
+	    "share_clients":[{"name":"*","uuid":"c320e59a-cd42-45aa-8dac-85586689045c","options":"rw,no_root_squash"}],      
+	  },
+	  {
       "uuid": "5312f112-b480-4c9a-8154-5c41d9ecf915",
       "volume_uuid": "e6af3ff8-78e3-46a5-b1a1-d0211960c1a5",
       "name": "sss01",
@@ -1648,10 +1800,10 @@ Response body example:
         }
       ]
      },
-    {
-     "... info for next share"
-    }
-  ]
+	  {
+	   "... info for next share"
+	  }
+	]
 }
 ```
 
@@ -1669,8 +1821,8 @@ List of keys:
 
 | Key | Description | Rules |
 |-|-|-|
-| `name`   | The name of the share. Not for the _nfs_ fstype |  It must begin with 'a-z','A-Z' or '0-9' only. Characters ' - ' or ' _ '  allowed to follow. Whitespace not allowed |
-| `path`   | The share path. Not for the _sss_ fstype | |
+| `name` 	 | The name of the share. Not for the _nfs_ fstype |  It must begin with 'a-z','A-Z' or '0-9' only. Characters ' - ' or ' _ '  allowed to follow. Whitespace not allowed |
+| `path` 	 | The share path. Not for the _sss_ fstype | |
 | `fstype` | The file system type | see below for allowed values |
 
 Available `fstype` values
@@ -1729,11 +1881,11 @@ Options specific to NFS share clients:
 
 | Value | Description | Default Setting |
 |-|-|-|
-| `nfs_rw`        | write access on the NFS share                                 | true  |
-| `nfs_sync`        | synchronize IO on the NFS share (may be bad for performance!) | false |
-| `nfs_insecure`        | allow access from insecure ports on the NFS share             | false |
-| `nfs_subtree_check`   | subtree checking NFS share                                    | false |
-| `nfs_root_squash`     | root squashing on the NFS share                               | true  |
+| `nfs_rw`  			| write access on the NFS share                                 | true  |
+| `nfs_sync`   			| synchronize IO on the NFS share (may be bad for performance!) | false |
+| `nfs_insecure`   	  	| allow access from insecure ports on the NFS share             | false |
+| `nfs_subtree_check` 	| subtree checking NFS share                                    | false |
+| `nfs_root_squash`   	| root squashing on the NFS share                               | true  |
 
 
 S3 share type specific keys:
@@ -1751,15 +1903,15 @@ Response body example:
 
 ```
 {
-  "uuid": "4f421fba-6d44-4bea-a56c-c63652a04c34",
-  "volume_uuid": "653bf326-a834-47ef-bab9-99ab8e5bcf9f",
-  "name": "SNAS2P-NFS01",
-  "path": "/SNAS2P-NFS01",
-  "fstype": "nfs",
-  "nfsid": 2,
-  "options": "",
-  "nfs_path": /shares/Test,
-  "share_clients": [{"name": "*","uuid": "bb5c656b-3d06-4cc7-9263-2a6bf6314083","options": "rw,no_root_squash"}]
+	"uuid": "4f421fba-6d44-4bea-a56c-c63652a04c34",
+	"volume_uuid": "653bf326-a834-47ef-bab9-99ab8e5bcf9f",
+	"name": "SNAS2P-NFS01",
+	"path": "/SNAS2P-NFS01",
+	"fstype": "nfs",
+	"nfsid": 2,
+	"options": "",
+	"nfs_path": /shares/Test,
+	"share_clients": [{"name": "*","uuid": "bb5c656b-3d06-4cc7-9263-2a6bf6314083","options": "rw,no_root_squash"}]
 }
 ```
 
@@ -1836,11 +1988,11 @@ Options specific to NFS share clients:
 
 | Value | Description | Default Setting |
 |-|-|-|
-| `nfs_rw`          | write access on the NFS share                                 | true  |
-| `nfs_sync`        | synchronize IO on the NFS share (may be bad for performance!) | false |
-| `nfs_insecure`        | allow access from insecure ports on the NFS share             | false |
-| `nfs_subtree_check`   | subtree checking NFS share                                    | false |
-| `nfs_root_squash`     | root squashing on the NFS share                               | true  |
+| `nfs_rw`  				| write access on the NFS share                                 | true  |
+| `nfs_sync`   			| synchronize IO on the NFS share (may be bad for performance!) | false |
+| `nfs_insecure`   	  	| allow access from insecure ports on the NFS share             | false |
+| `nfs_subtree_check` 	| subtree checking NFS share                                    | false |
+| `nfs_root_squash`   	| root squashing on the NFS share                               | true  |
 
 
 S3 share type specific keys:
@@ -1864,7 +2016,7 @@ DELETE /v1/shares/<share-uuid>.json
 
 ### S3 Bucket Operations
 
-#### List Buckets
+#### List Buckets 
 
 Lists all buckets for a particular _sss_ share.
 
@@ -1911,7 +2063,7 @@ List of keys:
 
 | Key | Description | Rules |
 |-|-|-|
-| `bucket`   | The name of the bucket.| It must begin with 'a-z' or '0-9' only. Character ' - ' is allowed to follow. Must end with 'a-z' or '0-9' only.Whitespace not allowed. Minimum length is 3 |
+| `bucket` 	 | The name of the bucket.| It must begin with 'a-z' or '0-9' only. Character ' - ' is allowed to follow. Must end with 'a-z' or '0-9' only.Whitespace not allowed. Minimum length is 3 |
 | `locked_bucket` | Creates a bucket with object locking  | set to true to enable the feature. Default:false |
 
 Note: Bucket with object locking can be created for shares both in SNMD and SNSD mode.  
@@ -1950,7 +2102,7 @@ List of keys:
 
 | Key | Description | 
 |-|-|
-| `bucket`   | The name of the bucket. |
+| `bucket` 	 | The name of the bucket. |
 
 
 ## Replication Operations
@@ -2079,9 +2231,11 @@ SNAS Volume specific options:
 |-|-|
 | `compression` | To enable/disable compression for the replication volume (Default: depends on the source volume) |
 | `protection_level` | SNAS protection level (2 or 3) (Default: depends on the source volume) |
-| `optimize`  | To enable/disable optimization for large files ( Default: false ) |
+| `optimize` 	| To enable/disable optimization for large files ( Default: false ) |
 
-Note: If the `source_volume` is an encrypted SNAS 2P/3P,the above keys will be ignored because all the options are copied from the `source_volume` to the replication volume
+Note: 
+- If the `source_volume` is an encrypted SNAS 2P/3P,the above keys will be ignored because all the options are copied from the `source_volume` to the replication volume
+- The Silent Brick Pro Controller doesn't support SNAS2P volume type, so only protection level 3 is allowed on these systems. 
 
 SNAS ERC Volume specific options:
 
@@ -2176,32 +2330,32 @@ GET /v1/snapshots.json
 Response body example:
 
 ```
-  {
-    "snapshots": [
-       {
-         "name": "SNAS2P-SNAP01",
-         "description": null,
-         "label": "20180725_152029",
-         "timestamp": "2012-12-09 08:50:03",
-         "uuid": "67731e3a-c0ba-4112-9b89-a0dcb83be12b",
-         "volume_uuid": "653bf326-a834-47ef-bab9-99ab8e5bcf9f",
-         "index_hwm": null,
-         "data_hwm": null,
-         "used": 212992
-       },
-       {
-         "name": "SNAS3P-SNAP02",
-         "description": null,
-         "label": "20180725_152560",
-         "timestamp": "2012-12-09 08:50:03",
-         "uuid": "85f27112-33e8-41e2-bd6c-cb9cfe7e1585",
-         "volume_uuid": "f5c9b996-03b5-4775-aac1-3abbf6a8a9aa",
-         "index_hwm": null,
-         "data_hwm": null,
-         "used": 286720
-       }
-    ]
-  }
+	{
+	  "snapshots": [
+	     {
+	       "name": "SNAS2P-SNAP01",
+	       "description": null,
+	       "label": "20180725_152029",
+	       "timestamp": "2012-12-09 08:50:03",
+	       "uuid": "67731e3a-c0ba-4112-9b89-a0dcb83be12b",
+	       "volume_uuid": "653bf326-a834-47ef-bab9-99ab8e5bcf9f",
+	       "index_hwm": null,
+	       "data_hwm": null,
+	       "used": 212992
+	     },
+	     {
+	       "name": "SNAS3P-SNAP02",
+	       "description": null,
+	       "label": "20180725_152560",
+	       "timestamp": "2012-12-09 08:50:03",
+	       "uuid": "85f27112-33e8-41e2-bd6c-cb9cfe7e1585",
+	       "volume_uuid": "f5c9b996-03b5-4775-aac1-3abbf6a8a9aa",
+	       "index_hwm": null,
+	       "data_hwm": null,
+	       "used": 286720
+	     }
+		]
+	}
 ```
 
 ### List snapshots for a volume
@@ -2217,32 +2371,32 @@ GET /v1/volumes/<volume-uuid>/list_snapshots.json
 Response body example:
 
 ```
-  {
-    "snapshots": [
-       {
-         "name": "SNAS2P-SNAP01",
-         "description": null,
-         "label": "20180725_152029",
-         "timestamp": "2012-12-09 08:50:03",
-         "uuid": "67731e3a-c0ba-4112-9b89-a0dcb83be12b",
-         "volume_uuid": "653bf326-a834-47ef-bab9-99ab8e5bcf9f",
-         "index_hwm": null,
-         "data_hwm": null,
-         "used": 212992
-       },
-       {
-         "name": "SNAS2P-SNAP02",
-         "description": null,
-         "label": "20180725_152302",
-         "timestamp": "2012-12-09 08:50:03",
-         "uuid": "562d4f03-7170-4145-8215-4cac217124b7",
-         "volume_uuid": "653bf326-a834-47ef-bab9-99ab8e5bcf9f",
-         "index_hwm": null,
-         "data_hwm": null,
-         "used": 286720
-       }
-    ]
-  }
+	{
+	  "snapshots": [
+	     {
+	       "name": "SNAS2P-SNAP01",
+	       "description": null,
+	       "label": "20180725_152029",
+	       "timestamp": "2012-12-09 08:50:03",
+	       "uuid": "67731e3a-c0ba-4112-9b89-a0dcb83be12b",
+	       "volume_uuid": "653bf326-a834-47ef-bab9-99ab8e5bcf9f",
+	       "index_hwm": null,
+	       "data_hwm": null,
+	       "used": 212992
+	     },
+	     {
+	       "name": "SNAS2P-SNAP02",
+	       "description": null,
+	       "label": "20180725_152302",
+	       "timestamp": "2012-12-09 08:50:03",
+	       "uuid": "562d4f03-7170-4145-8215-4cac217124b7",
+	       "volume_uuid": "653bf326-a834-47ef-bab9-99ab8e5bcf9f",
+	       "index_hwm": null,
+	       "data_hwm": null,
+	       "used": 286720
+	     }
+		]
+	}
 ```
 
 ### Create snapshot
@@ -2266,17 +2420,17 @@ List of keys:
 Response body example:
 
 ```
-  {
-    "name": "SNAS2P-SNAP02",
-    "description": "Test",
-    "label": "20180719_144408",
-    "timestamp": "2012-12-09 08:50:03",
-    "uuid": "397e27fc-b242-445e-930d-922f4decb3c0",
-    "volume_uuid": "bd056f33-cf07-49eb-a66e-a457f3bd2179",
-    "index_hwm": null,
-    "data_hwm": null,
-    "used": 131072
-  }
+	{
+		"name": "SNAS2P-SNAP02",
+		"description": "Test",
+		"label": "20180719_144408",
+		"timestamp": "2012-12-09 08:50:03",
+		"uuid": "397e27fc-b242-445e-930d-922f4decb3c0",
+		"volume_uuid": "bd056f33-cf07-49eb-a66e-a457f3bd2179",
+		"index_hwm": null,
+		"data_hwm": null,
+		"used": 131072
+	}
 ```
 
 ### Snapshot as Volume
@@ -2298,28 +2452,28 @@ List of keys:
 Response body example:
 
 ```
-  {
-    "name": "SNAS2P-SNAP02",
-    "description": "Test",
-    "label": "20180719_144408",
-    "timestamp": "2012-12-09 08:50:03",
-    "uuid": "397e27fc-b242-445e-930d-922f4decb3c0",
-    "volume_uuid": "bd056f33-cf07-49eb-a66e-a457f3bd2179",
-    "index_hwm": null,
-    "data_hwm": null,
-    "used": 131072,
-    "snapshot_volume": {
-    "name": "SNAS2P-SNAP02",
-    "description": "Test",
-    "volume_type": "snas_2p",
-    "mode": "snapshot",
-    "status": "incomplete",
-    "uuid": "2bddcb51-363b-4272-a5d8-eb38c851a931",
-    "size": 0,
-    "used": 0,
-    "used_percentage": 0.0
-    }
-  }
+	{
+	  "name": "SNAS2P-SNAP02",
+	  "description": "Test",
+	  "label": "20180719_144408",
+	  "timestamp": "2012-12-09 08:50:03",
+	  "uuid": "397e27fc-b242-445e-930d-922f4decb3c0",
+	  "volume_uuid": "bd056f33-cf07-49eb-a66e-a457f3bd2179",
+	  "index_hwm": null,
+	  "data_hwm": null,
+	  "used": 131072,
+	  "snapshot_volume": {
+		"name": "SNAS2P-SNAP02",
+		"description": "Test",
+		"volume_type": "snas_2p",
+		"mode": "snapshot",
+		"status": "incomplete",
+		"uuid": "2bddcb51-363b-4272-a5d8-eb38c851a931",
+		"size": 0,
+		"used": 0,
+		"used_percentage": 0.0
+	  }
+	}
 ```
 
 Examples:
@@ -2381,7 +2535,7 @@ SNAS Volume specific options:
 |-|-|
 | `compression` | To enable/disable compression for the clone volume (Default: depends on the source volume) |
 | `protection_level` | SNAS protection level (2 or 3) (Default: depends on the source volume) |
-| `optimize`  | To enable/disable optimization for large files ( Default: false ) |
+| `optimize` 	| To enable/disable optimization for large files ( Default: false ) |
 
 Note: If the `source_volume` is an encrypted SNAS 2P/3P, the above keys will be ignored because all the options are copied from the `source_volume` to the cloned volume
 
@@ -2397,6 +2551,8 @@ SNAS ERC Volume specific options:
 ### List Compliant Archives
 
 Lists all available Compliant Archives.
+
+Please Note that Silent Brick Pro Controller does not support any Compliant Archive Operations.
 
 Request:
 
@@ -2472,79 +2628,79 @@ GET /v1/brick_archives/<brick-archive-uuid>.json
 Response body example:
 
 ```
-  {
-    "brick_archive_uuid": "9a8e4326-8a80-11e8-9ecd-ccf0d678e953",
-    "revision": 1,
-    "name": "Arch01",
-    "description": "Test Compliant Archive",
-    "status": "running",
-    "rfa_status": "inactive",
-    "recovery_status": "inactive",
-    "type": "plain",
-    "stageless": false,
-    "read_only": false,
-    "can_start": true,
-    "can_archive_start": true,
-    "can_stage_start": true,
-    "rfa_possible": false,
-    "stages": [
-    {
-        "stage_uuid": "cc3aa51a-f695-4c29-bc75-ed08b874d5ab",
-        "brick_archive_uuid": "9a8e4326-8a80-11e8-9ecd-ccf0d678e953",
-        "current_stage": true,
-        "stage_volume": {
-            "name": "stage-9a8e4326-8a80-11e8-9ecd-ccf0d678e953-8f882e7f17a7ca2f",
-            "description": "",
-            "volume_type": "snas_3p",
-            "mode": "plain",
-            "status": "online",
-            "uuid": "8832e635-406f-4787-ac25-a656dd2a1ef3",
-            "size": 2993855232,
-            "used": 412432,
-            "brick_uuids": [
+	{
+	  "brick_archive_uuid": "9a8e4326-8a80-11e8-9ecd-ccf0d678e953",
+	  "revision": 1,
+	  "name": "Arch01",
+	  "description": "Test Compliant Archive",
+	  "status": "running",
+	  "rfa_status": "inactive",
+	  "recovery_status": "inactive",
+	  "type": "plain",
+	  "stageless": false,
+	  "read_only": false,
+	  "can_start": true,
+	  "can_archive_start": true,
+	  "can_stage_start": true,
+	  "rfa_possible": false,
+	  "stages": [
+		{
+		    "stage_uuid": "cc3aa51a-f695-4c29-bc75-ed08b874d5ab",
+		    "brick_archive_uuid": "9a8e4326-8a80-11e8-9ecd-ccf0d678e953",
+		    "current_stage": true,
+		    "stage_volume": {
+		        "name": "stage-9a8e4326-8a80-11e8-9ecd-ccf0d678e953-8f882e7f17a7ca2f",
+		        "description": "",
+		        "volume_type": "snas_3p",
+		        "mode": "plain",
+		        "status": "online",
+		        "uuid": "8832e635-406f-4787-ac25-a656dd2a1ef3",
+		        "size": 2993855232,
+		        "used": 412432,
+		        "brick_uuids": [
                     "cbce8c55-9b28-4d92-a99c-689f88c0351a",
                     "b176b695-7027-4ebf-925a-7fb1691c3f81" ]
-        }
-    }
-    ],
-    "archive_volume": {
-    "name": "archive-9a8e4326-8a80-11e8-9ecd-ccf0d678e953",
-    "description": "",
-    "volume_type": "snas_erc",
-    "mode": "plain",
-    "status": "online",
-    "uuid": "5ba7f0b1-cc95-4ab6-9c26-c0bb00d1ca16",
-    "size": 1995903488,
-    "used": 206074,
-    "brick_uuids": [
+		    }
+		}
+	  ],
+	  "archive_volume": {
+		"name": "archive-9a8e4326-8a80-11e8-9ecd-ccf0d678e953",
+		"description": "",
+		"volume_type": "snas_erc",
+		"mode": "plain",
+		"status": "online",
+		"uuid": "5ba7f0b1-cc95-4ab6-9c26-c0bb00d1ca16",
+		"size": 1995903488,
+		"used": 206074,
+		"brick_uuids": [
               "b8ba2eb5-33ac-48c2-a8a0-29429e6dbe93",
               "6d74d1f7-880a-45bf-b17f-1392c9083106" ]
-    },
-    "sub_volumes": [
-    {
-      "name": "Arch01-SubVol01",
-      "description": "Test SubVol",
-      "volume_type": "sub_volume",
-      "mode": "plain",
-      "status": "online",
-      "uuid": "b91c5741-8373-4977-abc9-aafc8df278d6",
-      "used": 0,
-      "sub_devices": [
-          {
-                "sub_device_uuid": "9c2fa302-ad0d-4ef4-bf41-989f477da6bd",
-                "status": "ok",
-                "net_used": 0,
-                "inode_count": 0,
-                "file_count": 0,
-                "directory_count": 0,
-                "symlink_count": 0,
-                "pending_file_count": 0,
-                "triggered_file_count": 0,
-                "file_version_count": 0
+	  },
+	  "sub_volumes": [
+		{
+		  "name": "Arch01-SubVol01",
+		  "description": "Test SubVol",
+		  "volume_type": "sub_volume",
+		  "mode": "plain",
+		  "status": "online",
+		  "uuid": "b91c5741-8373-4977-abc9-aafc8df278d6",
+		  "used": 0,
+		  "sub_devices": [
+        	{
+          	    "sub_device_uuid": "9c2fa302-ad0d-4ef4-bf41-989f477da6bd",
+          	    "status": "ok",
+          	    "net_used": 0,
+          	    "inode_count": 0,
+          	    "file_count": 0,
+          	    "directory_count": 0,
+          	    "symlink_count": 0,
+          	    "pending_file_count": 0,
+          	    "triggered_file_count": 0,
+          	    "file_version_count": 0
             }
-          ]
-      }
-   ]
+      	  ]
+	    }
+	 ]
    }
 ```
 
@@ -2575,6 +2731,7 @@ List of keys:
 ## Sub Volume Operations
 
 Using the `uuid` of a sub volume, the name and description can be updated just like a standard volume. But all other volume operations are not allowed for a sub volume.
+Please note that Silent Brick Pro Controller does not support any Compliant Archive operations, including any Sub Volume operations. 
 
 ### List Sub Volume Cache Policies
 
@@ -2621,7 +2778,7 @@ Response body example:
 }
 ```
 
-### Create or Update Sub Volume Cache Policies
+### Create or Update Sub Volume Cache Policies 
 
 Create or update the same cache policies for one or more Sub Volumes.
 
@@ -3035,12 +3192,12 @@ Response body example:
          "api_status": "not_connected",
          "blue_bar_status": "not_connected",
          "floating_ip": {
-          "floating_data_address": "172.20.61.51",
-          "strategy_string": "fail4one",
-          "enabled": true,
-          "initiator_status_string": "unknown",
-          "endpoint_status_string": "active"
-            }
+        	"floating_data_address": "172.20.61.51",
+        	"strategy_string": "fail4one",
+        	"enabled": true,
+        	"initiator_status_string": "unknown",
+        	"endpoint_status_string": "active"
+      	    }
          },
          {
             "... info for the next host connection"
@@ -3075,12 +3232,12 @@ GET /v1/host_connections/<host-connection-uuid>.json
          "api_status": "not_connected",
          "blue_bar_status": "not_connected",
          "floating_ip": {
-          "floating_data_address": "172.20.61.51",
-          "strategy_string": "fail4one",
-          "enabled": true,
-          "initiator_status_string": "unknown",
-          "endpoint_status_string": "active"
-            }
+        	"floating_data_address": "172.20.61.51",
+        	"strategy_string": "fail4one",
+        	"enabled": true,
+        	"initiator_status_string": "unknown",
+        	"endpoint_status_string": "active"
+      	    }
          },
     }
 ```
