@@ -1,8 +1,7 @@
 # FAST LTA GmbH - Silent Bricks Public REST API Description
 
-__Version:__ API Version v1 for Silent Bricks Software Version 2.61.0.4
-__Date:__ October 2024
-
+__Version:__ API Version v1 for Silent Bricks Software Version 2.65.0.9
+__Date:__ August 2025
 
 # Silent Bricks API
 
@@ -114,6 +113,7 @@ Response body example:
 	"shortname": "G5000",
 	"swversion": "2.20.0.5",
 	"systemid":  "9000"
+	"systemtype": "Silent Brick Controller"
 }
 ```
 
@@ -808,7 +808,7 @@ List of keys:
 The `display_mode` parameter can have the following values:
 
 | Value | Setting | Notes
-|-|-|
+|-|-|-|
 | `0` |  Don’t write any NFC information | |
 | `1` |  Description as text | Includes the Silent Brick serial number and description ( Default ) |
 | `2` |  Description as text + Silent Brick Info Link | Includes the serial number and the description set by the customer as text and as query parameter to the Silent Brick Info Link|
@@ -847,7 +847,7 @@ Note: This only shows the preview, does not update the Silent Brick Pro NFC tag.
 GET /v1/bricks/<brick-uuid>/nfc_preview.json
 ```
 
-For accepted keys and their descriptions see [Edit Silent Brick Pro information](#Edit Silent Brick Pro information)
+For accepted keys and their descriptions see [Edit Silent Brick Pro information](#edit-silent-brick-pro-information)
 
 Example:
 
