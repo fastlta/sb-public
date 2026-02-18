@@ -1,7 +1,7 @@
 # FAST LTA GmbH - Silent Bricks Public REST API Description
 
-__Version:__ API Version v1 for Silent Bricks Software Version 2.65.0.9
-__Date:__ August 2025
+__Version:__ API Version v1 for Silent Bricks Software Version 2.67.0.4
+__Date:__ January 2026
 
 # Silent Bricks API
 
@@ -264,16 +264,17 @@ Response body example: [click](hardware_info_example.json)
 `device` data with `model` and `hw_type` can be
 
 
-| Model    | Hw Type                                            | Description                            |
-|----------|----------------------------------------------------|----------------------------------------|
-| G5000    | ControllerG5000Vx                                  | Silent Brick Controller                |
-| G2000    | ControllerG2000                                    | Silent Brick Drive                     |
-| G1000    | ControllerG1000                                    | Silent Brick Single Drive              |
-| SBDS     | SilentBrickDSWORMShelf / SilentBrickDSNonWORMShelf | Silent Brick DS / Silent Brick DS WORM |
-| G5000V2  | ControllerG5200Vx                                  | Silent Brick Controller                |
-| EXTSHELF | ExternalShelf                                      | Silent Brick Shelf                     |
-| SBCPRO_V1 | ControllerProV1                                    | Silent Brick Pro Controller            |
-| BAY_V1    | BayShelfV1                                         | Silent Brick Pro Bay                   |
+| Model      | Hw Type                                            | Description                            |
+|------------|----------------------------------------------------|----------------------------------------|
+| G5000      | ControllerG5000Vx                                  | Silent Brick Controller                |
+| G2000      | ControllerG2000                                    | Silent Brick Drive                     |
+| G1000      | ControllerG1000                                    | Silent Brick Single Drive              |
+| SBDS       | SilentBrickDSWORMShelf / SilentBrickDSNonWORMShelf | Silent Brick DS / Silent Brick DS WORM |
+| SB Max Air | SilentBrickMaxAirShelf                             | Silent Brick Max Air                   |
+| G5000V2    | ControllerG5200Vx                                  | Silent Brick Controller                |
+| EXTSHELF   | ExternalShelf                                      | Silent Brick Shelf                     |
+| SBCPRO_V1  | ControllerProV1                                    | Silent Brick Pro Controller            |
+| BAY_V1     | BayShelfV1                                         | Silent Brick Pro Bay                   |
 
 ### Listing Network Info
 
@@ -621,6 +622,7 @@ The `type` can be
 | `WORM`     | Silent Brick WORM       |
 | `DSHDD`    | Silent Brick Max        |
 | `DSWORM`   | Silent Brick Max WORM   |
+| `MAXAIR`   | Silent Brick Max Air    |
 | `BRICKPRO` | Silent Brick Pro        |
 
 The `state` can be
@@ -736,7 +738,7 @@ Response body example:
 
 ### Edit Silent Brick information
 
-Updates a Silent Brick's description and status. Silent Brick Pro doesn't have a display, so this cannot be used to edit information for a Silent Brick Pro.
+Updates a Silent Brick's description and status. To update NFC settings of Silent Brick Pro use `nfc_update`.
 
 ```
 PUT /v1/bricks/<brick-uuid>.json
@@ -748,7 +750,7 @@ List of keys:
 |-|-|
 | `description` | The description for the Silent Brick |
 | `display_mode` |  The description display mode (see below) |
-| `qr` | Updates the string encoded in the QR code displayed in front of the Silent Brick. <br/>If the `value` starts with a `=` the complete string will be replaced. <br/>Otherwise the string is prepended to the QR code. |
+| `qr` | Updates the string encoded in the QR code displayed in front of the Silent Brick. <br/>If the `value` starts with a `=` the complete string will be replaced. <br/>Otherwise the string is prepended to the QR code. Fails when used with Silent Brick Pro, Silent Brick Max, Silent Brick Max Worm or Silent Brick Max Air |
 | `find_me` | To toggle on/off the beacon |
 
 The `qr` parameter sets the QR Code displayed in the front of the Silent Brick.
@@ -1675,7 +1677,7 @@ List of keys:
 Unlocks a Silent Brick so it can be ejected by touching its front sensor. If the Silent Brick is not unlocked first then the touch sensor will not work.
 Only Silent Bricks of volumes that are *offline* can be unlocked. Trying to unlock a Silent Brick that is part of an *online* volume will generate an error.
 
-Please note that Silent Brick Pro doesn't support unlock/lock operations.
+Please note that Silent Brick Pro and Silent Brick Max Air doesn't support unlock/lock operations.
 
 Request:
 
@@ -1689,9 +1691,10 @@ PUT /v1/volumes/<volume-uuid>/partitions/<partition-uuid>/lock.json
 
 ### Eject a partition
 
-Only possible for a Silent Brick Pro. Trying to eject any Silent Bricks that are not Silent Brick Pro type will generate an error.
-Only Silent Brick Pros of volumes that are *offline* can be ejected. Trying to eject a Silent Brick Pro that is part of an *online* volume will generate an error.
-Note: Please ensure there is enough (physical) space in front of the Silent Brick Pro before attempting an eject.
+Possible for all type of Bricks. 
+Only bricks of volumes that are *offline* can be ejected. Trying to eject a brick that is part of an *online* volume will generate an error.
+Silent Bricks can only be ejected if they are unlocked. Trying to eject a Silent Brick that is not unlocked will generate an error.
+Note: Please ensure there is enough (physical) space in front of the brick before attempting an eject.
 
 Request:
 
@@ -2103,6 +2106,78 @@ List of keys:
 | Key | Description | 
 |-|-|
 | `bucket` 	 | The name of the bucket. |
+
+
+## Share Quota Operations
+
+### List share quotas
+
+Lists all share quotas.
+
+Request:
+
+```
+GET /v1/share_quotas.json
+```
+
+Response body example:
+
+```
+{
+  "quotas": [
+    {
+       "member_id" : 20001,
+       "member_type" : "ad_group",
+       "name" : "QA-12R2/fastqa",
+       "quota_limit" : 1000,
+       "quota_used" : 250,
+       "uuid" : "2b1ddc1d-fc9c-4648-8f96-1ecf8ab447b6",
+       "volume_uuid" : "a0d2d3c7-9247-4183-b99b-668cfcf56121"
+    },
+    {
+         "member_id" : 1001,
+         "member_type" : "user",
+         "name" : "sby",
+         "quota_limit" : 10000,
+         "quota_used" : 2500,
+         "uuid" : "7edf1054-5acc-4b21-a3c0-881a2e7299c2",
+         "volume_uuid" : "70debe03-0be4-441c-a65a-c7555d6ca596"
+    },
+    {
+        .. next quota
+    }
+   
+  ]
+}
+```
+
+### List share quotas for a particular volume
+
+Lists only the share quotas belonging to a specific volume.
+
+Request:
+
+```
+GET /v1/volumes/<volume-uuid>/share_quotas.json
+```
+
+Response body example:
+
+```
+{
+  "quotas": [
+   {
+         "member_id" : 1001,
+         "member_type" : "user",
+         "name" : "sby",
+         "quota_limit" : 10000,
+         "quota_used" : 2500,
+         "uuid" : "7edf1054-5acc-4b21-a3c0-881a2e7299c2",
+         "volume_uuid" : "70debe03-0be4-441c-a65a-c7555d6ca596"
+    },
+  ]
+}
+```
 
 
 ## Replication Operations
